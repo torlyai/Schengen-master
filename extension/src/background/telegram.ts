@@ -30,6 +30,29 @@ function chatIdLooksValid(id: string): boolean {
   return /^-?\d{3,}$/.test(id.trim());
 }
 
+/**
+ * Format the current time in the SW's local timezone with a short timezone
+ * abbreviation (e.g. "21:40:18 BST"). Previous versions used UTC, which is
+ * technically correct but consistently 1 hour off from what UK users saw on
+ * their phone in summer — leading to "is the time wrong?" confusion reports.
+ *
+ * The SW inherits the user's OS timezone via Intl, so this matches whatever
+ * the user sees in Telegram's own "delivered at" timestamp.
+ */
+function formatLocalTime(): string {
+  try {
+    return new Date().toLocaleTimeString('en-GB', {
+      hour12: false,
+      timeZoneName: 'short',
+    });
+  } catch {
+    // Fall back to UTC if Intl.DateTimeFormat is unavailable (shouldn't happen
+    // in any supported Chromium build, but defensive — the function must
+    // never throw inside a Telegram payload builder).
+    return new Date().toISOString().slice(11, 19) + ' UTC';
+  }
+}
+
 interface SendResult {
   ok: boolean;
   status?: number;
@@ -83,7 +106,7 @@ export async function notifySlotAvailable(target: PersistedTarget | null): Promi
   const centre = mdEscape(target?.centre ?? 'TLScontact');
   const code = mdEscape(target?.subjectCode ?? '');
   const country = mdEscape((target?.country ?? '').toUpperCase());
-  const time = mdEscape(new Date().toISOString().slice(11, 19) + ' UTC');
+  const time = mdEscape(formatLocalTime());
 
   const text = [
     `🚨 *Slot found* — ${centre}`,
@@ -117,7 +140,7 @@ export async function notifyMonitoringStart(
   const centre = mdEscape(target?.centre ?? 'TLScontact');
   const code = mdEscape(target?.subjectCode ?? '');
   const country = mdEscape((target?.country ?? '').toUpperCase());
-  const time = mdEscape(new Date().toISOString().slice(11, 19) + ' UTC');
+  const time = mdEscape(formatLocalTime());
   const headline =
     kind === 'resumed'
       ? `✅ *Monitoring resumed* — ${centre}`
@@ -125,6 +148,37 @@ export async function notifyMonitoringStart(
   const sub = code ? `${country} visa · \`${code}\`` : '';
 
   const text = [headline, sub, `_${time}_`, '', `I'll ping you the moment a slot opens\\.`]
+    .filter(Boolean)
+    .join('\n');
+
+  await postSendMessage(s.telegramBotToken, s.telegramChatId, text);
+}
+
+/**
+ * Send a "monitoring paused" notification when the user clicks Pause in the
+ * popup. Gated on the same `telegramMonitoringStart` toggle as
+ * start/resume — users who opt into lifecycle pings get the full set
+ * (start / resume / pause). Symmetric: if you want to know it started,
+ * you want to know it stopped.
+ */
+export async function notifyMonitoringPaused(target: PersistedTarget | null): Promise<void> {
+  const s = await getSettings();
+  if (!s.telegramEnabled || !s.telegramMonitoringStart) return;
+  if (!tokenLooksValid(s.telegramBotToken) || !chatIdLooksValid(s.telegramChatId)) return;
+
+  const centre = mdEscape(target?.centre ?? 'TLScontact');
+  const code = mdEscape(target?.subjectCode ?? '');
+  const country = mdEscape((target?.country ?? '').toUpperCase());
+  const time = mdEscape(formatLocalTime());
+  const sub = code ? `${country} visa · \`${code}\`` : '';
+
+  const text = [
+    `⏸️ *Monitoring paused* — ${centre}`,
+    sub,
+    `_${time}_`,
+    '',
+    `I'll stay quiet until you resume in the popup\\.`,
+  ]
     .filter(Boolean)
     .join('\n');
 
@@ -141,7 +195,7 @@ export async function notifyBlocker(
   if (!tokenLooksValid(s.telegramBotToken) || !chatIdLooksValid(s.telegramChatId)) return;
 
   const centre = mdEscape(target?.centre ?? 'TLScontact');
-  const time = mdEscape(new Date().toISOString().slice(11, 19) + ' UTC');
+  const time = mdEscape(formatLocalTime());
   const headline =
     kind === 'CLOUDFLARE'
       ? '⚠️ *Cloudflare check needed*'
@@ -167,7 +221,7 @@ export async function testConnection(): Promise<SendResult> {
   if (!chatIdLooksValid(s.telegramChatId)) {
     return { ok: false, error: 'Chat ID must be a numeric value.' };
   }
-  const time = mdEscape(new Date().toISOString().slice(11, 19) + ' UTC');
+  const time = mdEscape(formatLocalTime());
   const text = [
     `✅ *Visa Master test message*`,
     `Telegram notifications are wired up correctly\\.`,

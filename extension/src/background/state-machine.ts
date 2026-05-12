@@ -32,6 +32,7 @@ import {
   notifySlotAvailable as tgSlot,
   notifyBlocker as tgBlocker,
   notifyMonitoringStart as tgMonStart,
+  notifyMonitoringPaused as tgMonPaused,
 } from './telegram';
 
 // 15 min auto-stop window for CLOUDFLARE and LOGGED_OUT, per wireframes §5/§13.
@@ -180,6 +181,13 @@ export async function transitionTo(next: ExtState, ctx: TransitionCtx = {}): Pro
     const target = await getTarget();
     const isResume = prev === 'PAUSED' || prev === 'CLOUDFLARE' || prev === 'LOGGED_OUT';
     tgMonStart(target, isResume ? 'resumed' : 'started').catch(() => { /* silent */ });
+  }
+
+  // Monitoring paused — fire on rising edge into PAUSED (user clicked the
+  // Pause button in the popup). Same opt-in toggle as start/resume.
+  if (next === 'PAUSED' && prev !== 'PAUSED') {
+    const target = await getTarget();
+    tgMonPaused(target).catch(() => { /* silent */ });
   }
 
   // Tell the content script to clear/apply the tab affordance.
