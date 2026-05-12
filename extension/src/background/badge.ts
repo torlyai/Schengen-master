@@ -2,7 +2,13 @@
 //
 // Wireframes §11:
 //   IDLE              → no badge text, grey
-//   NO_SLOTS          → "●" green
+//   NO_SLOTS          → "•" green   (small bullet — Chrome auto-sizes the
+//                                    badge pill to the text, so a narrow
+//                                    glyph keeps the green dot subtle. The
+//                                    earlier "●" U+25CF FILLED BLACK CIRCLE
+//                                    rendered a huge green pill that
+//                                    swallowed half the toolbar icon — see
+//                                    v1.0.7 fix notes.)
 //   SLOT_AVAILABLE    → "!" red (animated pulse for first 60s)
 //   CLOUDFLARE        → "⚠" amber
 //   LOGGED_OUT        → "⚠" amber
@@ -26,7 +32,7 @@ interface BadgeConfig {
 
 const CONFIG: Record<ExtState, BadgeConfig> = {
   IDLE: { text: '', color: COLORS.grey, title: 'Visa Master — idle (open a TLS booking page)' },
-  NO_SLOTS: { text: '●', color: COLORS.green, title: 'Visa Master — monitoring (no slots)' },
+  NO_SLOTS: { text: '•', color: COLORS.green, title: 'Visa Master — monitoring (no slots)' },
   SLOT_AVAILABLE: { text: '!', color: COLORS.red, title: 'Visa Master — SLOT FOUND' },
   CLOUDFLARE: { text: '⚠', color: COLORS.amber, title: 'Visa Master — Cloudflare check needed' },
   LOGGED_OUT: { text: '⚠', color: COLORS.amber, title: 'Visa Master — logged out of TLScontact' },
