@@ -137,7 +137,20 @@ export function useStatus(): UseStatus {
     };
   }, []);
 
-  const send = useCallback((msg: Msg) => sendMessage(msg), []);
+  // Every SW handler that mutates state (PAUSE / RESUME / ACK_SLOT /
+  // STOP_BOOKING / CLASSIFY_UNKNOWN / SET_CADENCE / CHECK_NOW) responds with
+  // a fresh StatusPayload. The previous version of `send` discarded that
+  // response — so clicking 暂停 (pause) silently moved the SW into PAUSED
+  // state but the popup never re-rendered because no STATUS push followed.
+  // Apply any StatusPayload-shaped response directly so the UI tracks the
+  // SW even without an explicit broadcast channel.
+  const send = useCallback(async (msg: Msg) => {
+    const resp = await sendMessage(msg);
+    if (resp && typeof resp === 'object' && 'state' in resp && 'cadenceMode' in resp) {
+      setStatus(resp as StatusPayload);
+    }
+    return resp;
+  }, []);
 
   return { status, send };
 }
