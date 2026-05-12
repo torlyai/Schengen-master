@@ -223,6 +223,8 @@
 
   "settings.about.version": "Version",
   "settings.about.source": "Source code",
+  "settings.about.developer": "Developer",
+  "settings.about.developerSub": "Torly AI builds visa-application AI assistants — including a UK Innovator Founder visa AI-assistant and this Schengen Visa Master agent. Open source so you can audit what runs on your machine.",
   "settings.about.license": "License",
   "settings.about.bug": "Report a bug",
   "settings.about.docs": "Reference docs",

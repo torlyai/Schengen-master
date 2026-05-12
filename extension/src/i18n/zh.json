@@ -223,6 +223,8 @@
 
   "settings.about.version": "版本",
   "settings.about.source": "源代码",
+  "settings.about.developer": "开发者",
+  "settings.about.developerSub": "Torly AI 专注于打造签证申请类 AI 助手 — 包括英国创新创始人签证 AI 助手，以及当前这款 Schengen Visa Master 代理。完全开源，你可以审计运行在自己电脑上的每一行代码。",
   "settings.about.license": "许可证",
   "settings.about.bug": "反馈问题",
   "settings.about.docs": "参考文档",

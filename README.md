@@ -1,5 +1,11 @@
 # Schengen-master
 
+> Read this in: **English** · [中文](README.zh-CN.md)
+>
+> Built by [**Torly AI**](https://torly.ai) — we build visa-application AI
+> assistants. The Schengen Visa Master agent is open source; our UK Innovator
+> Founder visa AI-assistant is a related, separate project.
+
 An open-source **toolkit + templates** for preparing a family Schengen visa
 application. Ships two things in one repository:
 
@@ -229,6 +235,41 @@ Once monitoring is on, you can leave Chrome running in the background. When
 a slot is detected the extension shows a desktop notification, swaps the tab
 title/favicon to ⚠ red, and (optionally) plays a sound.
 
+> **Not on the right page?** If you click the extension while on a non-watched
+> page (Idle popup) or on a TLS sub-page the extension doesn't recognise
+> (Unknown popup), the popup now leads with a green **"Go to my appointment
+> page"** button — one click takes you to your saved target URL, or to the
+> TLS landing page if you haven't set one yet.
+
+**Step 6 (optional) — Phone notifications via Telegram**
+
+Out of the box the extension fires *desktop* notifications. If you want slot
+alerts on your **phone** so you can step away from the laptop, the extension
+ships a built-in Telegram channel:
+
+1. Open **Settings → Phone notifications (Telegram)** and flip the toggle on.
+2. Follow the 5-step wizard — it walks you through install, bot creation,
+   pasting the token, messaging your bot, and getting your Chat ID.
+3. Hit **Send test message**. Your phone should ping within a couple of
+   seconds.
+
+Total setup time: ~2–3 minutes. Step 1 of the wizard includes download links
+for iOS / Android / Desktop / Web Telegram clients, and step 2 deep-links
+straight to **@BotFather** so you don't have to hunt for it.
+
+What gets sent to Telegram:
+
+| Event | Sent when |
+|---|---|
+| **Slot found** | Always, when Telegram is enabled. |
+| **Cloudflare check needed** / **Session expired** | Only if you enable the *also alert me on blockers* toggle. |
+| **Monitoring started / resumed** | Only if you enable the *ping me when monitoring starts* toggle. |
+
+Privacy: each message contains the centre name, country code, subject code,
+and a timestamp — never your TLScontact login, cookies, URLs, passport
+number, or any form-field content. Token + chat ID are stored in
+`chrome.storage.local`. See PRD Appendix A for the full posture.
+
 ---
 
 ### Path C — Open the workspace in Obsidian (optional)
@@ -302,6 +343,9 @@ the extension). Key options:
 | Notification sound | on | Desktop notification fires regardless. |
 | Tab title swap | on | The watched tab's title changes to ⚠ + audible bell character. |
 | Language | auto | English / 中文. |
+| Phone notifications (Telegram) | off | Opt-in. Setup wizard inside Settings — see Step 6 above. |
+| Also alert on Cloudflare / logged-out | off | Telegram pings you when monitoring gets blocked. |
+| Ping me when monitoring starts | off | Confirmation message after the extension begins watching. |
 
 ---
 
@@ -351,6 +395,14 @@ Everything detection-related happens in the content script in your own
 browser. Notifications are local OS notifications via the
 `chrome.notifications` API.
 
+> **Telegram exception (opt-in).** If you enable the optional Telegram
+> channel under *Settings → Phone notifications*, short structured strings
+> (centre name, country code, subject code, timestamp) are sent to
+> Telegram's servers so they can reach your phone. The bot token and chat
+> ID you provide are stored locally in `chrome.storage.local`. No raw page
+> content, no cookies, no login, no URLs leave the device. Off by default —
+> see PRD Appendix A for the full posture.
+
 ---
 
 ## Troubleshooting
@@ -363,6 +415,9 @@ browser. Notifications are local OS notifications via the
 | Extension badge stays grey | Watched tab not detected. | Make sure the TLScontact tab is open and the URL contains `tlscontact.com/workflow/` — only those URLs match the content script. |
 | No desktop notifications fire | OS notification permission. | macOS: System Settings → Notifications → Chrome → Allow. Windows: Settings → System → Notifications → Chrome. |
 | Tab title doesn't swap on slot found | Some TLS pages overwrite the title every render. | Known limitation; the badge + sound + notification still fire. |
+| Telegram test message fails with "Forbidden: bot was blocked by the user" | You haven't messaged the bot yet, or you blocked it. | Open the bot chat in Telegram and tap Start. Then re-test. |
+| Telegram test fails with "chat not found" | The Chat ID is wrong (often: extra space, wrong sign, or the bot ID copied by accident). | Re-run the *Find my Chat ID* button in Step 5 of the setup wizard; copy the `chat.id` number exactly. |
+| Telegram getUpdates page returns `"result": []` | You haven't sent a message to your bot yet. | Open the bot in Telegram and send any message (tap Start, type "hi"). Reload the getUpdates page. |
 
 ---
 
@@ -378,6 +433,28 @@ contributions that improve the extension or the documentation are welcome:
 
 **Do not** open issues or PRs containing real personal data, screenshots
 of filled forms, or actual booking confirmations.
+
+---
+
+## About Torly AI
+
+[**Torly AI (torly.ai)**](https://torly.ai) builds visa-application AI
+assistants. Current projects:
+
+- **Schengen Visa Master agent** — this project, fully open source (MIT)
+  so you can audit every line of code that runs on your machine.
+- **UK Innovator Founder visa AI-assistant** — a separate, related
+  project that helps overseas founders prepare UK Innovator Founder
+  visa applications.
+
+We believe: **when a tool touches your visa application, "open source +
+auditable" is the only credible way to earn trust.** You can inspect
+exactly what the code does — and does not do — on your own computer.
+
+Feedback, bug reports, or partnership inquiries:
+
+- GitHub Issues: <https://github.com/torlyai/Schengen-master/issues>
+- Website: <https://torly.ai>
 
 ---
 

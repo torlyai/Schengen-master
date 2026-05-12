@@ -319,12 +319,22 @@ export const SettingsPage: React.FC = () => {
         <Field label={t('settings.about.source')}>
           <a
             className="lnk"
-            href="https://github.com/visa-master/chrome-extension"
+            href="https://github.com/torlyai/Schengen-master"
             target="_blank"
             rel="noreferrer"
           >
-            github.com/visa-master/chrome-extension
+            github.com/torlyai/Schengen-master
           </a>
+        </Field>
+        <Field label={t('settings.about.developer')}>
+          <div>
+            <a className="lnk" href="https://torly.ai" target="_blank" rel="noreferrer">
+              Torly AI · torly.ai ↗
+            </a>
+            <div className="field__hint" style={{ marginTop: 4, lineHeight: 1.55 }}>
+              {t('settings.about.developerSub')}
+            </div>
+          </div>
         </Field>
         <Field label={t('settings.about.license')}>
           <div className="field__value">MIT</div>
@@ -332,7 +342,7 @@ export const SettingsPage: React.FC = () => {
         <div className="btn-group">
           <a
             className="btn"
-            href="https://github.com/visa-master/chrome-extension/issues/new"
+            href="https://github.com/torlyai/Schengen-master/issues/new"
             target="_blank"
             rel="noreferrer"
           >
@@ -340,7 +350,7 @@ export const SettingsPage: React.FC = () => {
           </a>
           <a
             className="btn"
-            href="https://github.com/visa-master/chrome-extension/blob/main/README.md"
+            href="https://github.com/torlyai/Schengen-master/blob/main/README.md"
             target="_blank"
             rel="noreferrer"
           >
