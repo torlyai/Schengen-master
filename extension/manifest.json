@@ -1,0 +1,74 @@
+{
+  "manifest_version": 3,
+  "name": "Visa Master — Appointment Watcher",
+  "short_name": "Visa Master",
+  "version": "1.0.0",
+  "description": "Privacy-first Chrome extension that watches your TLScontact appointment page and notifies you the moment a slot opens.",
+  "minimum_chrome_version": "110",
+
+  "action": {
+    "default_title": "Visa Master — Appointment Watcher",
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "public/icons/icon-16.png",
+      "32": "public/icons/icon-32.png",
+      "48": "public/icons/icon-48.png",
+      "128": "public/icons/icon-128.png"
+    }
+  },
+
+  "icons": {
+    "16": "public/icons/icon-16.png",
+    "32": "public/icons/icon-32.png",
+    "48": "public/icons/icon-48.png",
+    "128": "public/icons/icon-128.png"
+  },
+
+  "options_page": "src/settings/settings.html",
+
+  "background": {
+    "service_worker": "src/background/service-worker.ts",
+    "type": "module"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["https://*.tlscontact.com/*"],
+      "js": ["src/content/content-script.ts"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+
+  "permissions": [
+    "alarms",
+    "storage",
+    "notifications",
+    "tabs",
+    "scripting"
+  ],
+
+  "host_permissions": [
+    "https://*.tlscontact.com/*"
+  ],
+
+  "optional_host_permissions": [
+    "ws://localhost/*",
+    "wss://*/*"
+  ],
+
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "src/welcome/welcome.html",
+        "src/settings/settings.html",
+        "public/icons/*"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ],
+
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}

@@ -1,0 +1,101 @@
+# =====================================================================
+# PRIVACY GUARDRAILS — see privacy/GUARDRAILS.md
+# Rule #1: No personal data in git.
+#
+# Strategy: DENY-BY-DEFAULT for any folder/format that typically holds
+# PII (passport scans, bank statements, filled forms, booking
+# confirmations, insurance certs).
+#
+# To track a new file type, you MUST consciously un-ignore it here.
+# Audit any change to this file before committing.
+# =====================================================================
+
+# ---- PII collection folders ----
+# Structure preserved via .gitkeep; contents always ignored.
+forms/**
+!forms/.gitkeep
+appointments/**
+!appointments/.gitkeep
+insurance/**
+!insurance/.gitkeep
+
+# ---- Image formats (passport / BRP / document scans) ----
+*.png
+*.jpg
+*.jpeg
+*.heic
+*.heif
+*.webp
+*.tiff
+*.tif
+*.bmp
+*.gif
+
+# ---- Office documents (filled forms, statements, letters) ----
+*.docx
+*.doc
+*.xlsx
+*.xls
+*.pptx
+*.ppt
+*.odt
+*.ods
+
+# ---- PDFs: deny by default; allow only public reference docs ----
+*.pdf
+!Term-Dates-*.pdf
+
+# ---- Archives (likely bundles of sensitive docs) ----
+*.zip
+*.rar
+*.7z
+*.tar
+*.tar.gz
+*.tgz
+
+# ---- Email / contact exports ----
+*.eml
+*.msg
+*.vcf
+
+# ---- Obsidian: keep config, exclude workspace/cache state ----
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/cache
+.obsidian/plugins/*/data.json
+.obsidian/plugins/*/data-*.json
+
+# ---- Build artefacts & dependencies (extension) ----
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+
+# ---- Tool caches / runtime logs ----
+# Playwright MCP captures page snapshots that may contain personal data
+# (e.g. France-Visas portal DOM, TLScontact account state). Always ignore.
+.playwright-mcp/
+*.log
+
+# ---- OS / editor noise ----
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+.cursor/
+
+# ---- Secrets / env (defence in depth — should never exist here anyway) ----
+.env
+.env.*
+*.key
+*.pem
+*.p12
+*.pfx
+credentials*
+secrets*
