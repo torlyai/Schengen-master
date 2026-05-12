@@ -7,7 +7,32 @@ import type { CadenceMode } from '../shared/states';
 import type { SettingsPayload } from '../shared/messages';
 import { sendMessage, useStatus } from '../hooks/useStatus';
 import { LANGUAGES } from '../i18n';
-import { useT, useSyncLang } from '../i18n/useT';
+import { useT, useSyncLang, tInline } from '../i18n/useT';
+
+// ---------- Update-check helpers ----------
+
+interface UpdateInfo {
+  currentVersion: string;
+  latestVersion: string | null;
+  isUpdateAvailable: boolean;
+  releaseUrl: string;
+  error?: string;
+}
+
+function getCurrentVersion(): string {
+  const c: any = (globalThis as any).chrome;
+  return c?.runtime?.getManifest?.()?.version ?? '?';
+}
+
+async function requestGithubPermission(): Promise<boolean> {
+  const c: any = (globalThis as any).chrome;
+  if (!c?.permissions?.request) return true; // dev / no API — skip silently
+  try {
+    return await c.permissions.request({ origins: ['https://api.github.com/*'] });
+  } catch {
+    return false;
+  }
+}
 
 const DEFAULT_SETTINGS: SettingsPayload = {
   cadenceMode: 'smart',
@@ -273,7 +298,7 @@ export const SettingsPage: React.FC = () => {
 
       <Section title={t('settings.section.about')}>
         <Field label={t('settings.about.version')}>
-          <div className="field__value">1.0.7</div>
+          <UpdateCheckRow />
         </Field>
         <Field label={t('settings.about.source')}>
           <a
@@ -321,6 +346,89 @@ export const SettingsPage: React.FC = () => {
         </div>
       </Section>
 
+    </div>
+  );
+};
+
+// Inline About-section row: shows the installed version and a button that
+// hits GitHub's releases-latest API to tell the user whether a newer build
+// exists. The api.github.com host is in optional_host_permissions — Chrome
+// prompts on the first click (must be invoked from a real user gesture, so
+// we request the permission here in the click handler rather than in the SW).
+const UpdateCheckRow: React.FC = () => {
+  const { t } = useT();
+  const currentVersion = getCurrentVersion();
+  const [checking, setChecking] = useState(false);
+  const [info, setInfo] = useState<UpdateInfo | null>(null);
+
+  const onCheck = async (): Promise<void> => {
+    setChecking(true);
+    setInfo(null);
+    try {
+      const granted = await requestGithubPermission();
+      if (!granted) {
+        setInfo({
+          currentVersion,
+          latestVersion: null,
+          isUpdateAvailable: false,
+          releaseUrl: 'https://github.com/torlyai/Schengen-master/releases/latest',
+          error: 'permission-denied',
+        });
+        return;
+      }
+      const r = (await sendMessage({ type: 'CHECK_UPDATE' })) as UpdateInfo | undefined;
+      if (r && typeof r === 'object') setInfo(r);
+    } finally {
+      setChecking(false);
+    }
+  };
+
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <div className="field__value">v{currentVersion}</div>
+        <button className="btn" onClick={onCheck} disabled={checking}>
+          {checking ? t('settings.update.checking') : t('settings.update.check')}
+        </button>
+      </div>
+      {info && (
+        <div style={{ marginTop: 10 }}>
+          {info.error === 'permission-denied' && (
+            <div className="field__hint" style={{ color: 'var(--amber)' }}>
+              {t('settings.update.errorPermission')}
+            </div>
+          )}
+          {info.error && info.error !== 'permission-denied' && (
+            <div className="field__hint" style={{ color: 'var(--red)' }}>
+              {t('settings.update.errorNetwork')}
+            </div>
+          )}
+          {!info.error && info.isUpdateAvailable && info.latestVersion && (
+            <div>
+              <div style={{ color: 'var(--green)', fontWeight: 600 }}>
+                ↑ {tInline(t('settings.update.available'), { version: info.latestVersion })}
+              </div>
+              <a
+                className="btn btn--primary"
+                href={info.releaseUrl}
+                target="_blank"
+                rel="noreferrer"
+                style={{ marginTop: 8, display: 'inline-block' }}
+              >
+                {t('settings.update.downloadCta')} ↗
+              </a>
+            </div>
+          )}
+          {!info.error && !info.isUpdateAvailable && info.latestVersion && (
+            <div className="field__hint" style={{ color: 'var(--green)' }}>
+              ✓ {t('settings.update.upToDate')}
+            </div>
+          )}
+        </div>
+      )}
+      <div className="field__hint" style={{ marginTop: info ? 8 : 6, lineHeight: 1.55 }}>
+        {t('settings.update.help')}
+      </div>
     </div>
   );
 };

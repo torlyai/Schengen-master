@@ -66,6 +66,7 @@ export type Msg =
   | { type: 'SETTINGS'; payload: SettingsPayload }
   | { type: 'UPDATE_SETTINGS'; patch: Partial<SettingsPayload> }
   | { type: 'TEST_TELEGRAM' }
+  | { type: 'CHECK_UPDATE' }
   // From content script
   | { type: 'DETECTION_RESULT'; state: ExtState; evidence: string[]; url: string };
 

@@ -239,6 +239,14 @@
   "settings.about.docs": "参考文档",
   "settings.about.log": "查看检测日志",
   "settings.about.logHint": "推迟至 V1.1 — 详见线框图 §16。",
+  "settings.update.check": "检查更新",
+  "settings.update.checking": "正在检查…",
+  "settings.update.upToDate": "当前已是最新版本",
+  "settings.update.available": "发现新版本：v{version}",
+  "settings.update.downloadCta": "前往 GitHub 下载",
+  "settings.update.errorPermission": "需要授权访问 GitHub 才能检查更新。请再点一次允许。",
+  "settings.update.errorNetwork": "无法连接 GitHub。请检查网络后重试。",
+  "settings.update.help": "Visa Master 通过 GitHub Releases 发布，不会自动更新。点击上方按钮，对比你当前的版本和 GitHub 上的最新版本。",
 
 
   "lang.toggle.aria": "切换语言",

@@ -44,6 +44,7 @@ import {
   transitionTo,
 } from './state-machine';
 import { testConnection as testTelegram } from './telegram';
+import { checkForUpdate } from './update-checker';
 
 // ---------- Install / startup ----------
 
@@ -307,6 +308,9 @@ async function handle(msg: Msg): Promise<unknown> {
       }
       return merged;
     }
+
+    case 'CHECK_UPDATE':
+      return await checkForUpdate();
 
     case 'TEST_TELEGRAM':
       return await testTelegram();

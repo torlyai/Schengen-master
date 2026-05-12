@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Visa Master — Appointment Watcher",
   "short_name": "Visa Master",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Stop refreshing TLScontact. Get a phone + desktop ping the second a Schengen visa slot opens. Local-only, no servers.",
   "homepage_url": "https://github.com/torlyai/Schengen-master",
   "author": "Torly AI",
@@ -52,6 +52,10 @@
 
   "host_permissions": [
     "https://*.tlscontact.com/*"
+  ],
+
+  "optional_host_permissions": [
+    "https://api.github.com/*"
   ],
 
   "web_accessible_resources": [
