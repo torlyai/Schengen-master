@@ -18,9 +18,14 @@ import type { ExtState } from '../shared/states';
  * on the page text.
  *
  * Sources:
- *  - en-GB / en-US: TLScontact UK production strings
+ *  - en-GB / en-US: TLScontact UK production strings (2026-05-12 empirical
+ *    observations from visas-fr.tlscontact.com appointment-booking page)
  *  - zh-CN: 2026-05-12 empirical observation (PRD Appendix C)
  *  - fr-FR / es-ES / pt-PT / ar-SA / hi-IN: PRD §10.2 dictionary
+ *
+ * Each phrase must be a substring that ONLY appears on a no-slots page — never
+ * on a slots-available page. Word order matters: `includes` is a literal
+ * substring match.
  */
 const NO_SLOTS_PHRASES: ReadonlyArray<string> = [
   // English
@@ -28,6 +33,10 @@ const NO_SLOTS_PHRASES: ReadonlyArray<string> = [
   'no appointments available',
   'no appointment available',
   'no available slots',
+  "don't have any appointment slots",     // headline on visas-fr.tlscontact.com 2026-05-12
+  'do not have any appointment slots',    // straight-apostrophe variant
+  'no slots are currently available',     // subhead on the same page
+  'no appointment slots are available',
   // Chinese (simplified)
   '我们目前没有更多可用的预约时段',
   '目前没有可预约的名额',

@@ -7,7 +7,7 @@ import { sendMessage } from '../hooks/useStatus';
 import { LANGUAGES, setLang } from '../i18n';
 import { useT } from '../i18n/useT';
 
-const SOURCE_URL = 'https://github.com/visa-master/chrome-extension';
+const SOURCE_URL = 'https://github.com/torlyai/Schengen-master';
 
 export const WelcomePage: React.FC = () => {
   const { t } = useT();
@@ -45,12 +45,35 @@ export const WelcomePage: React.FC = () => {
       </div>
 
       <div className="welcome__hero">
-        <div className="welcome__eyebrow">{t('welcome.eyebrow')} — 12 May 2026</div>
+        <div className="welcome__eyebrow">{t('welcome.eyebrow')}</div>
         <h1 className="welcome__h1">
           {t('welcome.h1.before')}{' '}
           <em className="welcome__h1-mono">TLScontact</em> {t('welcome.h1.after')}
         </h1>
         <p className="welcome__lede">{t('welcome.lede')}</p>
+      </div>
+
+      <div className="welcome__highlights">
+        <div className="hl">
+          <div className="hl__icon" aria-hidden>👁️</div>
+          <div className="hl__title">{t('welcome.hl.watch.title')}</div>
+          <div className="hl__sub">{t('welcome.hl.watch.sub')}</div>
+        </div>
+        <div className="hl">
+          <div className="hl__icon" aria-hidden>📱</div>
+          <div className="hl__title">{t('welcome.hl.alert.title')}</div>
+          <div className="hl__sub">{t('welcome.hl.alert.sub')}</div>
+        </div>
+        <div className="hl">
+          <div className="hl__icon" aria-hidden>🔒</div>
+          <div className="hl__title">{t('welcome.hl.local.title')}</div>
+          <div className="hl__sub">{t('welcome.hl.local.sub')}</div>
+        </div>
+        <div className="hl">
+          <div className="hl__icon" aria-hidden>🆓</div>
+          <div className="hl__title">{t('welcome.hl.free.title')}</div>
+          <div className="hl__sub">{t('welcome.hl.free.sub')}</div>
+        </div>
       </div>
 
       <div className="welcome__grid">
@@ -83,7 +106,7 @@ export const WelcomePage: React.FC = () => {
         <div>
           {t('welcome.disclaim')}{' '}
           <a className="lnk" href={SOURCE_URL} target="_blank" rel="noreferrer">
-            github.com/visa-master/chrome-extension
+            github.com/torlyai/Schengen-master
           </a>
           .
         </div>

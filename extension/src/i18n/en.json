@@ -81,8 +81,16 @@
 
   "footer.summary": "{checks} checks · {slots} slots",
 
-  "welcome.brow.tag": "v1.0 · open source · MIT",
+  "welcome.brow.tag": "Open source · MIT",
   "welcome.eyebrow": "First run",
+  "welcome.hl.watch.title": "Watches 24/7",
+  "welcome.hl.watch.sub": "Polls TLScontact every 2–15 minutes around the clock — slot drops are caught within minutes.",
+  "welcome.hl.alert.title": "Desktop + phone",
+  "welcome.hl.alert.sub": "Local desktop notification by default. Optional Telegram pings to your phone when you step away from the laptop.",
+  "welcome.hl.local.title": "100% local",
+  "welcome.hl.local.sub": "No servers. No telemetry. Your TLScontact session and cookies never leave your browser.",
+  "welcome.hl.free.title": "Free & open source",
+  "welcome.hl.free.sub": "MIT licensed. Every line of code running on your machine is in the public GitHub repo — audit it yourself.",
   "welcome.h1.before": "Hello. I'll watch your",
   "welcome.h1.after": "page so you don't have to.",
   "welcome.lede": "I'm a small, polite background process. I refresh your appointment booking page on a steady cadence and tap you on the shoulder the moment a slot appears — nothing more.",
@@ -108,6 +116,7 @@
   "settings.title": "Settings",
   "settings.section.monitoring": "Monitoring",
   "settings.section.windows": "Release windows",
+  "settings.section.detection": "Detection",
   "settings.section.notifications": "Notifications",
   "settings.section.openclaw": "OpenClaw integration",
   "settings.section.language": "Language",
@@ -131,6 +140,9 @@
   "settings.windows.endUk": "End (UK)",
   "settings.windows.poll": "Poll every (min)",
   "settings.windows.outside": "All other times → poll every",
+
+  "settings.detection.monthCycling": "Cycle through month tabs",
+  "settings.detection.monthCyclingSub": "Experimental — when no slots are visible in the current month, click the next month tab to scan it too. Off by default to keep the extension a passive scanner.",
 
   "settings.notif.desktop": "Desktop notification on slot detected",
   "settings.notif.sound": "Play sound",

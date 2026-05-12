@@ -81,8 +81,16 @@
 
   "footer.summary": "{checks} 次检查 · {slots} 个时段",
 
-  "welcome.brow.tag": "v1.0 · 开源 · MIT",
+  "welcome.brow.tag": "开源 · MIT 协议",
   "welcome.eyebrow": "首次启动",
+  "welcome.hl.watch.title": "全天 24 小时监控",
+  "welcome.hl.watch.sub": "每 2–15 分钟轮询 TLScontact 一次 — 时段一开放，几分钟内就能抓到。",
+  "welcome.hl.alert.title": "桌面 + 手机",
+  "welcome.hl.alert.sub": "默认桌面系统通知。可选 Telegram 推送到手机，离开电脑也不会错过。",
+  "welcome.hl.local.title": "100% 本地运行",
+  "welcome.hl.local.sub": "零服务器、零数据采集。你的 TLScontact 登录态和 Cookie 永远不会离开浏览器。",
+  "welcome.hl.free.title": "免费 + 开源",
+  "welcome.hl.free.sub": "MIT 协议。在你电脑上运行的每一行代码都在公开的 GitHub 仓库里 — 自己审计。",
   "welcome.h1.before": "你好。我会替你盯着",
   "welcome.h1.after": "页面。",
   "welcome.lede": "我是一个克制的小型后台进程。我会以稳定的频率刷新你的预约页面，一旦出现可预约时段就立即通知你 — 仅此而已。",
@@ -108,6 +116,7 @@
   "settings.title": "设置",
   "settings.section.monitoring": "监测",
   "settings.section.windows": "时段窗口",
+  "settings.section.detection": "检测",
   "settings.section.notifications": "通知",
   "settings.section.openclaw": "OpenClaw 集成",
   "settings.section.language": "语言",
@@ -131,6 +140,9 @@
   "settings.windows.endUk": "结束（英国时间）",
   "settings.windows.poll": "每多少分钟轮询",
   "settings.windows.outside": "其他时段 → 每",
+
+  "settings.detection.monthCycling": "循环切换月份标签",
+  "settings.detection.monthCyclingSub": "实验性 — 当前月份无可预约时段时，自动点击下一个月份标签继续扫描。默认关闭，以保持插件为纯被动监控模式。",
 
   "settings.notif.desktop": "发现时段时显示桌面通知",
   "settings.notif.sound": "播放提示音",

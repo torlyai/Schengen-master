@@ -14,7 +14,11 @@
 > 日期、证件号码或行程细节 — 个人数据由你自己在本地填写，并通过
 > `.gitignore` 的"默认拒绝"策略阻止误提交。
 >
-> **状态：** 扩展 v1.0.0 仅支持手动加载 — Chrome 应用商店上架尚未完成。
+> **状态：** 扩展 v1.0.0 已提供**预构建 ZIP 包**，
+> 可从[最新发布页](https://github.com/torlyai/Schengen-master/releases/latest)直接下载
+> — **不需要 Node、不需要终端、不需要任何编译步骤**。
+> Chrome 应用商店上架尚未完成，所以仍需"加载已解压的扩展程序"
+> （需开启开发者模式），但安装步骤已经从 8 步简化到 6 步。
 
 ---
 
@@ -22,7 +26,8 @@
 
 - [扩展能做什么](#扩展能做什么)
 - [系统要求](#系统要求)
-- [安装步骤](#安装步骤)
+- [安装步骤（推荐路径 — 下载 ZIP）](#安装步骤推荐路径--下载-zip)
+- [安装步骤（开发者路径 — 从源码编译）](#安装步骤开发者路径--从源码编译)
 - [Telegram 手机通知设置（可选但推荐）](#telegram-手机通知设置可选但推荐)
 - [配置选项](#配置选项)
 - [隐私说明](#隐私说明)
@@ -53,6 +58,16 @@
 
 ## 系统要求
 
+### 普通用户（推荐路径 — 下载 ZIP 安装）
+
+| 组件 | 要求 | 检查方式 |
+| --- | --- | --- |
+| Chrome / Chromium | **≥ 110**（支持 Manifest V3） | 浏览器地址栏输入 `chrome://version` |
+
+仅此一项 — 不需要 Git、不需要 Node.js、不需要命令行。
+
+### 开发者 / 高级用户（从源码自己编译）
+
 | 组件 | 要求 | 检查方式 |
 | --- | --- | --- |
 | Git | 近期任意版本 | `git --version` |
@@ -69,49 +84,56 @@ nvm use 20
 
 ---
 
-## 安装步骤
+## 安装步骤（推荐路径 — 下载 ZIP）
 
-### 第 1 步 — 克隆仓库
+**不需要 Node、不需要终端、不需要编译。** 这是普通用户的路径，
+全程大约 2 分钟。
 
-```sh
-git clone https://github.com/torlyai/Schengen-master.git
-cd Schengen-master/extension
-```
+### 第 1 步 — 下载 ZIP 包
 
-### 第 2 步 — 安装依赖
+打开[最新发布页](https://github.com/torlyai/Schengen-master/releases/latest)，
+在 **Assets** 区域下载 `visa-master-v<版本号>.zip`（例如
+`visa-master-v1.0.0.zip`）。
 
-```sh
-npm install
-```
+如果没看到 "Assets"，点击发布说明下面的"Show all"或下拉箭头展开。
 
-会拉取 React 18、Vite 5、`@crxjs/vite-plugin`、TypeScript 和 Chrome
-类型定义。约 250 MB，需要 30–60 秒。
+### 第 2 步 — 解压
 
-### 第 3 步 — 构建扩展
+双击下载好的 ZIP — macOS 和 Windows 都会自动解压。
+你会得到**一个文件夹**，名字类似 `visa-master-v1.0.0/`。
 
-```sh
-npm run build
-```
+请记住这个文件夹的位置（比如 `~/Downloads/visa-master-v1.0.0/`），
+Chrome 会一直从这个文件夹加载扩展。**安装后不要删除或移动这个
+文件夹**，否则扩展会停止工作，直到你重新添加。
 
-Vite 会把 TypeScript 服务工作线程、内容脚本和 React UI 编译进
-`extension/dist/`。输出的就是一个可加载的 Chrome MV3 扩展。
+### 第 3 步 — 打开 Chrome 扩展页面
 
-> 注意：`dist/` 目录**不会**提交到仓库。必须先构建，否则下一步加载
-> 时会报"Could not load manifest"。
+在 Chrome 地址栏输入 `chrome://extensions` 然后按回车。
 
-### 第 4 步 — 在 Chrome 中加载扩展
+### 第 4 步 — 开启开发者模式
 
-1. 在 Chrome 地址栏打开 `chrome://extensions`。
-2. 右上角开启**开发者模式**。
-3. 点击**加载已解压的扩展程序**。
-4. 选择刚才构建出来的 `extension/dist/` 文件夹。
-5. 扩展会出现在工具栏，名称是 *Visa Master — Appointment Watcher*。
-   建议右键固定到工具栏。
+在扩展页面**右上角**，把 **开发者模式 / Developer mode** 开关
+打开。开关打开后，左上角会多出三个按钮 —
+*加载已解压的扩展程序* / *打包扩展程序* / *更新*。
 
-### 第 5 步 — 首次运行
+> **为什么要开发者模式？** Chrome 要求所有不是从 Chrome 应用商店
+> 安装的扩展都启用开发者模式。Visa Master 是开源项目、ZIP 是
+> GitHub Actions 用公开源码构建的 — 但因为我们还没上架 Chrome
+> 应用商店，所以仍然要走"本地文件夹加载"这条路，Chrome 把这
+> 叫作"开发者模式"，无论谁构建的 ZIP 都一样。
 
-扩展在安装后会自动弹出欢迎页。在那里选择语言（English / 中文），
-然后按页面引导完成：
+### 第 5 步 — 加载已解压的扩展程序
+
+点击**加载已解压的扩展程序**。在文件选择框里找到第 2 步解压
+出来的 `visa-master-v<版本号>/` 文件夹 — **选这个文件夹本身**，
+不是里面的某个文件。点*打开 / 选择文件夹*。
+
+扩展会立刻出现在扩展页面的卡片列表里，也会出现在 Chrome 工具栏
+（如果没看到，点击拼图图标 → *固定* 扩展）。一个欢迎页会自动打开。
+
+### 第 6 步 — 首次运行
+
+在欢迎页选择语言（English / 中文），然后按页面引导完成：
 
 1. 在另一个标签页打开你的 TLScontact 预约页面并登录。
 2. 回到欢迎页 — 扩展会自动识别被监控的标签页，工具栏图标会变绿色。
@@ -126,6 +148,53 @@ Vite 会把 TypeScript 服务工作线程、内容脚本和 React UI 编译进
 > （Unknown 弹窗），新版弹窗会顶部显示一个绿色的**"去我的预约页面"**
 > 按钮 — 一键就能跳到你保存的预约 URL；如果还没保存过目标，就跳到
 > TLScontact 首页。
+
+### 更新到新版本
+
+发布新版本时：
+
+1. 从[发布页](https://github.com/torlyai/Schengen-master/releases/latest)
+   下载新的 ZIP。
+2. 解压 — 你会得到一个版本号更新的文件夹（例如 `visa-master-v1.0.1/`）。
+3. 在 `chrome://extensions`，先在旧扩展卡片上点 **移除**，
+   然后用**加载已解压的扩展程序**加载新文件夹。
+   你的设置存在 `chrome.storage.local`，重装不会丢失。
+
+如果只是源码改了一点点（同一个 ZIP 文件夹），直接在扩展卡片上
+点 **重新载入** 图标即可，Chrome 会重新读取那个文件夹。
+
+---
+
+## 安装步骤（开发者路径 — 从源码编译）
+
+只有当你想自己审计代码、改源码、或者不放心 GitHub Actions 构建的
+ZIP，才需要走这条路。需要先安装 Node 20 和 Git（见上面的系统要求）。
+
+```sh
+# 1. 克隆仓库
+git clone https://github.com/torlyai/Schengen-master.git
+cd Schengen-master/extension
+
+# 2. 安装依赖（约 250 MB，30–60 秒）
+npm install
+
+# 3. 类型检查（可选，确认源码没问题）
+npm run typecheck
+
+# 4. 构建扩展，产物会写到 extension/dist/
+npm run build
+
+# 5. （可选）打包成 ZIP，模拟 GitHub Actions 的输出
+npm run package
+```
+
+构建完成后：
+
+- 走"普通用户"路径加载 `extension/dist/` 文件夹即可，
+- 或者解压 `extension/visa-master-v<版本号>.zip` 加载它，效果一样。
+
+> `dist/` 和 `*.zip` 都**不会**提交到仓库；每次构建出来都是新的。
+> 第一次加载时记得开启**开发者模式**（同上面的第 4 步）。
 
 ---
 

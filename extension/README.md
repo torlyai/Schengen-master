@@ -10,25 +10,41 @@ See `../docs/06-visa-master-chrome-extension-prd.md` for the full PRD and
 
 ## Install (end users)
 
-1. Run `npm install` and `npm run build` (see below).
-2. Open `chrome://extensions` in Chrome.
-3. Toggle "Developer mode" (top-right).
-4. Click "Load unpacked" and pick the generated `dist/` folder.
-5. Open your TLS booking page (e.g. `https://visas-fr.tlscontact.com/workflow/...`)
-   while logged in. The badge turns green, monitoring is on.
+**Recommended:** download the pre-built ZIP — no Node, no build step.
 
-The Chrome Web Store listing is not live yet — until it is, sideload is the
-only install path.
+1. Open the [latest release](https://github.com/torlyai/Schengen-master/releases/latest)
+   and download `visa-master-v<version>.zip`.
+2. Unzip it. You get one folder named `visa-master-v<version>/`.
+3. Open `chrome://extensions` in Chrome.
+4. Toggle **Developer mode** (top-right).
+5. Click **Load unpacked** and pick the unzipped folder.
+6. Open your TLS booking page (e.g.
+   `https://visas-fr.tlscontact.com/workflow/...`) while logged in. The
+   badge turns green, monitoring is on.
+
+The Chrome Web Store listing is not live yet — until it is, "Load unpacked"
+is the only install path Chrome allows.
+
+Full bilingual end-user instructions: see the
+[main README](../README.md#path-b--install-the-pre-built-extension-recommended)
+(EN) or [中文 README](../README.zh-CN.md#安装步骤推荐路径--下载-zip) (中文).
 
 ## Develop
 
 ```sh
 npm install
 npm run build          # one-shot build into dist/
+npm run package        # zip dist/ → visa-master-v<version>.zip
+npm run release        # build && package — same as the GH Actions release flow
 npm run typecheck      # tsc --noEmit, no emit
 npm run dev            # vite dev with HMR (use chrome://extensions reload)
 npm run icons          # regenerate placeholder icons
 ```
+
+The ZIP packaging is a pure-Node script with no native deps — see
+[`scripts/package.mjs`](scripts/package.mjs). It writes the ZIP next to
+`package.json` (gitignored). For tagged releases the same script runs in
+`.github/workflows/release.yml` and attaches the ZIP to the GitHub Release.
 
 Build target: Chromium ≥ 110. Uses `@crxjs/vite-plugin` so the `manifest.json`
 is the single source of truth for entry points (service worker, content

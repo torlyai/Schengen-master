@@ -1,0 +1,116 @@
+name: Release extension ZIP
+
+# Builds the Chrome extension and attaches a downloadable ZIP to a GitHub
+# Release whenever a version tag is pushed.
+#
+# Trigger:
+#   git tag v1.0.1
+#   git push origin v1.0.1
+#
+# Result:
+#   - A new GitHub Release is created (or the existing one is updated)
+#   - `visa-master-v1.0.1.zip` is attached as a release asset
+#   - The README's `/releases/latest` link automatically points to the new one
+#
+# Manual trigger is also supported via the Actions UI (workflow_dispatch) for
+# rebuilds without a new tag.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to package and attach to (e.g. v1.0.1). Must already exist.'
+        required: true
+
+permissions:
+  contents: write  # required to create/update a release and upload assets
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: extension
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: extension/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build extension
+        run: npm run build
+
+      - name: Package into ZIP
+        run: npm run package
+
+      - name: Locate ZIP
+        id: zip
+        run: |
+          ZIP_PATH=$(ls visa-master-v*.zip | head -n 1)
+          echo "Found: $ZIP_PATH"
+          {
+            echo "path=extension/$ZIP_PATH"
+            echo "name=$ZIP_PATH"
+          } >> "$GITHUB_OUTPUT"
+
+      # Resolve tag name into a step output. We deliberately pipe the
+      # untrusted workflow_dispatch input through an env var rather than
+      # interpolating it into the shell — see
+      # https://github.blog/security/vulnerability-research/how-to-catch-github-actions-workflow-injections-before-attackers-do/
+      - name: Resolve tag
+        id: tag
+        working-directory: .
+        env:
+          INPUT_TAG: ${{ github.event.inputs.tag }}
+          GITHUB_REF: ${{ github.ref }}
+        run: |
+          if [ -n "$INPUT_TAG" ]; then
+            REF="$INPUT_TAG"
+          else
+            REF="${GITHUB_REF#refs/tags/}"
+          fi
+          # Sanity: tag names are always [A-Za-z0-9._-]+; refuse anything else.
+          if ! printf '%s' "$REF" | grep -Eq '^[A-Za-z0-9._-]+$'; then
+            echo "Refusing suspicious ref: $REF" >&2
+            exit 1
+          fi
+          echo "ref=$REF" >> "$GITHUB_OUTPUT"
+
+      - name: Create or update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.ref }}
+          name: ${{ steps.tag.outputs.ref }}
+          files: ${{ steps.zip.outputs.path }}
+          fail_on_unmatched_files: true
+          generate_release_notes: true
+          body: |
+            ## Install (no Node / no terminal required)
+
+            1. Download `${{ steps.zip.outputs.name }}` from the **Assets** section below.
+            2. Double-click the ZIP to unzip it. You'll get one folder.
+            3. Open Chrome and visit `chrome://extensions`.
+            4. Toggle **Developer mode** ON (top-right).
+            5. Click **Load unpacked** and select the unzipped folder.
+            6. Open your TLScontact appointment page — the extension badge turns green.
+
+            Full step-by-step bilingual instructions are in the
+            [README](https://github.com/${{ github.repository }}#path-b--install-the-pre-built-extension-recommended).
+
+            ---
+
+            Built from commit `${{ github.sha }}` by GitHub Actions.

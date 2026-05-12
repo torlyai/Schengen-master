@@ -7,11 +7,21 @@
 //  4. Re-run detection if the page swaps content client-side (SPA-style).
 
 import { detectState } from './detector';
+import { cycleToNextMonth } from './month-cycler';
 import type { Msg } from '../shared/messages';
 
 // We don't want to spam DETECTION_RESULT — debounce to once per 500 ms.
 let lastSendTs = 0;
 const DEBOUNCE_MS = 500;
+
+// Month-cycling — opt-in via settings. Cached locally so runDetection stays
+// synchronous; refreshed on storage.onChanged below. Default false matches
+// DEFAULT_SETTINGS in shared/storage.ts.
+let monthCyclingEnabled = false;
+
+// Throttle on cycler clicks so we don't race the mutation observer.
+let lastCycleTs = 0;
+const CYCLE_THROTTLE_MS = 1500;
 
 function send(msg: Msg): void {
   try {
@@ -21,6 +31,34 @@ function send(msg: Msg): void {
   } catch {
     /* extension context invalidated — ignore */
   }
+}
+
+function maybeCycleMonths(state: string): void {
+  if (!monthCyclingEnabled) return;
+  if (state !== 'NO_SLOTS') return;
+
+  const now = Date.now();
+  if (now - lastCycleTs < CYCLE_THROTTLE_MS) return;
+  lastCycleTs = now;
+
+  // Small settle delay so the page's tab-strip layout/state is stable before
+  // we click — and so we don't fire instantly inside the detection callback.
+  setTimeout(() => {
+    const result = cycleToNextMonth(document);
+    if (result.clicked && result.clickedTab) {
+      // Surface as evidence on the NEXT detection (the mutation observer will
+      // re-run runDetection ~750 ms after the click).
+      send({
+        type: 'DETECTION_RESULT',
+        state: 'NO_SLOTS',
+        evidence: [
+          `Month-cycle: clicked ${result.clickedTab.label}`,
+          `Scanned so far: ${Array.from(result.discovered.map((t) => t.key)).join(', ')}`,
+        ],
+        url: location.href,
+      });
+    }
+  }, 500);
 }
 
 function runDetection(reason: string): void {
@@ -37,6 +75,37 @@ function runDetection(reason: string): void {
     evidence: fullEvidence,
     url: location.href,
   });
+
+  // After reporting, if cycling is on and we're sitting on NO_SLOTS, click
+  // the next unscanned month tab so the observer picks up the swap.
+  maybeCycleMonths(state);
+}
+
+// ---------- Settings cache (for month-cycling toggle) ----------
+//
+// Read once on script load, then keep in sync via storage.onChanged. The
+// content script can't import shared/storage.ts because chrome.* APIs are
+// scoped to MV3 service workers + extension pages — but chrome.storage is
+// available to content scripts, so we read it directly.
+
+try {
+  chrome.storage.local.get('settings', (v) => {
+    const s = v?.settings;
+    if (s && typeof s === 'object' && typeof s.monthCyclingEnabled === 'boolean') {
+      monthCyclingEnabled = s.monthCyclingEnabled;
+    }
+  });
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== 'local') return;
+    const c = changes.settings;
+    if (!c || !c.newValue) return;
+    const n = c.newValue as { monthCyclingEnabled?: boolean };
+    if (typeof n.monthCyclingEnabled === 'boolean') {
+      monthCyclingEnabled = n.monthCyclingEnabled;
+    }
+  });
+} catch {
+  /* extension context invalidated or storage API missing — keep default */
 }
 
 // ---------- Initial detection ----------

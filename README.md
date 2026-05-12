@@ -23,8 +23,11 @@ application. Ships two things in one repository:
 > live here — concrete data is filled in by each user on their own machine
 > and stays local via the deny-by-default `.gitignore`.
 >
-> **Status:** Extension v1.0.0 sideload-only — Chrome Web Store listing is
-> not live yet.
+> **Status:** Extension v1.0.0 ships as a pre-built ZIP on the
+> [Releases page](https://github.com/torlyai/Schengen-master/releases/latest)
+> — **no Node / no terminal / no build step needed** for end-user install.
+> Chrome Web Store listing is not live yet, so installation is still
+> "Load unpacked" (with Developer mode on).
 
 ---
 
@@ -34,8 +37,8 @@ application. Ships two things in one repository:
 - [Repository structure](#repository-structure)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
-  - [Path A — Just read the case study (no install)](#path-a--just-read-the-case-study-no-install)
-  - [Path B — Install the Chrome extension](#path-b--install-the-chrome-extension)
+  - [Path A — Use the templates for your own application](#path-a--use-the-templates-for-your-own-application)
+  - [Path B — Install the pre-built extension (recommended)](#path-b--install-the-pre-built-extension-recommended)
   - [Path C — Open the workspace in Obsidian (optional)](#path-c--open-the-workspace-in-obsidian-optional)
   - [Path D — Develop the extension](#path-d--develop-the-extension)
 - [Configuration](#configuration)
@@ -176,72 +179,92 @@ cd Schengen-master
 
 ---
 
-### Path B — Install the Chrome extension
+### Path B — Install the pre-built extension (recommended)
 
-This is the main install path. The extension is sideloaded ("Load unpacked")
-until a Chrome Web Store listing is published.
+**No Node, no terminal, no build step.** This is the path for normal users.
+Total install time: ~2 minutes.
 
-**Step 1 — Clone**
+**Step 1 — Download the ZIP**
 
-```sh
-git clone https://github.com/torlyai/Schengen-master.git
-cd Schengen-master/extension
-```
+Open the [latest release page](https://github.com/torlyai/Schengen-master/releases/latest)
+and download the asset named `visa-master-v<version>.zip` (e.g.
+`visa-master-v1.0.0.zip`).
 
-**Step 2 — Install dependencies**
+If you don't see an "Assets" section, click "Show all" / the disclosure
+triangle just below the release notes.
 
-```sh
-npm install
-```
+**Step 2 — Unzip it**
 
-This pulls React 18, Vite 5, `@crxjs/vite-plugin`, TypeScript and Chrome
-type definitions. About 250 MB into `node_modules/`. Takes 30–60 s.
+Double-click the downloaded ZIP. macOS and Windows will both auto-extract.
+You'll get **one folder** named `visa-master-v<version>/`.
 
-**Step 3 — Build the extension**
+Remember where it lives (e.g. `~/Downloads/visa-master-v1.0.0/`). Chrome
+will keep loading the extension from this exact folder, so don't delete or
+move it after install — if you do, the extension will stop working until
+you re-add it.
 
-```sh
-npm run build
-```
+**Step 3 — Open Chrome's Extensions page**
 
-Vite compiles the TypeScript service worker, content script and React UI
-into `extension/dist/`. The output is a valid unpacked MV3 extension.
+Type `chrome://extensions` into the Chrome address bar and press Enter.
 
-> Note: `dist/` is **not** committed to the repo. You must build before
-> loading. If you skip this step the next one will fail with "Could not
-> load manifest".
+**Step 4 — Turn on Developer mode**
 
-**Step 4 — Load the unpacked extension in Chrome**
+In the top-right corner of the Extensions page, flip the **Developer mode**
+toggle ON. Three new buttons will appear — *Load unpacked*, *Pack extension*,
+*Update*.
 
-1. Open `chrome://extensions` in Chrome.
-2. Toggle **Developer mode** in the top-right corner.
-3. Click **Load unpacked**.
-4. Select the `extension/dist/` folder you just built.
-5. The extension appears in your toolbar as *Visa Master — Appointment Watcher*.
-   Pin it for easier access.
+> **Why Developer mode?** Chrome requires it for any extension that's not
+> from the Chrome Web Store. Visa Master is open source and pre-built on
+> GitHub Actions from the public source code — but until we publish to the
+> Chrome Web Store, you're loading it from a local folder, and Chrome
+> calls that "developer mode" regardless of who built the ZIP.
 
-**Step 5 — First run**
+**Step 5 — Load the unpacked extension**
 
-The extension opens a welcome tab on install. Pick your language (English /
-中文), then follow the in-page guidance to:
+Click **Load unpacked**. In the file picker, navigate to and select the
+`visa-master-v<version>/` folder from Step 2 (the folder itself, not any
+file inside it). Click *Open* / *Select Folder*.
+
+The extension now appears as a card on the Extensions page and as an icon
+in your Chrome toolbar (you may need to click the puzzle-piece icon and
+*pin* it). A welcome tab opens automatically.
+
+**Step 6 — First run**
+
+In the welcome tab, pick your language (English / 中文), then follow the
+in-page guidance:
 
 1. Open your TLScontact appointment page in another tab and log in.
-2. Return to the welcome tab — the extension auto-detects the watched tab and
-   the badge turns green.
+2. Return to the welcome tab — the extension auto-detects the watched tab
+   and the toolbar badge turns green.
 3. Open the popup to confirm the polling schedule and notification settings
    (defaults: poll every 2 min inside the configured release windows, every
    6 min outside; UK local time).
 
 Once monitoring is on, you can leave Chrome running in the background. When
-a slot is detected the extension shows a desktop notification, swaps the tab
-title/favicon to ⚠ red, and (optionally) plays a sound.
+a slot is detected the extension shows a desktop notification, swaps the
+tab title/favicon to ⚠ red, and (optionally) plays a sound.
 
-> **Not on the right page?** If you click the extension while on a non-watched
-> page (Idle popup) or on a TLS sub-page the extension doesn't recognise
-> (Unknown popup), the popup now leads with a green **"Go to my appointment
-> page"** button — one click takes you to your saved target URL, or to the
-> TLS landing page if you haven't set one yet.
+> **Not on the right page?** If you click the extension while on a
+> non-watched page (Idle popup) or on a TLS sub-page the extension doesn't
+> recognise (Unknown popup), the popup leads with a green
+> **"Go to my appointment page"** button — one click takes you to your
+> saved target URL, or to the TLS landing page if you haven't set one yet.
 
-**Step 6 (optional) — Phone notifications via Telegram**
+**Updating to a new version**
+
+When a new release ships:
+
+1. Re-download the new ZIP from the [Releases page](https://github.com/torlyai/Schengen-master/releases/latest).
+2. Unzip it. You'll get a folder with a new version suffix (e.g.
+   `visa-master-v1.0.1/`).
+3. On `chrome://extensions`, click the **reload icon** on the extension
+   card — Chrome re-reads the original folder. To switch to the new
+   version's folder, click **Remove** on the existing card, then **Load
+   unpacked** the new folder. Your settings persist via
+   `chrome.storage.local` and survive the reinstall.
+
+**Step 7 (optional) — Phone notifications via Telegram**
 
 Out of the box the extension fires *desktop* notifications. If you want slot
 alerts on your **phone** so you can step away from the laptop, the extension

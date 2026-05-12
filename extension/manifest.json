@@ -2,8 +2,10 @@
   "manifest_version": 3,
   "name": "Visa Master — Appointment Watcher",
   "short_name": "Visa Master",
-  "version": "1.0.0",
-  "description": "Privacy-first Chrome extension that watches your TLScontact appointment page and notifies you the moment a slot opens.",
+  "version": "1.0.1",
+  "description": "Stop refreshing TLScontact. Get a phone + desktop ping the second a Schengen visa slot opens. Local-only, no servers.",
+  "homepage_url": "https://github.com/torlyai/Schengen-master",
+  "author": "Torly AI",
   "minimum_chrome_version": "110",
 
   "action": {

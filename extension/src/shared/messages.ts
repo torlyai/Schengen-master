@@ -43,6 +43,11 @@ export interface SettingsPayload {
   telegramChatId: string;
   telegramAlsoBlockers: boolean;
   telegramMonitoringStart: boolean;
+  // Month-tab cycling — opt-in. When ON, the content script clicks through
+  // visible month tabs after a NO_SLOTS scan to cover months other than the
+  // page's default. Off by default to preserve the passive, scanner-only
+  // posture; see src/content/month-cycler.ts for the policy.
+  monthCyclingEnabled: boolean;
 }
 
 // Discriminated union of every message the SW expects to receive,

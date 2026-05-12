@@ -31,6 +31,7 @@ const DEFAULT_SETTINGS: SettingsPayload = {
   telegramChatId: '',
   telegramAlsoBlockers: false,
   telegramMonitoringStart: false,
+  monthCyclingEnabled: false,
 };
 
 function useSettings(): {
@@ -200,6 +201,15 @@ export const SettingsPage: React.FC = () => {
             </div>
           </div>
         )}
+      </Section>
+
+      <Section title={t('settings.section.detection')}>
+        <Toggle
+          label={t('settings.detection.monthCycling')}
+          sub={t('settings.detection.monthCyclingSub')}
+          on={settings.monthCyclingEnabled}
+          onChange={(v) => patch({ monthCyclingEnabled: v })}
+        />
       </Section>
 
       <Section title={t('settings.section.notifications')}>

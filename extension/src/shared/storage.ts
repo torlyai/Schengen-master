@@ -72,6 +72,7 @@ export const DEFAULT_SETTINGS: SettingsPayload = {
   telegramChatId: '',
   telegramAlsoBlockers: false,
   telegramMonitoringStart: false,
+  monthCyclingEnabled: false,
 };
 
 export const DEFAULT_STATE: PersistedState = {
