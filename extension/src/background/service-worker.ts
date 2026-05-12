@@ -32,6 +32,9 @@ import {
   applyResolvedCadence,
   resolveCadence,
   clear as clearSchedule,
+  schedule,
+  stateAllowsPolling,
+  healPollAlarm,
 } from './scheduler';
 import {
   applyDetection,
@@ -79,6 +82,10 @@ chrome.runtime.onStartup?.addListener(async () => {
     const s = await getState();
     await setBadgeForState(s.state);
     await adoptExistingTlsTab();
+    // After cold start, the chrome.alarms persistence layer can sometimes
+    // have dropped the POLL_ALARM (sleep/wake on macOS in particular).
+    // If state still expects polling, ensure the alarm is registered.
+    await healPollAlarm();
   } catch {
     /* ignore */
   }
@@ -129,8 +136,22 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === POLL_ALARM) {
     const s = await getState();
     if (s.state === 'NO_SLOTS' || s.state === 'SLOT_AVAILABLE') {
-      // For smart mode, the resolved cadence may have changed since last tick.
-      await applyResolvedCadence();
+      // For smart mode, the resolved cadence may have changed since the alarm
+      // was first scheduled (e.g. we just crossed a release-window boundary).
+      // Only call schedule() — which clears + recreates the alarm — when the
+      // cadence actually changed. Recreating on every fire is the canonical
+      // way chrome.alarms.create can race with its own dispatch and lose the
+      // next tick; sticking with the existing repeating alarm avoids that.
+      const resolved = await resolveCadence();
+      const existing = await chrome.alarms.get(POLL_ALARM);
+      const sameCadence =
+        existing && Math.abs((existing.periodInMinutes ?? 0) - resolved.minutes) < 0.01;
+      if (!sameCadence) {
+        await schedule(resolved.minutes);
+      } else {
+        // Refresh the countdown anchor for the popup's "next check in" display.
+        await setState({ nextCheckTs: Date.now() + resolved.minutes * 60_000 });
+      }
       await pollOnce();
     } else {
       // We shouldn't be polling in this state — clear the alarm defensively.
@@ -206,6 +227,10 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 async function handle(msg: Msg): Promise<unknown> {
   switch (msg.type) {
     case 'GET_STATUS':
+      // Opportunistically heal the poll alarm whenever the popup asks for
+      // status — guarantees that simply opening the popup re-arms polling
+      // after a missed alarm.
+      await healPollAlarm();
       return buildStatusPayload();
 
     case 'STATUS':

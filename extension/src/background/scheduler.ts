@@ -201,3 +201,32 @@ export async function applyResolvedCadence(): Promise<{ minutes: number; mode: C
 export function stateAllowsPolling(state: ExtState): boolean {
   return state === 'NO_SLOTS' || state === 'SLOT_AVAILABLE';
 }
+
+/**
+ * Self-heal: if the persisted state expects polling but no POLL_ALARM is
+ * actually registered with Chrome, recreate it. This is the safety net for
+ * a class of MV3 failures we cannot prevent:
+ *   - macOS sleep/wake: alarms past their fire time can be dropped silently
+ *   - aggressive SW eviction during low-memory or battery-saver conditions
+ *   - intermittent Chrome bugs where chrome.alarms.create is lost when
+ *     called from inside an alarm handler
+ *
+ * Called from cheap user-engagement points (SW cold start, popup GET_STATUS,
+ * manual CHECK_NOW). The lazy pattern keeps the cost at zero when nothing's
+ * wrong — chrome.alarms.get is a single IPC round-trip with no side effects.
+ *
+ * Returns true if it had to heal (no alarm was present).
+ */
+export async function healPollAlarm(): Promise<boolean> {
+  try {
+    const s = await getState();
+    if (!stateAllowsPolling(s.state)) return false;
+    const existing = await chrome.alarms.get(POLL_ALARM);
+    if (existing) return false;
+    // State expects polling but the alarm is missing — recreate.
+    await applyResolvedCadence();
+    return true;
+  } catch {
+    return false;
+  }
+}
