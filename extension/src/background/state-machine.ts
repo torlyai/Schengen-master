@@ -29,6 +29,11 @@ import {
   stateAllowsPolling,
 } from './scheduler';
 import { emitSlotAvailable } from './openclaw';
+import {
+  notifySlotAvailable as tgSlot,
+  notifyBlocker as tgBlocker,
+  notifyMonitoringStart as tgMonStart,
+} from './telegram';
 
 // 15 min auto-stop window for CLOUDFLARE and LOGGED_OUT, per wireframes §5/§13.
 const AUTOSTOP_MIN = 15;
@@ -152,11 +157,30 @@ export async function transitionTo(next: ExtState, ctx: TransitionCtx = {}): Pro
   if (next === 'CLOUDFLARE' && prev !== 'CLOUDFLARE') {
     const target = await getTarget();
     await notify('CLOUDFLARE', target?.centre ?? null);
+    tgBlocker('CLOUDFLARE', target).catch(() => { /* silent */ });
   }
 
   if (next === 'LOGGED_OUT' && prev !== 'LOGGED_OUT') {
     const target = await getTarget();
     await notify('LOGGED_OUT', target?.centre ?? null);
+    tgBlocker('LOGGED_OUT', target).catch(() => { /* silent */ });
+  }
+
+  // Monitoring started/resumed — fire on any rising edge into NO_SLOTS from
+  // a non-monitoring precursor. skipNotify suppresses user-driven paths
+  // (ackSlot, classifyUnknown) where the user is already at the laptop.
+  if (
+    next === 'NO_SLOTS' &&
+    !ctx.skipNotify &&
+    (prev === 'IDLE' ||
+      prev === 'PAUSED' ||
+      prev === 'UNKNOWN' ||
+      prev === 'CLOUDFLARE' ||
+      prev === 'LOGGED_OUT')
+  ) {
+    const target = await getTarget();
+    const isResume = prev === 'PAUSED' || prev === 'CLOUDFLARE' || prev === 'LOGGED_OUT';
+    tgMonStart(target, isResume ? 'resumed' : 'started').catch(() => { /* silent */ });
   }
 
   // Tell the content script to clear/apply the tab affordance.
@@ -179,6 +203,13 @@ async function onSlotFound(evidence: string[], _prevState: PersistedState): Prom
     });
   } catch {
     /* OpenClaw failures must never crash the SW */
+  }
+
+  // Telegram phone notification — full no-op when disabled.
+  try {
+    await tgSlot(target);
+  } catch {
+    /* Telegram failures must never crash the SW */
   }
 }
 

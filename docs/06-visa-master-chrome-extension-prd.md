@@ -870,3 +870,230 @@ These observations validate the multi-signal approach in §10.1 and are the lowe
 - [s4m111h/Booking-Appointment-in-TLScontact](https://github.com/s4m111h/Booking-Appointment-in-TLScontact)
 - [israr-ulhaq/tls_contact_visaBot](https://github.com/israr-ulhaq/tls_contact_visaBot)
 - [bilaltosungit/schengen-visa-appointment-bot](https://github.com/bilaltosungit/schengen-visa-appointment-bot)
+- [Telegram Bot API](https://core.telegram.org/bots/api) (Appendix A)
+
+---
+
+# Appendix A — Phone notifications (Telegram)
+
+**Status:** Added 2026-05-12 · scope addition to V1
+**Owner:** Visa Master extension
+**Companion code:** `extension/src/background/telegram.ts`, settings UI in `SettingsPage.tsx`
+
+## A.1 Problem
+
+The base PRD's §7.4 notification design assumes the user is sitting in front of the laptop running Chrome. In practice, slots release while users are on the train, in a meeting, walking the dog. Desktop `chrome.notifications` does not reach the phone. The architectural OpenClaw → WhatsApp/Slack path (§7.5) exists *in design* but depends on the user running an OpenClaw gateway — friction wall most users will not climb.
+
+We need a **zero-infra, free, encrypted, ~2-minute setup** path from `SLOT_AVAILABLE` to the user's phone. Telegram is the answer.
+
+## A.2 Channel decision
+
+Considered:
+
+| Channel | Setup friction | Cost | Server dependency | Verdict |
+|---|---|---|---|---|
+| **Telegram bot** | Talk to @BotFather, copy token + chat_id | Free | None beyond Telegram itself | **Chosen** |
+| ntfy.sh | Pick a topic, install free app | Free | ntfy.sh public server | Strong second; topic is the auth (security smell for sensitive alerts) |
+| Pushover | Account + paid app (~$5) | $5 one-time | Pushover servers | Polished but paid |
+| Discord webhook | Create webhook URL | Free | Discord | Fine if user already runs Discord on phone |
+| Twilio SMS | Account + paid API + phone number | ~$0.01/msg | Twilio | Heaviest setup; cost compounding |
+| Email → IFTTT → SMS | Wire 2 services | Free–paid | Multiple | Slow + fragile |
+
+**Why Telegram won:**
+1. **Real auth** — bot token is a credential, not a guessable topic. Sensitive enough to send slot alerts that imply "user is actively trying to book".
+2. **End-to-end transit encryption** — TLS to Telegram + Telegram client-to-server. Better than ntfy's plaintext-topic model.
+3. **Free with no upsell** — no rate-limit cliff at scale-of-one.
+4. **Phone client already excellent on iOS + Android.** Reliable push delivery is solved.
+5. **Setup measured in minutes** — see A.4 below.
+
+## A.3 Settings UI (added in this revision)
+
+New section in the Settings page (`/extension/src/settings/SettingsPage.tsx`), inserted between Notifications and OpenClaw:
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  ▣  Phone notifications (Telegram)                           │
+│  ─────────────                                               │
+│  [○]  Send slot alerts to my phone via Telegram              │
+│       Free, encrypted, takes ~2 minutes to set up.           │
+│       Phone keeps notifications even when this laptop is     │
+│       asleep.                                                │
+│                                                              │
+│  Bot token:  [ •••••••••••••••••••••••••••••••  ]            │
+│              From @BotFather. Looks like 123456789:ABC-...   │
+│                                                              │
+│  Chat ID:    [ 123456789                          ]          │
+│              Numeric. Message your bot once, then visit      │
+│              https://api.telegram.org/bot<TOKEN>/getUpdates  │
+│                                                              │
+│  [○]  Also alert me on Cloudflare check / logged-out         │
+│                                                              │
+│  [ Send test message ]   ✓ Sent — check your phone.          │
+│                                                              │
+│  ▾ How to set up                                             │
+│       1. Open Telegram and start a chat with @BotFather.     │
+│       2. Send /newbot, follow prompts. Copy the bot token.   │
+│       3. Open chat with YOUR new bot, send any message.      │
+│       4. Visit https://api.telegram.org/bot<TOKEN>/getUpdates│
+│          — copy the chat id.                                 │
+│       5. Paste both above, flip the toggle on, hit Test.     │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Design choices:**
+- Bot token uses `<input type="password">` — minimises shoulder-surfing risk during config; nothing about the token is meant to be visible at rest.
+- Chat ID is text, not password — it's not a credential; useful to see/copy/share when debugging.
+- Setup help is collapsed by default (`<details>` element) — users who already know the flow don't see noise.
+- `Send test message` returns a typed `{ok, error?}` from the SW so the inline status string is precise: success message in green, exact failure reason in red.
+- The whole block is conditionally rendered behind the enable toggle. Disabled = no token field visible = no fingerprint surface.
+
+## A.4 End-user setup flow
+
+Documented inline in the help panel and reproduced here:
+
+1. Open Telegram → start a chat with **@BotFather**.
+2. Send `/newbot`. Follow prompts (bot needs a unique username ending in `bot`).
+3. BotFather returns a token like `123456789:ABC-DEF1234ghIkl-zyx57W2v1u123ew11`. Copy it.
+4. Open a chat with **YOUR** new bot (link in BotFather's reply). Send any message — this initialises the chat object.
+5. Visit `https://api.telegram.org/bot<TOKEN>/getUpdates` in any browser. JSON appears. Find `"chat":{"id": NUMBER, ...}` — copy the NUMBER.
+6. Paste both into Visa Master → Settings → Phone notifications. Toggle on. Click **Send test message**. Phone should ping within 2 seconds.
+
+Total time for a first-timer: ~2-3 minutes. Subsequent reuses: 30 seconds (same bot can be re-paired to a new install by pasting the same two values).
+
+## A.5 Wire contract
+
+```
+POST https://api.telegram.org/bot<TOKEN>/sendMessage
+Content-Type: application/json
+
+{
+  "chat_id": "<CHAT_ID>",
+  "text": "<MarkdownV2-escaped message>",
+  "parse_mode": "MarkdownV2",
+  "disable_web_page_preview": true
+}
+```
+
+**Token validation** (client-side, before any send): regex `^\d{6,12}:[A-Za-z0-9_-]{20,}$`. Cheap pre-flight that catches the majority of "I accidentally pasted only half the token" errors before they hit the wire.
+
+**Chat ID validation:** `^-?\d{3,}$` — accepts user chats (positive), group chats (negative), and channels (`-100…`).
+
+**Timeout:** 7 seconds via `AbortController`. Telegram's median latency is ~200ms; 7s buys headroom for cellular dead zones without parking the SW indefinitely.
+
+**Failure handling:** every Telegram call is wrapped in try/catch and *cannot crash the service worker*. A Telegram outage must never break detection or polling. Failures are logged to the SW console only; the user-facing surfaces stay quiet (we do not show "Telegram failed to send" notifications, because that would create a notification loop on a flaky network).
+
+## A.6 Message templates
+
+All bodies are MarkdownV2-formatted and escape user-supplied centre / code values.
+
+**SLOT_AVAILABLE:**
+```
+🚨 *Slot found* — Manchester
+FR visa · `gbMNC2fr`
+_15:21:08 UTC_
+
+Switch to your TLScontact tab and book now\.
+```
+
+**CLOUDFLARE** (only if `telegramAlsoBlockers` is on):
+```
+⚠️ *Cloudflare check needed*
+Manchester · _15:21:08 UTC_
+
+Open the TLS tab and complete the check\. Monitoring is paused\.
+```
+
+**LOGGED_OUT** (only if `telegramAlsoBlockers` is on):
+```
+⚠️ *TLScontact session expired*
+Manchester · _15:21:08 UTC_
+
+Sign back in to resume monitoring\.
+```
+
+**TEST_TELEGRAM** (sent from settings button):
+```
+✅ *Visa Master test message*
+Telegram notifications are wired up correctly\.
+_15:21:08 UTC_
+```
+
+## A.7 Privacy posture
+
+What leaves the device when Telegram is enabled:
+- The bot token (only in the URL of outbound POSTs to api.telegram.org).
+- The chat ID (in the request body).
+- A short message string containing: centre name (e.g. "Manchester"), country code (e.g. "FR"), subject code (e.g. "gbMNC2fr"), and a timestamp.
+
+What does **not** leave the device:
+- The TLS appointment URL (no link is included in the message).
+- The user's TLScontact login / cookies / session.
+- The user's name, passport number, or any form field on the page.
+- The HTML snapshot or any detection evidence beyond the state name.
+
+Trade-off explicit in the UI: the enable toggle subtext acknowledges the message body leaves the device. Off by default — strict opt-in.
+
+## A.8 Storage additions
+
+Four new fields appended to `SettingsPayload` (see `extension/src/shared/messages.ts`). The wire contract uses *additive* changes — no existing field semantics changed:
+
+```ts
+interface SettingsPayload {
+  // ... existing fields ...
+  telegramEnabled: boolean;        // default false — strict opt-in
+  telegramBotToken: string;        // empty string when not configured
+  telegramChatId: string;          // empty string when not configured
+  telegramAlsoBlockers: boolean;   // default false — slots only by default
+}
+```
+
+**Important:** the bot token is stored in `chrome.storage.local` in **plain text**. Same trust model as the OpenClaw `plainToken` path: the storage is local-to-this-profile and reachable only by the extension's own context. If you want stronger protection (e.g. against malware that reads chrome storage), use the existing OpenClaw passphrase encryption mechanism on this token too — a future iteration.
+
+## A.9 Message bus additions
+
+One new request type added to `Msg` (`extension/src/shared/messages.ts`):
+
+```ts
+| { type: 'TEST_TELEGRAM' }
+```
+
+Response shape (returned by the SW envelope after unwrap):
+```ts
+{ ok: true } | { ok: false, error: string }
+```
+
+The SW router (`extension/src/background/service-worker.ts`) handles this by calling `telegram.testConnection()`, which validates token + chat id format, sends a probe `sendMessage`, and returns the result.
+
+## A.10 Failure modes
+
+| Failure | Behaviour |
+|---|---|
+| Token format invalid | Block at validation; show inline error before any network call. |
+| Chat ID format invalid | Block at validation. |
+| Network offline | `fetch` throws; caught; logged to SW console; user sees no popup, no Telegram side. Detection / polling continues unaffected. |
+| Telegram API 4xx (revoked token, blocked bot, wrong chat) | Caught; `description` from JSON body surfaced in the Test button status line; no auto-retries. |
+| Telegram API 5xx | Caught; logged; no auto-retries. (The next slot detection will try fresh — no point queuing in MV3 ephemeral SW.) |
+| Slow network (>7s) | Aborted via `AbortController`; logged. |
+| Markdown injection from user-supplied centre/code | All values are pushed through `mdEscape()` before insertion; reserved MarkdownV2 characters are backslash-escaped per Telegram spec. |
+
+## A.11 Out of scope for V1.0
+
+Deliberately deferred:
+
+1. **Encrypted token storage.** A future iteration can reuse the OpenClaw PBKDF2→AES-GCM machinery to encrypt the bot token at rest. Useful on shared-computer setups.
+2. **Per-event subscription preferences.** Today: one toggle for SLOT_AVAILABLE (always-on when telegram enabled) and one toggle for blockers. A future version might let the user choose any subset of (SLOT, CLOUDFLARE, LOGGED_OUT, daily summary).
+3. **Multi-chat fan-out.** Currently one chat_id. Could be a comma-separated list — useful for couples / families monitoring together — but defer until requested.
+4. **Inline keyboards** (e.g. "Pause monitoring" button inside the Telegram message). Requires a webhook receiver server-side, which violates the no-infrastructure principle that made Telegram win in the first place.
+5. **Other channels** from the table in A.2 (ntfy.sh, Discord webhook, Pushover). The wire contract is intentionally not Telegram-specific — `telegram.ts` is a self-contained module that can be cloned/adapted for additional channels without touching the state machine.
+
+## A.12 Impact on existing PRD sections
+
+| PRD section | Change |
+|---|---|
+| §3.3 Success metrics | Add: "≥70% of returning users have Telegram enabled within their first 3 sessions" once instrumented |
+| §6.2 Slot detection flow | After the desktop notification step, fan out: parallel-fire Telegram (if enabled). Non-blocking. |
+| §7.4 Notification channels | Telegram is now a first-class channel, not a future possibility. Update the channels table accordingly. |
+| §7.7 Settings | Add Phone notifications section to the rendered settings list. |
+| §10.1 State machine | No transitions change. Telegram is a side-effect on rising-edge transitions, identical to the existing desktop notification logic. |
+
+No transitions, no detection logic, no storage migration logic was modified. This is a pure additive feature.

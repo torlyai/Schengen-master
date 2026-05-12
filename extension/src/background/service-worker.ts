@@ -51,6 +51,7 @@ import {
   testConnection,
   getConnectionStatus,
 } from './openclaw';
+import { testConnection as testTelegram } from './telegram';
 
 // ---------- Install / startup ----------
 
@@ -333,6 +334,9 @@ async function handle(msg: Msg): Promise<unknown> {
 
     case 'TEST_OPENCLAW':
       return await testConnection();
+
+    case 'TEST_TELEGRAM':
+      return await testTelegram();
 
     case 'DETECTION_RESULT': {
       await applyDetection(msg.state, msg.evidence, msg.url);

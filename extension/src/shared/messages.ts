@@ -37,6 +37,12 @@ export interface SettingsPayload {
   detectionLang: string;
   telemetry: boolean;
   openClawEncrypt: boolean;
+  // Telegram phone notifications — see PRD Appendix A.
+  telegramEnabled: boolean;
+  telegramBotToken: string;
+  telegramChatId: string;
+  telegramAlsoBlockers: boolean;
+  telegramMonitoringStart: boolean;
 }
 
 // Discriminated union of every message the SW expects to receive,
@@ -59,6 +65,7 @@ export type Msg =
   | { type: 'PAIR_OPENCLAW'; gateway: string; token: string; passphrase?: string }
   | { type: 'UNPAIR_OPENCLAW' }
   | { type: 'TEST_OPENCLAW' }
+  | { type: 'TEST_TELEGRAM' }
   // From content script
   | { type: 'DETECTION_RESULT'; state: ExtState; evidence: string[]; url: string };
 

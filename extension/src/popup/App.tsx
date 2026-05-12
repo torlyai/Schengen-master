@@ -10,6 +10,7 @@ import { Paused } from './states/Paused';
 import { Unknown } from './states/Unknown';
 import { useStatus } from '../hooks/useStatus';
 import { useT, useSyncLang, tInline } from '../i18n/useT';
+import type { StatusPayload } from '../shared/messages';
 
 export const App: React.FC = () => {
   const { status, send } = useStatus();
@@ -41,20 +42,31 @@ export const App: React.FC = () => {
       return <Unknown status={status} send={send} />;
     case 'IDLE':
     default:
-      return <IdlePlaceholder />;
+      return <IdlePlaceholder status={status} />;
   }
 };
 
-const IdlePlaceholder: React.FC = () => {
+const TLS_FALLBACK_URL = 'https://www.tlscontact.com/';
+
+const IdlePlaceholder: React.FC<{ status?: StatusPayload }> = ({ status }) => {
   const { t } = useT();
+  const targetUrl = status?.target?.url;
+  const href = targetUrl || TLS_FALLBACK_URL;
+  const label = targetUrl ? t('popup.idle.gotoTarget') : t('popup.idle.openTls');
+
+  const openInTab = () => {
+    const c: any = (globalThis as any).chrome;
+    if (c?.tabs?.create) {
+      c.tabs.create({ url: href });
+    } else {
+      window.open(href, '_blank', 'noreferrer noopener');
+    }
+  };
+
   return (
     <Popup
       stateTone="grey"
       headerLeft={<span>{t('popup.idle.label')}</span>}
-      onOpenSettings={() => {
-        const c: any = (globalThis as any).chrome;
-        c?.runtime?.openOptionsPage?.();
-      }}
     >
       <div className="hero" style={{ borderTop: 0, paddingTop: 4 }}>
         <div className="hero__label">{t('popup.idle.statusLabel')}</div>
@@ -69,6 +81,22 @@ const IdlePlaceholder: React.FC = () => {
           })}
         </div>
       </div>
+
+      <div
+        style={{
+          marginTop: 12,
+          marginBottom: 12,
+          fontSize: 12.5,
+          color: 'var(--ink-2)',
+          lineHeight: 1.55,
+        }}
+      >
+        {t('popup.idle.howItWorks')}
+      </div>
+
+      <button className="btn btn--primary btn--block" onClick={openInTab}>
+        {label} ↗
+      </button>
     </Popup>
   );
 };

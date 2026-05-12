@@ -67,6 +67,11 @@ export const DEFAULT_SETTINGS: SettingsPayload = {
   detectionLang: 'en',
   telemetry: false,
   openClawEncrypt: true,
+  telegramEnabled: false,
+  telegramBotToken: '',
+  telegramChatId: '',
+  telegramAlsoBlockers: false,
+  telegramMonitoringStart: false,
 };
 
 export const DEFAULT_STATE: PersistedState = {
