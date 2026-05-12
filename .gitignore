@@ -58,12 +58,19 @@ insurance/**
 *.msg
 *.vcf
 
-# ---- Obsidian: keep config, exclude workspace/cache state ----
+# ---- Obsidian: keep small config JSONs, exclude everything else ----
+# Plugins are downloaded by Obsidian from the community marketplace when
+# the user trusts the vault — never vendor `main.js` / `styles.css` /
+# `manifest.json` into git. The committed `community-plugins.json` lists
+# which plugins to install, which is the only reproducibility signal
+# that matters.
+.obsidian/plugins/
+.obsidian/snippets/
+.obsidian/themes/
 .obsidian/workspace.json
 .obsidian/workspace-mobile.json
+.obsidian/workspace.json.bak
 .obsidian/cache
-.obsidian/plugins/*/data.json
-.obsidian/plugins/*/data-*.json
 
 # ---- Build artefacts & dependencies (extension) ----
 node_modules/
