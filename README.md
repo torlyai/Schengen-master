@@ -349,5 +349,5 @@ of filled forms, or actual booking confirmations.
 
 ## License
 
-MIT — see `LICENSE` (to be added). Open source by design; auditability is
-the trust contract that makes a privacy-first extension credible.
+MIT — see [`LICENSE`](LICENSE). Open source by design; auditability is the
+trust contract that makes a privacy-first extension credible.
