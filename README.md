@@ -1,20 +1,24 @@
 # Schengen-master
 
-An open-source **case study + tool** for a family Schengen visa application
-(Chinese nationals, UK-resident, France-primary itinerary). Ships two things
-in one repository:
+An open-source **toolkit + templates** for preparing a family Schengen visa
+application. Ships two things in one repository:
 
 1. **A privacy-first Chrome extension** — *Visa Master Appointment Watcher* —
    that watches your TLScontact appointment page and notifies you the instant
    a slot opens. Runs entirely in your own browser; no credentials leave the
    device.
-2. **A complete documentation workspace** — research, requirements, document
-   checklists, itinerary, cover-letter templates, and an Obsidian-friendly
-   dashboard — designed to be readable as an end-to-end worked example for
-   anyone preparing a similar application.
+2. **A documentation template set** — skeletal templates for the application
+   docs every family maintains *locally* (family profile, master action plan,
+   itinerary, status dashboard, audit log), plus the product specs and
+   platform design notes behind the extension.
 
-> **Status:** Active. Application target submission window 18 May 2026.
-> Extension v1.0.0 sideload-only — Chrome Web Store listing is not live yet.
+> **Privacy by design.** The repository is intentionally **template-only**.
+> No real names, addresses, dates, document numbers, or itinerary specifics
+> live here — concrete data is filled in by each user on their own machine
+> and stays local via the deny-by-default `.gitignore`.
+>
+> **Status:** Extension v1.0.0 sideload-only — Chrome Web Store listing is
+> not live yet.
 
 ---
 
@@ -41,13 +45,21 @@ in one repository:
 | Area | Purpose |
 | --- | --- |
 | `extension/` | Chrome MV3 extension source (TypeScript + React + Vite). Watches TLScontact, raises notifications when a slot is detected. |
-| `docs/` | Numbered worked-example documents — visa requirements, document checklist, appointment booking guide, travel insurance guide, itinerary, PRD and wireframes for the extension. Read in numeric order. |
-| `platform/` | Higher-level platform design — competitive landscape, architecture, feature spec, privacy notes. |
-| `privacy/` | `GUARDRAILS.md` (the "no PII in git" contract) + an action audit log. |
+| `docs/templates/` | Skeleton templates with `{{PLACEHOLDER}}` tokens — copy locally, fill in, **don't** commit. See [`docs/templates/README.md`](docs/templates/README.md). |
+| `docs/06-visa-master-chrome-extension-prd.md` | Product spec for the Chrome extension. |
+| `docs/07-chrome-extension-wireframes.md` | Screen-by-screen wireframes for the extension. |
+| `platform/` | Higher-level platform design — competitive landscape, architecture, feature spec, privacy framework. |
+| `privacy/GUARDRAILS.md` | The "no PII in git" contract — read before contributing or committing. |
 | `forms/`, `appointments/`, `insurance/` | **Always git-ignored.** Where you keep your own filled letters, booking confirmations and insurance certificates locally. Empty in the repo by design. |
-| `DASHBOARD.md` | Single-screen status overview suited to Obsidian. |
-| `visa-workflow.html` | Standalone interactive workflow visualisation. |
 | `Term-Dates-*.pdf` | Public UK school term dates — the only PDFs allowed into git, allow-listed in `.gitignore`. |
+
+### Personal docs are kept local-only
+
+The author's *concrete* worked example — family profile, itinerary, master
+action plan, document checklist, status dashboard, audit log, country-specific
+research notes — lives on the maintainer's local disk and is denied by name
+in `.gitignore`. The community gets the **templates**, not someone else's
+private application file.
 
 ---
 
@@ -56,24 +68,21 @@ in one repository:
 ```
 Schengen-master/
 ├── README.md                       ← you are here
-├── .gitignore                      ← deny-by-default PII firewall
-├── DASHBOARD.md                    ← family-level status dashboard
-├── visa-workflow.html              ← interactive workflow diagram
+├── LICENSE                         ← MIT
+├── .gitignore                      ← deny-by-default privacy firewall
 ├── Term-Dates-2025-2026.pdf        ← public reference (UK school terms)
 ├── Term-Dates-2026-2027.pdf        ← public reference (UK school terms)
 │
-├── docs/                           ← worked-example, read in numeric order
-│   ├── 00-family-profile.md
-│   ├── 01-france-visa-requirements.md
-│   ├── 01-italy-visa-requirements.md
-│   ├── 02-document-checklist.md
-│   ├── 03-appointment-booking-guide.md
-│   ├── 04-travel-insurance-guide.md
-│   ├── 05-master-action-plan.md
-│   ├── 06-itinerary-locked.md
-│   ├── 06-visa-master-chrome-extension-prd.md
-│   ├── 07-bookings-research.md
-│   └── 07-chrome-extension-wireframes.md
+├── docs/
+│   ├── 06-visa-master-chrome-extension-prd.md   ← extension product spec
+│   ├── 07-chrome-extension-wireframes.md        ← extension wireframes
+│   └── templates/                  ← copy locally, fill in, do NOT commit
+│       ├── README.md
+│       ├── family-profile.template.md
+│       ├── master-action-plan.template.md
+│       ├── itinerary.template.md
+│       ├── dashboard.template.md
+│       └── audit-log.template.md
 │
 ├── extension/                      ← Chrome MV3 extension (TS + React + Vite)
 │   ├── manifest.json               ← single source of truth for entry points
@@ -96,17 +105,24 @@ Schengen-master/
 ├── platform/                       ← system-level docs (architecture, etc.)
 │   ├── architecture/
 │   ├── features/
+│   ├── integrations/
 │   ├── research/
 │   └── privacy/
 │
 ├── privacy/
-│   ├── GUARDRAILS.md               ← READ THIS BEFORE COMMITTING
-│   └── audit-log.md                ← action log, no PII
+│   └── GUARDRAILS.md               ← READ THIS BEFORE COMMITTING
 │
 ├── forms/                          ← gitignored (your filled letters)
 ├── appointments/                   ← gitignored (your bookings)
 └── insurance/                      ← gitignored (your policy docs)
 ```
+
+> **Files you'll create locally** (all ignored by `.gitignore`):
+> `DASHBOARD.md`, `visa-workflow.html`, `docs/00-family-profile.md`,
+> `docs/01-…-visa-requirements.md`, `docs/02-document-checklist.md`,
+> `docs/03-appointment-booking-guide.md`, `docs/04-travel-insurance-guide.md`,
+> `docs/05-master-action-plan.md`, `docs/06-itinerary-locked.md`,
+> `docs/07-bookings-research.md`, `privacy/audit-log.md`.
 
 ---
 
@@ -133,17 +149,24 @@ nvm use 20
 
 ## Installation
 
-### Path A — Just read the case study (no install)
+### Path A — Use the templates for your own application
 
-If you only want to read the documentation:
+If you want to prepare your own Schengen application using the same
+templates:
 
 ```sh
-git clone https://github.com/DukeWood/Schengen-master.git
+git clone https://github.com/torlyai/Schengen-master.git
 cd Schengen-master
 ```
 
-Open `docs/00-family-profile.md` and read in numeric order. Everything is
-plain Markdown — GitHub renders it inline, or use any Markdown viewer.
+1. Read `privacy/GUARDRAILS.md` — the one-page contract that keeps your
+   data off git.
+2. Browse `docs/templates/` and copy the templates you want to their
+   target paths (each template's frontmatter says where to copy it to).
+3. Fill in the `{{PLACEHOLDER}}` tokens with your own data.
+4. **Never commit the filled copies.** The repo's `.gitignore` already
+   denies the canonical target paths, so as long as you don't rename
+   the files you can't accidentally publish them.
 
 ---
 
@@ -155,7 +178,7 @@ until a Chrome Web Store listing is published.
 **Step 1 — Clone**
 
 ```sh
-git clone https://github.com/DukeWood/Schengen-master.git
+git clone https://github.com/torlyai/Schengen-master.git
 cd Schengen-master/extension
 ```
 
@@ -217,7 +240,10 @@ gitignored, but plugin configuration is preserved).
 1. Install [Obsidian](https://obsidian.md/) if you don't have it.
 2. **Open folder as vault** → select the cloned `Schengen-master/` folder.
 3. Trust the author when prompted (community plugins are read-only here).
-4. Start at `DASHBOARD.md`.
+4. Start at `docs/templates/README.md` to see the available templates.
+5. Once you've copied a template (e.g. to `DASHBOARD.md`), Obsidian will
+   pick it up automatically — and `.gitignore` will keep your filled copy
+   out of git.
 
 Useful pre-configured plugins:
 
@@ -286,12 +312,20 @@ This project takes privacy seriously — see
 
 **What stays in git:**
 
-- Documentation (uses placeholders like `APPLICANT_1`, `[PARIS_HOTEL_TBD]`).
+- Templates with `{{PLACEHOLDER}}` tokens (`docs/templates/`).
 - Extension source code.
+- Product specs and platform design notes (no application-level personal data).
 - Public reference data (UK school term PDFs, allow-listed in `.gitignore`).
 
 **What is always git-ignored:**
 
+- Personal application docs by canonical path: `DASHBOARD.md`,
+  `visa-workflow.html`, `docs/00-family-profile.md`,
+  `docs/01-france-visa-requirements.md`, `docs/01-italy-visa-requirements.md`,
+  `docs/02-document-checklist.md`, `docs/03-appointment-booking-guide.md`,
+  `docs/04-travel-insurance-guide.md`, `docs/05-master-action-plan.md`,
+  `docs/06-itinerary-locked.md`, `docs/07-bookings-research.md`,
+  `privacy/audit-log.md`.
 - `forms/`, `appointments/`, `insurance/` — folders that, by intent, hold
   filled letters, booking confirmations and policy docs.
 - All images (`*.png`, `*.jpg`, `*.heic`, …) — so passport scans cannot be

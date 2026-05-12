@@ -90,6 +90,23 @@ Thumbs.db
 .vscode/
 .cursor/
 
+# ---- Personal application docs (kept LOCAL only) ----
+# These contain family-specific context (composition, locations, dates,
+# itinerary) that should never reach the public mirror. Generic templates
+# with placeholders are tracked under docs/templates/ instead.
+/DASHBOARD.md
+/visa-workflow.html
+/docs/00-family-profile.md
+/docs/01-france-visa-requirements.md
+/docs/01-italy-visa-requirements.md
+/docs/02-document-checklist.md
+/docs/03-appointment-booking-guide.md
+/docs/04-travel-insurance-guide.md
+/docs/05-master-action-plan.md
+/docs/06-itinerary-locked.md
+/docs/07-bookings-research.md
+/privacy/audit-log.md
+
 # ---- Secrets / env (defence in depth — should never exist here anyway) ----
 .env
 .env.*
