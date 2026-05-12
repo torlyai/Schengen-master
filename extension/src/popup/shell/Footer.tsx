@@ -7,17 +7,11 @@ export interface FooterProps {
   checks: number;
   slots: number;
   notif: 'ON' | 'OFF';
-  openClaw: 'Connected' | 'Disconnected' | 'Disabled';
 }
 
-export const Footer: React.FC<FooterProps> = ({ checks, slots, notif, openClaw }) => {
+export const Footer: React.FC<FooterProps> = ({ checks, slots, notif }) => {
   const { t } = useT();
-  const ocLabel =
-    openClaw === 'Connected'
-      ? t('common.connected')
-      : openClaw === 'Disconnected'
-        ? t('common.disconnected')
-        : t('common.disabled');
+  const notifLabel = notif === 'ON' ? t('footer.notif.on') : t('footer.notif.off');
   return (
     <>
       <span className="popup__ftr-item">
@@ -29,7 +23,7 @@ export const Footer: React.FC<FooterProps> = ({ checks, slots, notif, openClaw }
           className="popup__ftr-dot"
           style={{ background: notif === 'ON' ? 'var(--green)' : 'var(--muted)' }}
         />
-        {ocLabel}
+        {notifLabel}
       </span>
     </>
   );

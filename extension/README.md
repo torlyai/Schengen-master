@@ -53,7 +53,7 @@ script, popup, welcome, settings).
 ## Architecture
 
 ```
-content-script  →  service-worker  →  badge / notifications / OpenClaw
+content-script  →  service-worker  →  badge / notifications
    (detector)       (state machine,
                      scheduler, SW
                      message router)
@@ -64,9 +64,8 @@ content-script  →  service-worker  →  badge / notifications / OpenClaw
   sends `DETECTION_RESULT` to the service worker. Also receives commands to
   swap the tab title / favicon when a slot is found.
 - **Service worker** (`src/background/`) — owns the state machine, the
-  `chrome.alarms` polling schedule, the badge, desktop notifications, and the
-  OpenClaw WebSocket client. State persists in `chrome.storage.local` and is
-  restored on SW eviction.
+  `chrome.alarms` polling schedule, the badge, and desktop notifications.
+  State persists in `chrome.storage.local` and is restored on SW eviction.
 - **Shared** (`src/shared/`) — the typed message contract that the popup and
   settings UI use to talk to the SW. UI agent imports types from here.
 

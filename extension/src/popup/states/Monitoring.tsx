@@ -40,7 +40,6 @@ export const Monitoring: React.FC<StateProps> = ({ status, send }) => {
           checks={status.todayChecks}
           slots={status.todaySlots}
           notif={status.notif}
-          openClaw={status.openClaw}
         />
       }
     >

@@ -8,7 +8,6 @@ import type { SettingsPayload } from '../shared/messages';
 import { sendMessage, useStatus } from '../hooks/useStatus';
 import { LANGUAGES } from '../i18n';
 import { useT, useSyncLang } from '../i18n/useT';
-import PairingWizard from './PairingWizard';
 
 const DEFAULT_SETTINGS: SettingsPayload = {
   cadenceMode: 'smart',
@@ -25,7 +24,6 @@ const DEFAULT_SETTINGS: SettingsPayload = {
   uiLang: 'en-GB',
   detectionLang: 'en',
   telemetry: false,
-  openClawEncrypt: true,
   telegramEnabled: false,
   telegramBotToken: '',
   telegramChatId: '',
@@ -81,17 +79,8 @@ export const SettingsPage: React.FC = () => {
   const { t } = useT();
   const { settings, patch } = useSettings();
   const { status } = useStatus();
-  const [pairOpen, setPairOpen] = useState(false);
 
   useSyncLang(settings.uiLang);
-
-  const ocLabel = status?.openClaw ?? 'Disconnected';
-  const ocLabelLocalized =
-    ocLabel === 'Connected'
-      ? t('common.connected')
-      : ocLabel === 'Disconnected'
-        ? t('common.disconnected')
-        : t('common.disabled');
 
   return (
     <div className="page-shell">
@@ -245,41 +234,6 @@ export const SettingsPage: React.FC = () => {
         {settings.telegramEnabled && <TelegramWizard settings={settings} patch={patch} />}
       </Section>
 
-      <Section title={t('settings.section.openclaw')}>
-        <Field label={t('settings.oc.status')}>
-          <div className="status-line">
-            <span
-              className={`dot dot--${
-                ocLabel === 'Connected' ? 'green' : ocLabel === 'Disconnected' ? 'grey' : 'amber'
-              }`}
-            />
-            {ocLabelLocalized}
-          </div>
-        </Field>
-        <Field label={t('settings.oc.gateway')}>
-          <div className="field__hint">{ocLabel === 'Connected' ? 'ws://127.0.0.1:18789' : '—'}</div>
-        </Field>
-        <div className="btn-group" style={{ marginTop: 6 }}>
-          <button
-            className="btn"
-            disabled={ocLabel !== 'Connected'}
-            onClick={() => sendMessage({ type: 'UNPAIR_OPENCLAW' })}
-          >
-            {t('settings.oc.disconnect')}
-          </button>
-          <button className="btn btn--primary" onClick={() => setPairOpen(true)}>
-            {t('settings.oc.repair')}
-          </button>
-          <button
-            className="btn"
-            disabled={ocLabel !== 'Connected'}
-            onClick={() => sendMessage({ type: 'TEST_OPENCLAW' })}
-          >
-            {t('settings.oc.test')}
-          </button>
-        </div>
-      </Section>
-
       <Section title={t('settings.section.language')}>
         <Field label={t('settings.lang.ui')}>
           <select
@@ -315,16 +269,11 @@ export const SettingsPage: React.FC = () => {
           on={settings.telemetry}
           onChange={(v) => patch({ telemetry: v })}
         />
-        <Toggle
-          label={t('settings.oc.encrypt')}
-          on={settings.openClawEncrypt}
-          onChange={(v) => patch({ openClawEncrypt: v })}
-        />
       </Section>
 
       <Section title={t('settings.section.about')}>
         <Field label={t('settings.about.version')}>
-          <div className="field__value">1.0.0</div>
+          <div className="field__value">1.0.2</div>
         </Field>
         <Field label={t('settings.about.source')}>
           <a
@@ -372,13 +321,6 @@ export const SettingsPage: React.FC = () => {
         </div>
       </Section>
 
-      <PairingWizard
-        open={pairOpen}
-        onClose={() => setPairOpen(false)}
-        onSubmit={async ({ gateway, token, passphrase }) => {
-          await sendMessage({ type: 'PAIR_OPENCLAW', gateway, token, passphrase });
-        }}
-      />
     </div>
   );
 };

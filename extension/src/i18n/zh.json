@@ -80,6 +80,8 @@
   "popup.idle.howItWorks": "Visa Master 只有当你在 TLScontact 的预约页面上时才会监控时段。打开一个，我会自动开始监控。",
 
   "footer.summary": "{checks} 次检查 · {slots} 个时段",
+  "footer.notif.on": "通知已开启",
+  "footer.notif.off": "通知已关闭",
 
   "welcome.brow.tag": "开源 · MIT 协议",
   "welcome.eyebrow": "首次启动",
@@ -118,7 +120,6 @@
   "settings.section.windows": "时段窗口",
   "settings.section.detection": "检测",
   "settings.section.notifications": "通知",
-  "settings.section.openclaw": "OpenClaw 集成",
   "settings.section.language": "语言",
   "settings.section.privacy": "隐私",
   "settings.section.about": "关于",
@@ -150,15 +151,6 @@
   "settings.notif.focus": "检测到时自动聚焦 TLS 标签页",
   "settings.notif.sample": "试听提示音",
 
-  "settings.oc.status": "状态",
-  "settings.oc.gateway": "网关",
-  "settings.oc.nodeId": "节点 ID",
-  "settings.oc.disconnect": "断开",
-  "settings.oc.repair": "重新配对",
-  "settings.oc.pair": "配对",
-  "settings.oc.test": "测试事件",
-  "settings.oc.encrypt": "使用密码加密 OpenClaw 令牌",
-  "settings.oc.changePass": "更改密码",
 
   "settings.section.telegram": "手机通知（Telegram）",
   "settings.tg.enable": "通过 Telegram 把时段提醒发到手机",
@@ -243,21 +235,6 @@
   "settings.about.log": "查看检测日志",
   "settings.about.logHint": "推迟至 V1.1 — 详见线框图 §16。",
 
-  "wizard.title": "与 OpenClaw 网关配对",
-  "wizard.step1.heading": "第 1 步，共 2 步 — 网关地址",
-  "wizard.step1.label": "你的 OpenClaw 网关运行在哪里？",
-  "wizard.step1.hint": "本地通常使用默认地址。远程使用 wss://your-gateway.example.com/openclaw",
-  "wizard.step1.invalid": "必须是 ws:// 或 wss:// 地址。",
-  "wizard.step1.next": "下一步",
-  "wizard.step2.heading": "第 2 步，共 2 步 — 配对令牌",
-  "wizard.step2.run": "在你的 OpenClaw 主机上运行此命令：",
-  "wizard.step2.copy": "复制命令",
-  "wizard.step2.copied": "已复制",
-  "wizard.step2.paste": "在此粘贴令牌",
-  "wizard.step2.passphrase": "使用密码加密（推荐）",
-  "wizard.step2.back": "返回",
-  "wizard.step2.pair": "配对",
-  "wizard.close": "关闭",
 
   "lang.toggle.aria": "切换语言",
   "lang.en.label": "English",
@@ -265,9 +242,6 @@
 
   "common.cancel": "取消",
   "common.save": "保存",
-  "common.connected": "已连接",
-  "common.disconnected": "已断开",
-  "common.disabled": "已禁用",
   "common.on": "开",
   "common.off": "关",
 

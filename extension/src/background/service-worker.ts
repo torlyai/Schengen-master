@@ -6,7 +6,6 @@
 //  - Wire up chrome.runtime.onMessage (UI ↔ SW + content script).
 //  - Wire up chrome.notifications.onClicked (focus TLS tab).
 //  - Wire up chrome.tabs.onRemoved (clear watched tab if it disappears).
-//  - Bootstrap OpenClaw client on cold start.
 
 import type { Msg, StatusPayload } from '../shared/messages';
 import type { ExtState } from '../shared/states';
@@ -44,13 +43,6 @@ import {
   onAutoStopTick,
   transitionTo,
 } from './state-machine';
-import {
-  bootstrap as bootstrapOpenClaw,
-  pairOpenClaw,
-  unpairOpenClaw,
-  testConnection,
-  getConnectionStatus,
-} from './openclaw';
 import { testConnection as testTelegram } from './telegram';
 
 // ---------- Install / startup ----------
@@ -77,7 +69,6 @@ chrome.runtime.onInstalled.addListener(async (details) => {
 chrome.runtime.onStartup?.addListener(async () => {
   const s = await getState();
   await setBadgeForState(s.state);
-  bootstrapOpenClaw().catch(() => { /* swallow */ });
 });
 
 // Some SW lifecycles don't fire onStartup; do a best-effort bootstrap on
@@ -86,7 +77,6 @@ chrome.runtime.onStartup?.addListener(async () => {
   try {
     const s = await getState();
     await setBadgeForState(s.state);
-    bootstrapOpenClaw().catch(() => { /* swallow */ });
     await adoptExistingTlsTab();
   } catch {
     /* ignore */
@@ -318,23 +308,6 @@ async function handle(msg: Msg): Promise<unknown> {
       return merged;
     }
 
-    case 'PAIR_OPENCLAW': {
-      const settings = await getSettings();
-      return await pairOpenClaw(
-        msg.gateway,
-        msg.token,
-        msg.passphrase,
-        settings.openClawEncrypt,
-      );
-    }
-
-    case 'UNPAIR_OPENCLAW':
-      await unpairOpenClaw();
-      return { ok: true };
-
-    case 'TEST_OPENCLAW':
-      return await testConnection();
-
     case 'TEST_TELEGRAM':
       return await testTelegram();
 
@@ -382,7 +355,6 @@ async function buildStatusPayload(): Promise<StatusPayload> {
     evidence: state.evidence,
     slotDetectedTs: state.slotDetectedTs,
     notif: settings.notifDesktop ? 'ON' : 'OFF',
-    openClaw: getConnectionStatus(),
     uiLang: settings.uiLang,
     detectionLang: settings.detectionLang,
   };

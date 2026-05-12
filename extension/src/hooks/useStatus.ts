@@ -86,7 +86,6 @@ function buildMockStatus(): StatusPayload {
       : [],
     slotDetectedTs: state === 'SLOT_AVAILABLE' ? now - 2000 : null,
     notif: 'ON',
-    openClaw: 'Connected',
     uiLang: getMockLang(),
     detectionLang: 'en',
   };

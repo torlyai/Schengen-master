@@ -19,7 +19,6 @@ export interface StatusPayload {
   evidence: string[];           // for SLOT_AVAILABLE / UNKNOWN
   slotDetectedTs: number | null;
   notif: 'ON' | 'OFF';
-  openClaw: 'Connected' | 'Disconnected' | 'Disabled';
   uiLang: string;
   detectionLang: string;
 }
@@ -36,7 +35,6 @@ export interface SettingsPayload {
   uiLang: string;
   detectionLang: string;
   telemetry: boolean;
-  openClawEncrypt: boolean;
   // Telegram phone notifications — see PRD Appendix A.
   telegramEnabled: boolean;
   telegramBotToken: string;
@@ -67,9 +65,6 @@ export type Msg =
   | { type: 'GET_SETTINGS' }
   | { type: 'SETTINGS'; payload: SettingsPayload }
   | { type: 'UPDATE_SETTINGS'; patch: Partial<SettingsPayload> }
-  | { type: 'PAIR_OPENCLAW'; gateway: string; token: string; passphrase?: string }
-  | { type: 'UNPAIR_OPENCLAW' }
-  | { type: 'TEST_OPENCLAW' }
   | { type: 'TEST_TELEGRAM' }
   // From content script
   | { type: 'DETECTION_RESULT'; state: ExtState; evidence: string[]; url: string };

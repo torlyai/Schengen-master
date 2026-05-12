@@ -6,7 +6,6 @@
 //   target     : { url, centre, subjectCode, country }
 //   stats      : { date: 'YYYY-MM-DD', checks: number, slots: number }
 //   consent    : { tsGranted: number, version: string }
-//   openclaw   : { gateway: string; encryptedToken?: string; passphraseHint?: string }
 
 import type { SettingsPayload } from './messages';
 import type { ExtState } from './states';
@@ -41,16 +40,6 @@ export interface PersistedConsent {
   version: string;
 }
 
-export interface PersistedOpenClaw {
-  gateway: string;
-  encryptedToken?: string;     // AES-GCM blob, base64
-  iv?: string;                 // base64 IV used during encryption
-  salt?: string;               // base64 PBKDF2 salt
-  passphraseHint?: string;
-  // When openClawEncrypt is FALSE, store the raw token directly (still local-only).
-  plainToken?: string;
-}
-
 export const DEFAULT_SETTINGS: SettingsPayload = {
   cadenceMode: 'smart',
   cadenceMinutes: 4,
@@ -66,7 +55,6 @@ export const DEFAULT_SETTINGS: SettingsPayload = {
   uiLang: 'en',
   detectionLang: 'en',
   telemetry: false,
-  openClawEncrypt: true,
   telegramEnabled: false,
   telegramBotToken: '',
   telegramChatId: '',
@@ -180,20 +168,6 @@ export async function getConsent(): Promise<PersistedConsent | null> {
 
 export async function setConsent(c: PersistedConsent): Promise<void> {
   await setRaw('consent', c);
-}
-
-// ---------- openclaw ----------
-
-export async function getOpenClaw(): Promise<PersistedOpenClaw | null> {
-  return (await getRaw<PersistedOpenClaw>('openclaw')) ?? null;
-}
-
-export async function setOpenClaw(v: PersistedOpenClaw | null): Promise<void> {
-  if (v === null) {
-    await chrome.storage.local.remove('openclaw');
-  } else {
-    await setRaw('openclaw', v);
-  }
 }
 
 // ---------- subscribe ----------

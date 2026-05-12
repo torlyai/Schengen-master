@@ -28,7 +28,6 @@ import {
   clearAutoStop,
   stateAllowsPolling,
 } from './scheduler';
-import { emitSlotAvailable } from './openclaw';
 import {
   notifySlotAvailable as tgSlot,
   notifyBlocker as tgBlocker,
@@ -149,9 +148,9 @@ export async function transitionTo(next: ExtState, ctx: TransitionCtx = {}): Pro
     await clearSchedule();
   }
 
-  // Notifications and OpenClaw emission, only on rising edge.
+  // Notifications, only on rising edge.
   if (next === 'SLOT_AVAILABLE' && prev !== 'SLOT_AVAILABLE' && !ctx.skipNotify) {
-    await onSlotFound(ctx.evidence ?? [], persisted);
+    await onSlotFound(persisted);
   }
 
   if (next === 'CLOUDFLARE' && prev !== 'CLOUDFLARE') {
@@ -187,23 +186,11 @@ export async function transitionTo(next: ExtState, ctx: TransitionCtx = {}): Pro
   await applyTabAffordance(next);
 }
 
-async function onSlotFound(evidence: string[], _prevState: PersistedState): Promise<void> {
+async function onSlotFound(_prevState: PersistedState): Promise<void> {
   const target = await getTarget();
 
   await incrementStat('slots', 1);
   await notify('SLOT_AVAILABLE', target?.centre ?? null);
-
-  // OpenClaw emission — silently degrades if not paired.
-  try {
-    await emitSlotAvailable({
-      url: target?.url ?? '',
-      centre: target?.centre,
-      subjectCode: target?.subjectCode,
-      evidence,
-    });
-  } catch {
-    /* OpenClaw failures must never crash the SW */
-  }
 
   // Telegram phone notification — full no-op when disabled.
   try {

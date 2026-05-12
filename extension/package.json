@@ -1,7 +1,7 @@
 {
   "name": "visa-master-extension",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Visa Master — privacy-first Chrome extension that watches your TLScontact appointment page and notifies you when a slot opens.",
   "type": "module",
   "scripts": {
