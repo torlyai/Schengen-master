@@ -31,6 +31,12 @@ insurance/**
 *.bmp
 *.gif
 
+# Allow-list: brand/contact assets that ship as part of the extension.
+# These are public marketing material (no PII), not document scans.
+!extension/public/qrcode/*.png
+!extension/public/qrcode/*.jpeg
+!extension/public/qrcode/*.jpg
+
 # ---- Office documents (filled forms, statements, letters) ----
 *.docx
 *.doc

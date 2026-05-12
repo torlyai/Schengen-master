@@ -21,6 +21,15 @@ function openOptionsPage(): void {
   c?.runtime?.openOptionsPage?.();
 }
 
+function openInNewTab(url: string): void {
+  const c: any = (globalThis as any).chrome;
+  if (c?.tabs?.create) {
+    c.tabs.create({ url });
+  } else {
+    window.open(url, '_blank', 'noreferrer noopener');
+  }
+}
+
 // Hover-activated tooltip showing the Torly AI contact QR codes
 // (WhatsApp + WeChat). Pure CSS hover/:focus-within — no React state.
 // The two QR images are bundled in public/qrcode/ so this works offline.
@@ -59,10 +68,10 @@ const ContactQrPopover: React.FC = () => {
   );
 };
 
-// Bottom chrome row — always-on entry-point to the Options page, plus the
-// current extension version. Lives at the very bottom of every popup state
-// (below the state-specific footer). Matches the "Settings · version" UX
-// pattern many Chrome extensions use as their settings affordance.
+// Bottom chrome row — always-on entry-points: Settings (left) ·
+// torly.ai brand link (centre) · version (right). Lives at the very bottom
+// of every popup state, pinned via flex layout so short states no longer
+// leave dead space below it.
 const BottomChrome: React.FC = () => {
   const { t } = useT();
   const v = manifestVersion();
@@ -75,6 +84,15 @@ const BottomChrome: React.FC = () => {
         aria-label={t('footer.settings')}
       >
         <Gear /> <span>{t('footer.settings')}</span>
+      </button>
+      <button
+        type="button"
+        className="popup__bottom-brand"
+        onClick={() => openInNewTab('https://torly.ai/')}
+        aria-label="torly.ai"
+        title="torly.ai"
+      >
+        torly.ai ↗
       </button>
       {v && <span className="popup__bottom-version">v{v}</span>}
     </div>

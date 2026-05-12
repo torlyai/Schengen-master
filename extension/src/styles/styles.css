@@ -127,20 +127,23 @@ button {
   display: none;
   position: absolute;
   top: calc(100% + 8px);
-  right: -8px;
+  right: -4px;
   z-index: 100;
   flex-direction: column;
-  gap: 10px;
-  width: 320px;
-  padding: 14px;
+  gap: 8px;
+  width: 240px;
+  padding: 12px;
   background: var(--surface);
   border: 1px solid var(--rule);
   border-radius: var(--radius);
   box-shadow: 0 14px 36px -10px rgba(0, 0, 0, 0.22);
   text-align: left;
+  /* Stop the popover being clipped by ancestor scroll containers if any state
+     view introduces overflow: hidden on the popup body. */
+  overflow: visible;
 }
 .contact-popover__title {
-  font-size: 11.5px;
+  font-size: 11px;
   font-family: var(--mono);
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -149,28 +152,33 @@ button {
 .contact-popover__qrs {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 10px;
 }
 .contact-popover__qr {
   margin: 0;
   text-align: center;
 }
 .contact-popover__qr img {
+  /* Slightly smaller than the 1fr-column maximum, with object-fit so the QR
+     never crops — full pattern stays readable even if aspect ratios drift. */
   width: 100%;
-  height: auto;
-  border-radius: 6px;
+  max-width: 104px;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  border-radius: 5px;
   background: #fff;
   border: 1px solid var(--rule);
   display: block;
+  margin: 0 auto;
 }
 .contact-popover__qr figcaption {
-  font-size: 11.5px;
+  font-size: 11px;
   color: var(--ink-2);
-  margin-top: 6px;
+  margin-top: 5px;
   font-weight: 500;
 }
 
-/* ---- Bottom chrome row (Settings + version) ------------------------- */
+/* ---- Bottom chrome row (Settings · brand · version) ----------------- */
 .popup__bottom {
   display: flex;
   align-items: center;
@@ -178,11 +186,12 @@ button {
   padding: 8px 14px;
   border-top: 1px solid var(--rule);
   background: var(--paper);
+  flex-shrink: 0;
 }
 .popup__bottom-link {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   background: transparent;
   border: 0;
   font-size: 13px;
@@ -191,6 +200,8 @@ button {
   padding: 4px 8px;
   margin-left: -8px;
   border-radius: 5px;
+  text-decoration: none;
+  font-family: inherit;
 }
 .popup__bottom-link:hover {
   background: var(--paper-2);
@@ -201,10 +212,26 @@ button {
 .popup__bottom-link:hover > svg {
   color: var(--ink);
 }
+.popup__bottom-brand {
+  background: transparent;
+  border: 0;
+  padding: 4px 6px;
+  border-radius: 5px;
+  font-size: 12px;
+  color: var(--muted);
+  font-family: var(--mono);
+  cursor: pointer;
+  text-decoration: none;
+}
+.popup__bottom-brand:hover {
+  color: var(--ink);
+  background: var(--paper-2);
+}
 .popup__bottom-version {
   font-size: 11px;
   color: var(--muted-2);
   font-family: var(--mono);
+  margin-right: -4px;
 }
 
 .dot {
@@ -834,12 +861,24 @@ body.vm-popup {
   min-height: 480px;
   margin: 0;
   background: var(--paper);
+  /* The popup needs to fill the body so the BottomChrome row pins to
+     the actual bottom; without this, short states (Idle / Loading) leave
+     ~128 px of dead space between the bottom chrome and the popup edge. */
+  display: flex;
+  flex-direction: column;
 }
 
 body.vm-popup .popup {
   border-radius: 0;
   border: 0;
   box-shadow: none;
+  /* Stretch to fill the body; flex column so popup__body grows. */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+body.vm-popup .popup__body {
+  flex: 1;
 }
 
 /* Welcome and Settings full-page hosts */

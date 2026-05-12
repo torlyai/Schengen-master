@@ -273,7 +273,7 @@ export const SettingsPage: React.FC = () => {
 
       <Section title={t('settings.section.about')}>
         <Field label={t('settings.about.version')}>
-          <div className="field__value">1.0.5</div>
+          <div className="field__value">1.0.6</div>
         </Field>
         <Field label={t('settings.about.source')}>
           <a
