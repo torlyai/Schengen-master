@@ -1,10 +1,85 @@
 // Popup chrome — same wrapper used by every state. Ported from popup.jsx.
 import React from 'react';
-import { More } from '../../components/Icons';
+import { More, Gear, QrCode } from '../../components/Icons';
 import { useT } from '../../i18n/useT';
 import { sendMessage } from '../../hooks/useStatus';
 
 export type StateTone = 'green' | 'amber' | 'red' | 'grey';
+
+function extensionUrl(path: string): string {
+  const c: any = (globalThis as any).chrome;
+  return c?.runtime?.getURL?.(path) ?? path;
+}
+
+function manifestVersion(): string {
+  const c: any = (globalThis as any).chrome;
+  return c?.runtime?.getManifest?.()?.version ?? '';
+}
+
+function openOptionsPage(): void {
+  const c: any = (globalThis as any).chrome;
+  c?.runtime?.openOptionsPage?.();
+}
+
+// Hover-activated tooltip showing the Torly AI contact QR codes
+// (WhatsApp + WeChat). Pure CSS hover/:focus-within — no React state.
+// The two QR images are bundled in public/qrcode/ so this works offline.
+const ContactQrPopover: React.FC = () => {
+  const { t } = useT();
+  // Vite's default public-folder behaviour copies `public/foo` to `dist/foo`
+  // (the `public/` prefix is stripped). The icons live under `dist/public/`
+  // only because they're referenced in manifest.json, which crxjs preserves
+  // verbatim. QR codes aren't in the manifest, so they're at the root.
+  const whatsappQr = extensionUrl('qrcode/whatsapp-qr.png');
+  const wechatQr = extensionUrl('qrcode/wechat-qr.jpeg');
+  return (
+    <div className="contact-trigger" tabIndex={0}>
+      <button
+        className="popup__hdr-btn"
+        aria-label={t('contact.trigger')}
+        title={t('contact.trigger')}
+        type="button"
+      >
+        <QrCode />
+      </button>
+      <div className="contact-popover" role="tooltip">
+        <div className="contact-popover__title">{t('contact.title')}</div>
+        <div className="contact-popover__qrs">
+          <figure className="contact-popover__qr">
+            <img src={whatsappQr} alt="WhatsApp QR" />
+            <figcaption>{t('contact.whatsapp')}</figcaption>
+          </figure>
+          <figure className="contact-popover__qr">
+            <img src={wechatQr} alt="WeChat QR" />
+            <figcaption>{t('contact.wechat')}</figcaption>
+          </figure>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Bottom chrome row — always-on entry-point to the Options page, plus the
+// current extension version. Lives at the very bottom of every popup state
+// (below the state-specific footer). Matches the "Settings · version" UX
+// pattern many Chrome extensions use as their settings affordance.
+const BottomChrome: React.FC = () => {
+  const { t } = useT();
+  const v = manifestVersion();
+  return (
+    <div className="popup__bottom">
+      <button
+        type="button"
+        className="popup__bottom-link"
+        onClick={openOptionsPage}
+        aria-label={t('footer.settings')}
+      >
+        <Gear /> <span>{t('footer.settings')}</span>
+      </button>
+      {v && <span className="popup__bottom-version">v{v}</span>}
+    </div>
+  );
+};
 
 export interface PopupProps {
   stateTone?: StateTone;
@@ -19,8 +94,7 @@ export interface PopupProps {
 }
 
 function defaultOpenOptions(): void {
-  const c: any = (globalThis as any).chrome;
-  c?.runtime?.openOptionsPage?.();
+  openOptionsPage();
 }
 
 // EN / 中 toggle pill. One click swaps the language locally for instant
@@ -75,6 +149,7 @@ export const Popup: React.FC<PopupProps> = ({
         <div className="popup__hdr-right">
           {headerRight ?? (
             <>
+              <ContactQrPopover />
               <LangToggle />
               <button className="popup__hdr-btn" aria-label="Settings" onClick={handleMore}>
                 <More />
@@ -85,6 +160,7 @@ export const Popup: React.FC<PopupProps> = ({
       </div>
       <div className="popup__body">{children}</div>
       {footer && <div className="popup__ftr">{footer}</div>}
+      <BottomChrome />
     </div>
   );
 };

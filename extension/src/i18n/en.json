@@ -82,6 +82,11 @@
   "footer.summary": "{checks} checks · {slots} slots",
   "footer.notif.on": "Notifications on",
   "footer.notif.off": "Notifications off",
+  "footer.settings": "Settings",
+  "contact.trigger": "Contact us",
+  "contact.title": "Talk to Torly AI",
+  "contact.whatsapp": "WhatsApp",
+  "contact.wechat": "WeChat / 微信",
 
   "welcome.brow.tag": "Open source · MIT",
   "welcome.eyebrow": "First run",

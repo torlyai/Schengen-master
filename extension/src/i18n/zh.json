@@ -82,6 +82,11 @@
   "footer.summary": "{checks} 次检查 · {slots} 个时段",
   "footer.notif.on": "通知已开启",
   "footer.notif.off": "通知已关闭",
+  "footer.settings": "设置",
+  "contact.trigger": "联系我们",
+  "contact.title": "联系 Torly AI",
+  "contact.whatsapp": "WhatsApp",
+  "contact.wechat": "微信",
 
   "welcome.brow.tag": "开源 · MIT 协议",
   "welcome.eyebrow": "首次启动",

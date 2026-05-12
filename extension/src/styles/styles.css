@@ -106,8 +106,106 @@ button {
   display: grid;
   place-items: center;
   color: var(--muted);
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
 }
 .popup__hdr-btn:hover { background: var(--paper-2); color: var(--ink); }
+
+/* ---- Contact QR hover popover (top-right of header) ----------------- */
+.contact-trigger {
+  position: relative;
+  display: inline-flex;
+  outline: none;
+}
+.contact-trigger:hover .contact-popover,
+.contact-trigger:focus-within .contact-popover {
+  display: flex;
+}
+.contact-popover {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: -8px;
+  z-index: 100;
+  flex-direction: column;
+  gap: 10px;
+  width: 320px;
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  box-shadow: 0 14px 36px -10px rgba(0, 0, 0, 0.22);
+  text-align: left;
+}
+.contact-popover__title {
+  font-size: 11.5px;
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+.contact-popover__qrs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.contact-popover__qr {
+  margin: 0;
+  text-align: center;
+}
+.contact-popover__qr img {
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  background: #fff;
+  border: 1px solid var(--rule);
+  display: block;
+}
+.contact-popover__qr figcaption {
+  font-size: 11.5px;
+  color: var(--ink-2);
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+/* ---- Bottom chrome row (Settings + version) ------------------------- */
+.popup__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-top: 1px solid var(--rule);
+  background: var(--paper);
+}
+.popup__bottom-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 0;
+  font-size: 13px;
+  color: var(--ink);
+  cursor: pointer;
+  padding: 4px 8px;
+  margin-left: -8px;
+  border-radius: 5px;
+}
+.popup__bottom-link:hover {
+  background: var(--paper-2);
+}
+.popup__bottom-link > svg {
+  color: var(--muted);
+}
+.popup__bottom-link:hover > svg {
+  color: var(--ink);
+}
+.popup__bottom-version {
+  font-size: 11px;
+  color: var(--muted-2);
+  font-family: var(--mono);
+}
 
 .dot {
   width: 8px;

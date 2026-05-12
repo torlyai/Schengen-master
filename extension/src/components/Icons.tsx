@@ -77,6 +77,19 @@ export const Poll: React.FC<IcoProps> = (p) => (
   </svg>
 );
 
+// Stylised QR-code icon — three finder squares + two data pixels. Used as
+// the hover affordance on the popup header that reveals the contact QR
+// codes (Torly AI WhatsApp + WeChat).
+export const QrCode: React.FC<IcoProps> = (p) => (
+  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" {...p}>
+    <rect x="1.5" y="1.5" width="4" height="4" rx="0.4" />
+    <rect x="10.5" y="1.5" width="4" height="4" rx="0.4" />
+    <rect x="1.5" y="10.5" width="4" height="4" rx="0.4" />
+    <rect x="8" y="8" width="2" height="2" fill="currentColor" stroke="none" />
+    <rect x="11.5" y="11.5" width="2" height="2" fill="currentColor" stroke="none" />
+  </svg>
+);
+
 // Aggregated namespace export so callers can write <Ico.gear/> style if they want.
 export const Ico = {
   gear: Gear,
@@ -89,4 +102,5 @@ export const Ico = {
   bell: Bell,
   link: Link,
   poll: Poll,
+  qrCode: QrCode,
 };
