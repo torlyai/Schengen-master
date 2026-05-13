@@ -209,6 +209,113 @@ export async function notifyBlocker(
   await postSendMessage(s.telegramBotToken, s.telegramChatId, text);
 }
 
+// ──────────────────────────────────────────────────────────
+// Premium-tier notifications (PRD docs/09 §6.6 + §15 W-14/W-15/W-17)
+// All three reuse the same Telegram channel as Free-tier alerts —
+// PRD §17 Q5 resolution: same latency, single shared bot.
+// Gated on telegramEnabled only — Premium users opt into Telegram
+// the same way Free users do.
+// ──────────────────────────────────────────────────────────
+
+/**
+ * Booking succeeded — £19 captured by Stripe.
+ * PRD §6.6 FAQ: "Email + Telegram the moment we book."
+ */
+export async function notifyBookingConfirmed(args: {
+  centre: string | null;
+  slotAt: string | null;        // ISO 8601, e.g. '2026-06-04T10:30:00.000Z'
+  bookingId: string | null;
+  amountPence: number;
+  currency: string;             // 'gbp'
+}): Promise<void> {
+  const s = await getSettings();
+  if (!s.telegramEnabled) return;
+  if (!tokenLooksValid(s.telegramBotToken) || !chatIdLooksValid(s.telegramChatId)) return;
+
+  const centre = mdEscape(args.centre ?? 'TLScontact');
+  const slotLine = args.slotAt
+    ? mdEscape(
+        new Date(args.slotAt).toLocaleString('en-GB', {
+          dateStyle: 'medium',
+          timeStyle: 'short',
+        }),
+      )
+    : null;
+  const ref = args.bookingId ? mdEscape(args.bookingId) : null;
+  const amount = (args.amountPence / 100).toFixed(0);
+  const ccy = args.currency.toUpperCase() === 'GBP' ? '£' : mdEscape(args.currency.toUpperCase());
+  const time = mdEscape(formatLocalTime());
+
+  const text = [
+    `🎉 *Slot booked* — ${centre}`,
+    slotLine ? `Appointment: ${slotLine}` : '',
+    ref ? `Reference: \`${ref}\`` : '',
+    '',
+    `${ccy}${amount} captured\\. _${time}_`,
+    '',
+    `⏰ One step left — pay TLScontact's visa fee within 30 minutes to confirm\\.`,
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  await postSendMessage(s.telegramBotToken, s.telegramChatId, text);
+}
+
+/**
+ * Booking attempt failed — slot was taken before we could confirm, or
+ * the 60s budget elapsed. No charge.
+ */
+export async function notifyBookingFailed(args: {
+  centre: string | null;
+  reason: string;
+}): Promise<void> {
+  const s = await getSettings();
+  if (!s.telegramEnabled) return;
+  if (!tokenLooksValid(s.telegramBotToken) || !chatIdLooksValid(s.telegramChatId)) return;
+
+  const centre = mdEscape(args.centre ?? 'TLScontact');
+  const reason = mdEscape(args.reason);
+  const time = mdEscape(formatLocalTime());
+
+  const text = [
+    `❌ *Booking attempt failed* — ${centre}`,
+    `_${time}_`,
+    '',
+    `Reason: ${reason}`,
+    '',
+    `£0 charged\\. Back to scanning for the next slot\\.`,
+  ].join('\n');
+
+  await postSendMessage(s.telegramBotToken, s.telegramChatId, text);
+}
+
+/**
+ * Refund issued (PRD §6.5) — TLS voided the slot within 24h, we
+ * automatically refunded the £19.
+ */
+export async function notifyRefundIssued(args: {
+  amountPence: number;
+  currency: string;
+}): Promise<void> {
+  const s = await getSettings();
+  if (!s.telegramEnabled) return;
+  if (!tokenLooksValid(s.telegramBotToken) || !chatIdLooksValid(s.telegramChatId)) return;
+
+  const amount = (args.amountPence / 100).toFixed(0);
+  const ccy = args.currency.toUpperCase() === 'GBP' ? '£' : mdEscape(args.currency.toUpperCase());
+  const time = mdEscape(formatLocalTime());
+
+  const text = [
+    `💰 *Refund issued* — ${ccy}${amount}`,
+    `_${time}_`,
+    '',
+    `Refunds usually appear on your card in 5\\-10 business days\\.`,
+    `We're back to scanning for a new slot\\.`,
+  ].join('\n');
+
+  await postSendMessage(s.telegramBotToken, s.telegramChatId, text);
+}
+
 /** Send a probe message. Returns { ok, error? } the UI can render directly. */
 export async function testConnection(): Promise<SendResult> {
   const s = await getSettings();

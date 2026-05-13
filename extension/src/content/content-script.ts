@@ -7,6 +7,7 @@
 //  4. Re-run detection if the page swaps content client-side (SPA-style).
 
 import { detectState } from './detector';
+import { detectBookingConfirmation } from './booking-confirmation-detector';
 import { cycleToNextMonth } from './month-cycler';
 import type { Msg } from '../shared/messages';
 
@@ -61,10 +62,44 @@ function maybeCycleMonths(state: string): void {
   }, 500);
 }
 
+// Booking-confirmation idempotency on the page side. Once we've fired
+// BOOKING_CONFIRMED for a given bookingId we don't re-fire — the
+// confirmation page may mutate as the user scrolls/expands details.
+// The SW also de-dupes via the idempotency unique index on the bookings
+// table, but client-side guard avoids a needless round-trip.
+let lastConfirmedBookingId: string | null = null;
+
 function runDetection(reason: string): void {
   const now = Date.now();
   if (now - lastSendTs < DEBOUNCE_MS) return;
   lastSendTs = now;
+
+  // Booking confirmation runs FIRST and short-circuits — if we landed
+  // on the post-booking success page, that's the only signal that
+  // matters. The slot-detector would otherwise see "no slots" on a
+  // confirmation page and report NO_SLOTS, which is wrong.
+  const confirmation = detectBookingConfirmation(
+    document,
+    location.href,
+    document.title,
+  );
+  if (confirmation.matched) {
+    const id = confirmation.bookingId ?? `unknown-${Math.floor(now / 1000)}`;
+    if (id !== lastConfirmedBookingId) {
+      lastConfirmedBookingId = id;
+      send({
+        type: 'BOOKING_CONFIRMED',
+        bookingId: confirmation.bookingId,
+        slotAt: confirmation.slotAt,
+        centre: confirmation.centre,
+        evidence: confirmation.evidence,
+        url: location.href,
+      });
+    }
+    // Don't run the slot-detector on the confirmation page — its rules
+    // would mis-classify "your appointment is confirmed" as no-slots.
+    return;
+  }
 
   const { state, evidence } = detectState(document, location.href);
   const fullEvidence = evidence.length ? evidence : [`Trigger: ${reason}`];

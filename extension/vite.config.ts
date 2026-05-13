@@ -31,6 +31,7 @@ export default defineConfig({
       input: {
         welcome: path.resolve(__dirname, 'src/welcome/welcome.html'),
         settings: path.resolve(__dirname, 'src/settings/settings.html'),
+        premium: path.resolve(__dirname, 'src/premium/premium.html'),
       },
     },
   },

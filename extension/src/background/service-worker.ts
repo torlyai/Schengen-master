@@ -19,6 +19,11 @@ import {
   setConsent,
   getConsent,
   DEFAULT_STATE,
+  getBookingWindow,
+  setBookingWindow,
+  deriveAcceptingRange,
+  setTlsCredentials,
+  forgetTlsCredentials,
 } from '../shared/storage';
 import { parseTlsUrl, isTlsUrl } from '../shared/target';
 
@@ -48,6 +53,22 @@ import {
 } from './state-machine';
 import { testConnection as testTelegram } from './telegram';
 import { checkForUpdate } from './update-checker';
+import {
+  getLicense,
+  clearLicense,
+  installLicenseFromJwt,
+  getOrCreateInstallId,
+} from '../shared/license';
+import {
+  startCheckout,
+  fetchLicenseStatus,
+} from './backend-client';
+import {
+  maybeStartBookingOnSlot,
+  handleBookingConfirmed,
+  handleBookingTimeout,
+  refundActiveBooking,
+} from './booking-fsm';
 
 // ---------- Install / startup ----------
 
@@ -162,6 +183,14 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 
   if (alarm.name === AUTOSTOP_ALARM) {
     await onAutoStopTick();
+    return;
+  }
+
+  if (alarm.name === 'VM_BOOKING_TIMEOUT') {
+    // Premium auto-booking exceeded its 60s budget without seeing
+    // a BOOKING_CONFIRMED message. Fail the attempt cleanly with
+    // no charge (PRD §12).
+    await handleBookingTimeout();
     return;
   }
 });
@@ -342,7 +371,171 @@ async function handle(msg: Msg): Promise<unknown> {
 
     case 'DETECTION_RESULT': {
       await applyDetection(msg.state, msg.evidence, msg.url);
+
+      // Premium auto-book bridge: if the detection that just landed is
+      // SLOT_AVAILABLE and this install is Premium with a slot that
+      // fits the booking window, take over with the booking FSM. The
+      // FSM transitions the state to PREMIUM_BOOKING_IN_PROGRESS
+      // immediately; the brief SLOT_AVAILABLE flash + Free-tier
+      // notification still fire but are quickly superseded — by design.
+      if (msg.state === 'SLOT_AVAILABLE') {
+        const status = await buildStatusPayload();
+        await maybeStartBookingOnSlot(status);
+      }
       return { ok: true };
+    }
+
+    case 'BOOKING_CONFIRMED': {
+      // Premium-only path. The booking FSM verifies tier + active
+      // booking + idempotency before calling the backend capture.
+      // Free-tier installs without an active booking get { ok: false }
+      // which is swallowed by the content script (no UX impact).
+      const result = await handleBookingConfirmed({
+        bookingId: msg.bookingId,
+        slotAt: msg.slotAt,
+        centre: msg.centre,
+      });
+      return result;
+    }
+
+    // ── Premium message handlers (PRD docs/09) ──
+    // PHASE 2 partial wiring: UPGRADE_TO_PREMIUM + START_PREMIUM_SETUP +
+    // OPEN/CLOSE_PREMIUM_OPTIONS are now wired. Setup-wizard transitions,
+    // Stripe activation, refund, and booking-FSM message handlers still
+    // log-and-stub — they need backend (PHASE 3) and booking automation
+    // (PHASE 4) to actually do anything.
+
+    case 'UPGRADE_TO_PREMIUM': {
+      // Free-tier nudge clicked. Open the in-extension Premium intro
+      // page in a new tab. PRD docs/09 §7 / wireframes docs/10 P-17.
+      const url = chrome.runtime.getURL('src/premium/premium.html');
+      try {
+        await chrome.tabs.create({ url });
+      } catch {
+        /* SW may not have tabs permission on some Chromium variants */
+      }
+      return { ok: true };
+    }
+
+    case 'PREMIUM_ACTIVATE': {
+      // P-7 "Activate" button. Hit /api/visa-master/checkout to get a
+      // Stripe Checkout session URL, open it in a new tab. After
+      // checkout succeeds, the user lands on
+      // torly.ai/visa-master/activated which posts back to the
+      // extension via the license-relay content script (→ the
+      // PREMIUM_INSTALL_LICENSE case below).
+      const installId = await getOrCreateInstallId();
+      const result = await startCheckout(installId);
+      if (!result.ok) {
+        console.error('[Premium] checkout failed', result);
+        return { ok: false, error: result.error };
+      }
+      try {
+        await chrome.tabs.create({ url: result.data.checkoutUrl });
+      } catch {
+        /* ignore */
+      }
+      return { ok: true, data: { url: result.data.checkoutUrl } };
+    }
+
+    case 'PREMIUM_INSTALL_LICENSE': {
+      // The content script on torly.ai/visa-master/activated relayed
+      // the JWT to us. Persist it (license.ts will refuse malformed or
+      // expired tokens). Then transition to PREMIUM_ACTIVE so the
+      // popup immediately reflects the new tier.
+      const installed = await installLicenseFromJwt(msg.licenseToken);
+      if (!installed) {
+        return { ok: false, error: 'Invalid licence token' };
+      }
+      await transitionTo('PREMIUM_ACTIVE', {});
+      return { ok: true, data: { tier: installed.tier } };
+    }
+
+    case 'PREMIUM_CANCEL': {
+      // User clicked "Cancel Premium" in P-12 Options. Wipe the
+      // license token locally — scanning falls back to Free. The
+      // Stripe card stays on file (user can re-activate later).
+      // Backend will sync via /webhook on customer-side actions.
+      await clearLicense();
+      await transitionTo('IDLE', {});
+      return { ok: true };
+    }
+
+    case 'START_PREMIUM_SETUP': {
+      // User clicked "Start setup" on the intro page. Flip popup state to
+      // PREMIUM_PREFLIGHT so the in-popup wizard takes over. PHASE 4 will
+      // also seed any prerequisite state (target URL, etc.) but for PHASE
+      // 2 a clean transition is enough — the Preflight component renders
+      // entirely from local state.
+      await transitionTo('PREMIUM_PREFLIGHT', {});
+      return { ok: true };
+    }
+
+    case 'OPEN_PREMIUM_OPTIONS': {
+      // Header More button on PREMIUM_ACTIVE → swap to PREMIUM_OPTIONS.
+      // Same transition pattern; the body component handles "Back".
+      await transitionTo('PREMIUM_OPTIONS', {});
+      return { ok: true };
+    }
+
+    case 'CLOSE_PREMIUM_OPTIONS': {
+      // Body Back link or "Never mind" on RefundPrompt → return to ACTIVE.
+      await transitionTo('PREMIUM_ACTIVE', {});
+      return { ok: true };
+    }
+
+    case 'PREMIUM_REQUEST_REFUND': {
+      // PRD §6.5. PHASE 4: booking-fsm.ts persists the booking IDs at
+      // capture time, so we can refund without a server lookup.
+      // Backend enforces the 24h window — if elapsed, we surface the
+      // backend's 409 response back to the popup.
+      const result = await refundActiveBooking(msg.reason);
+      return result;
+    }
+
+    case 'PREMIUM_SAVE_BOOKING_WINDOW': {
+      // P-6 setup step 3 — travel date + buffer + Prime Time toggle.
+      // Persisted to chrome.storage.local under 'bookingWindow'.
+      // The derived acceptingFrom/To range is recomputed on every
+      // status read, so changes are picked up immediately by the
+      // auto-book FSM.
+      await setBookingWindow({
+        travelDate: msg.travelDate,
+        visaProcessingDays: msg.visaProcessingDays,
+        minDaysNotice: msg.minDaysNotice,
+        includePrimeTime: msg.includePrimeTime,
+      });
+      return { ok: true };
+    }
+
+    case 'PREMIUM_SAVE_CREDENTIALS': {
+      // P-4 setup step 1. AES-GCM encrypted at rest via
+      // src/shared/crypto.ts. Never transmitted to torly.ai or any
+      // other server — PRD §11.1 invariant.
+      await setTlsCredentials({ email: msg.email, password: msg.password });
+      return { ok: true };
+    }
+
+    case 'PREMIUM_FORGET_CREDENTIALS': {
+      // P-12 danger button. Wipes the encrypted creds AND the crypto
+      // salt — any future encryption uses a fresh salt + key.
+      // Premium itself stays active (license token survives).
+      await forgetTlsCredentials();
+      return { ok: true };
+    }
+
+    case 'PREMIUM_SETUP_NEXT':
+    case 'PREMIUM_SETUP_BACK':
+    case 'PREMIUM_SETUP_RESET': {
+      // Wizard navigation stubs — the popup state components own
+      // their local form state and emit save events on Continue.
+      // The state-machine transition that walks the wizard is
+      // implicit (the popup re-renders the next step on the next
+      // SAVE_* message). PHASE 4 doesn't need explicit step
+      // transitions in the SW.
+      // eslint-disable-next-line no-console
+      console.log('[Premium] wizard nav (no-op):', msg.type);
+      return { ok: true, data: { noop: true } };
     }
 
     default: {
@@ -355,15 +548,18 @@ async function handle(msg: Msg): Promise<unknown> {
 // ---------- Status payload assembly ----------
 
 async function buildStatusPayload(): Promise<StatusPayload> {
-  const [settings, state, target, stats] = await Promise.all([
+  const [settings, state, target, stats, bookingWindow] = await Promise.all([
     getSettings(),
     getState(),
     getTarget(),
     getStats(),
+    getBookingWindow(),
   ]);
 
   // Resolve current cadence minutes (smart mode may differ from settings.cadenceMinutes).
   const cadence = await resolveCadence();
+  // Derive Premium booking-window range.
+  const range = deriveAcceptingRange(bookingWindow);
 
   return {
     state: state.state,
@@ -386,6 +582,15 @@ async function buildStatusPayload(): Promise<StatusPayload> {
     notif: settings.notifDesktop ? 'ON' : 'OFF',
     uiLang: settings.uiLang,
     detectionLang: settings.detectionLang,
+    // Premium fields (PRD docs/09 §8.4). All optional in StatusPayload;
+    // popup states ignore them when license tier is 'free'.
+    travelDate: bookingWindow.travelDate,
+    visaProcessingDays: bookingWindow.visaProcessingDays,
+    minDaysNotice: bookingWindow.minDaysNotice,
+    includePrimeTime: bookingWindow.includePrimeTime,
+    groupId: bookingWindow.groupId,
+    acceptingFrom: range.from,
+    acceptingTo: range.to,
   };
 }
 

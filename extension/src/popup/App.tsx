@@ -8,6 +8,22 @@ import { LoggedOut } from './states/LoggedOut';
 import { Cloudflare } from './states/Cloudflare';
 import { Paused } from './states/Paused';
 import { Unknown } from './states/Unknown';
+import { WrongPage } from './states/WrongPage';
+// Premium states (PRD docs/09 §12, wireframes docs/10)
+import { Preflight } from './states/premium/Preflight';
+import { SetupCredentials } from './states/premium/SetupCredentials';
+import { SetupSigningIn } from './states/premium/SetupSigningIn';
+import { SetupBookingWindow } from './states/premium/SetupBookingWindow';
+import { SetupReadyToActivate } from './states/premium/SetupReadyToActivate';
+import { VerificationGate } from './states/premium/VerificationGate';
+import { SetupFailedRetry } from './states/premium/SetupFailedRetry';
+import { SetupFailedStale } from './states/premium/SetupFailedStale';
+import { PremiumActive } from './states/premium/PremiumActive';
+import { PremiumOptions } from './states/premium/PremiumOptions';
+import { BookingInProgress } from './states/premium/BookingInProgress';
+import { Booked } from './states/premium/Booked';
+import { BookingFailed } from './states/premium/BookingFailed';
+import { RefundPrompt } from './states/premium/RefundPrompt';
 import { useStatus } from '../hooks/useStatus';
 import { useT, useSyncLang, tInline } from '../i18n/useT';
 import type { StatusPayload } from '../shared/messages';
@@ -40,6 +56,40 @@ export const App: React.FC = () => {
       return <Paused status={status} send={send} />;
     case 'UNKNOWN':
       return <Unknown status={status} send={send} />;
+    case 'WRONG_PAGE':
+      return <WrongPage status={status} send={send} />;
+    // ── Premium states (PRD docs/09 §12) ──
+    // These render only when the license JWT in chrome.storage.local has
+    // tier='premium'. The SW is responsible for refusing to enter these
+    // states for unlicensed installs; the popup trusts the SW state.
+    case 'PREMIUM_PREFLIGHT':
+      return <Preflight status={status} send={send} />;
+    case 'PREMIUM_SETUP_CREDENTIALS':
+      return <SetupCredentials status={status} send={send} />;
+    case 'PREMIUM_SETUP_SIGNING_IN':
+      return <SetupSigningIn status={status} send={send} />;
+    case 'PREMIUM_SETUP_BOOKING_WINDOW':
+      return <SetupBookingWindow status={status} send={send} />;
+    case 'PREMIUM_SETUP_READY':
+      return <SetupReadyToActivate status={status} send={send} />;
+    case 'PREMIUM_VERIFICATION_GATE':
+      return <VerificationGate status={status} send={send} />;
+    case 'PREMIUM_SETUP_FAILED_RETRY':
+      return <SetupFailedRetry status={status} send={send} />;
+    case 'PREMIUM_SETUP_FAILED_STALE':
+      return <SetupFailedStale status={status} send={send} />;
+    case 'PREMIUM_ACTIVE':
+      return <PremiumActive status={status} send={send} />;
+    case 'PREMIUM_OPTIONS':
+      return <PremiumOptions status={status} send={send} />;
+    case 'PREMIUM_BOOKING_IN_PROGRESS':
+      return <BookingInProgress status={status} send={send} />;
+    case 'PREMIUM_BOOKED':
+      return <Booked status={status} send={send} />;
+    case 'PREMIUM_BOOKING_FAILED':
+      return <BookingFailed status={status} send={send} />;
+    case 'PREMIUM_REFUND_PROMPT':
+      return <RefundPrompt status={status} send={send} />;
     case 'IDLE':
     default:
       return <IdlePlaceholder status={status} />;

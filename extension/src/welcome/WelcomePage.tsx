@@ -2,6 +2,11 @@
 // The big CTA sends CONSENT_GRANTED then closes the tab — the popup auto-opens next.
 // Named WelcomePage (not Welcome.tsx) because macOS is case-insensitive
 // and the manifest entry point is welcome.tsx.
+//
+// 2026-05-13 — added Premium tier section between Highlights and Yes/No so
+// first-run users see the auto-book upsell up-front. The "Tell me more"
+// link fires UPGRADE_TO_PREMIUM which the SW logs in PHASE 1 and will
+// route to /premium.html in PHASE 2.
 import React, { useState } from 'react';
 import { sendMessage } from '../hooks/useStatus';
 import { LANGUAGES, setLang } from '../i18n';
@@ -73,6 +78,60 @@ export const WelcomePage: React.FC = () => {
           <div className="hl__icon" aria-hidden>🆓</div>
           <div className="hl__title">{t('welcome.hl.free.title')}</div>
           <div className="hl__sub">{t('welcome.hl.free.sub')}</div>
+        </div>
+      </div>
+
+      <div className="welcome__tiers">
+        <div className="welcome__tiers-eyebrow">{t('welcome.tiers.eyebrow')}</div>
+        <h2 className="welcome__tiers-h">{t('welcome.tiers.h')}</h2>
+        <p className="welcome__tiers-sub">{t('welcome.tiers.sub')}</p>
+
+        <div className="welcome__tiers-grid">
+          <div className="tier-card">
+            <div className="tier-card__h">
+              <span className="tier-card__name">{t('welcome.tiers.free.name')}</span>
+              <span className="tier-card__pill tier-card__pill--free">
+                {t('welcome.tiers.free.pill')}
+              </span>
+            </div>
+            <ul className="tier-card__list">
+              <li>{t('welcome.tiers.free.bullet.1')}</li>
+              <li>{t('welcome.tiers.free.bullet.2')}</li>
+              <li>{t('welcome.tiers.free.bullet.3')}</li>
+              <li>{t('welcome.tiers.free.bullet.4')}</li>
+            </ul>
+            <div className="tier-card__price">{t('welcome.tiers.free.price')}</div>
+          </div>
+
+          <div className="tier-card tier-card--premium">
+            <div className="tier-card__h">
+              <span className="tier-card__name">
+                <span style={{ color: 'var(--green)', marginRight: 6 }}>★</span>
+                {t('welcome.tiers.premium.name')}
+              </span>
+              <span className="tier-card__pill tier-card__pill--soon">
+                {t('welcome.tiers.premium.pill')}
+              </span>
+            </div>
+            <ul className="tier-card__list">
+              <li>{t('welcome.tiers.premium.bullet.1')}</li>
+              <li>{t('welcome.tiers.premium.bullet.2')}</li>
+              <li>{t('welcome.tiers.premium.bullet.3')}</li>
+              <li>{t('welcome.tiers.premium.bullet.4')}</li>
+            </ul>
+            <div className="tier-card__price">
+              {t('welcome.tiers.premium.price')}
+            </div>
+            <button
+              type="button"
+              className="tier-card__lnk"
+              onClick={() => {
+                sendMessage({ type: 'UPGRADE_TO_PREMIUM' }).catch(() => {});
+              }}
+            >
+              {t('welcome.tiers.premium.cta')} →
+            </button>
+          </div>
         </div>
       </div>
 

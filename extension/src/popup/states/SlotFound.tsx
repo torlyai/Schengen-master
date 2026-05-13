@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import Popup from '../shell/Popup';
 import { Target } from '../../components/Icons';
+import UpsellCard from '../../components/premium/UpsellCard';
+import { useLicense } from '../../hooks/useLicense';
 import type { Msg, StatusPayload } from '../../shared/messages';
 import { secondsUntil, utcClock } from '../format';
 import { useT, countryName } from '../../i18n/useT';
@@ -16,6 +18,7 @@ const WINDOW_SEC = 60;
 
 export const SlotFound: React.FC<StateProps> = ({ status, send }) => {
   const { t } = useT();
+  const { tier } = useLicense();
   const expiresAt = (status.slotDetectedTs ?? Date.now()) + WINDOW_SEC * 1000;
   const [now, setNow] = useState(Date.now());
 
@@ -98,6 +101,11 @@ export const SlotFound: React.FC<StateProps> = ({ status, send }) => {
           {t('popup.slotFound.imBooking')}
         </button>
       </div>
+
+      {/* PRD §5.2 — upsell only renders for Free users. Premium users
+          never see this because their slot-found goes straight to
+          BookingInProgress via the SW booking FSM. */}
+      {tier === 'free' && <UpsellCard send={send} />}
     </Popup>
   );
 };

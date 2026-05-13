@@ -38,6 +38,23 @@ const CONFIG: Record<ExtState, BadgeConfig> = {
   LOGGED_OUT: { text: '⚠', color: COLORS.amber, title: 'Visa Master — logged out of TLScontact' },
   UNKNOWN: { text: '⚠', color: COLORS.amber, title: 'Visa Master — help classify this page' },
   PAUSED: { text: '‖', color: COLORS.grey, title: 'Visa Master — paused' },
+  WRONG_PAGE: { text: '→', color: COLORS.amber, title: 'Visa Master — open the booking page to start monitoring' },
+  // ── Premium (PRD docs/09 §12). The badge text uses ★ to distinguish
+  // Premium-tier setup/operation from Free-tier monitoring at a glance.
+  PREMIUM_PREFLIGHT:            { text: '★', color: COLORS.grey,  title: 'Visa Master Premium — setup' },
+  PREMIUM_SETUP_CREDENTIALS:    { text: '★', color: COLORS.grey,  title: 'Visa Master Premium — setup step 1/4' },
+  PREMIUM_SETUP_SIGNING_IN:     { text: '★', color: COLORS.amber, title: 'Visa Master Premium — signing in' },
+  PREMIUM_SETUP_BOOKING_WINDOW: { text: '★', color: COLORS.grey,  title: 'Visa Master Premium — setup step 3/4' },
+  PREMIUM_SETUP_READY:          { text: '★', color: COLORS.green, title: 'Visa Master Premium — ready to activate' },
+  PREMIUM_VERIFICATION_GATE:    { text: '⚠', color: COLORS.amber, title: 'Visa Master Premium — TLS verification' },
+  PREMIUM_SETUP_FAILED_RETRY:   { text: '✕', color: COLORS.red,   title: "Visa Master Premium — setup couldn't finish" },
+  PREMIUM_SETUP_FAILED_STALE:   { text: '✕', color: COLORS.red,   title: 'Visa Master Premium — manual logout needed' },
+  PREMIUM_ACTIVE:               { text: '★', color: COLORS.green, title: 'Visa Master Premium — active' },
+  PREMIUM_OPTIONS:              { text: '★', color: COLORS.green, title: 'Visa Master Premium — options' },
+  PREMIUM_BOOKING_IN_PROGRESS:  { text: '⚡', color: COLORS.amber, title: 'Visa Master Premium — booking…' },
+  PREMIUM_BOOKED:               { text: '🎉', color: COLORS.green, title: 'Visa Master Premium — booked' },
+  PREMIUM_BOOKING_FAILED:       { text: '!', color: COLORS.amber, title: 'Visa Master Premium — booking failed' },
+  PREMIUM_REFUND_PROMPT:        { text: '£', color: COLORS.grey,  title: 'Visa Master Premium — refund?' },
 };
 
 // Pulse animation for SLOT_AVAILABLE — switches color every 500ms for up to 60s.

@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import Popup from '../shell/Popup';
 import Footer from '../shell/Footer';
 import { Pause as IcoPause, Refresh } from '../../components/Icons';
+import UpgradeLine from '../../components/premium/UpgradeLine';
+import { useLicense } from '../../hooks/useLicense';
 import type { StatusPayload } from '../../shared/messages';
 import type { Msg } from '../../shared/messages';
 import { cadenceToPips, countdownMS, relativePast } from '../format';
@@ -16,6 +18,7 @@ export interface StateProps {
 
 export const Monitoring: React.FC<StateProps> = ({ status, send }) => {
   const { t } = useT();
+  const { tier } = useLicense();
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
     const id = window.setInterval(() => setNow(Date.now()), 1000);
@@ -88,6 +91,10 @@ export const Monitoring: React.FC<StateProps> = ({ status, send }) => {
           <Refresh /> {t('popup.monitoring.checkNow')}
         </button>
       </div>
+
+      {/* PRD §5.2 — quiet upgrade line for Free users only. Premium users
+          see PremiumActive (P-11) instead of this state entirely. */}
+      {tier === 'free' && <UpgradeLine send={send} />}
     </Popup>
   );
 };

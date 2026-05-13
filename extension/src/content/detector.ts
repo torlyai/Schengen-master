@@ -137,7 +137,41 @@ const LOGIN_SELECTORS: ReadonlyArray<string> = [
 const LOGIN_URL_HINTS: ReadonlyArray<RegExp> = [
   /\/login(\/|\?|$)/i,
   /\/signin(\/|\?|$)/i,
-  /\/en-us(\/|\?|$)/i, // TLS marketing home — redirected here when session is lost
+  // TLS marketing home — bare /en-us only. The 2026-05-13 user-report bug
+  // had this matching /en-us/* (e.g. /en-us/travel-groups), which is a
+  // LOGGED-IN page, not the post-session-loss marketing redirect. Tighten
+  // to either /en-us with nothing after it OR /en-us/ as the final segment.
+  /\/en-us\/?(\?|$)/i,
+];
+
+/**
+ * Booking-page URL patterns — when on TLScontact but the URL doesn't match
+ * any of these, we treat it as WRONG_PAGE (logged in, just not on the
+ * appointment booking step). User-facing CTA: open the booking page.
+ */
+const BOOKING_URL_PATTERNS: ReadonlyArray<RegExp> = [
+  /\/workflow\/appointment-booking/i,
+  /\/workflow\/[^/]+\/appointment/i,
+  /\/appointment-booking(\/|\?|$)/i,
+];
+
+/**
+ * Sub-pages we KNOW are logged-in but non-booking. When the URL matches
+ * one of these, we're confident the user is signed in to TLS — no need to
+ * ask the user to classify, just point them at the booking page.
+ *
+ * Sources: empirical observation 2026-05-13 (user reported the popup
+ * showed UNKNOWN classification prompt on /en-us/travel-groups despite
+ * being signed in and seeing the Application list).
+ */
+const KNOWN_NON_BOOKING_PATTERNS: ReadonlyArray<RegExp> = [
+  /\/travel-groups(\/|\?|$)/i,
+  /\/applications?(\/|\?|$)/i,
+  /\/profile(\/|\?|$)/i,
+  /\/account(\/|\?|$)/i,
+  /\/dashboard(\/|\?|$)/i,
+  /\/visa-types(\/|\?|$)/i,
+  /\/workflow\/[^/]+\/?(\?|$)/i,        // /workflow/foo without /appointment
 ];
 
 // ---------- Detector ----------
@@ -162,7 +196,16 @@ export function detectState(doc: Document = document, url: string = location.hre
     return { state: 'LOGGED_OUT', evidence: lo.evidence };
   }
 
-  // 3) Positive signals.
+  // 3) Wrong-page check — user is logged in to TLS but on a non-booking
+  //    sub-page. Don't bother running the slot-detection rule; tell the
+  //    user to go to the booking page. (2026-05-13 fix: was previously
+  //    falling through to UNKNOWN classification, which was a dead-end UX.)
+  const wp = detectWrongPage(url);
+  if (wp.hit) {
+    return { state: 'WRONG_PAGE', evidence: wp.evidence };
+  }
+
+  // 4) Positive signals.
   const bodyText = (doc.body?.innerText ?? '').toLowerCase();
 
   const noSlotsTextPresent = NO_SLOTS_PHRASES.some((p) => bodyText.includes(p.toLowerCase()));
@@ -244,6 +287,27 @@ function detectCloudflare(doc: Document): { hit: boolean; evidence: string[] } {
   }
 
   return { hit: evidence.length > 0, evidence };
+}
+
+function detectWrongPage(url: string): { hit: boolean; evidence: string[] } {
+  // If the URL matches a known booking-page pattern, NOT a wrong page.
+  for (const re of BOOKING_URL_PATTERNS) {
+    if (re.test(url)) {
+      return { hit: false, evidence: [] };
+    }
+  }
+
+  // If the URL matches a known non-booking sub-page, that's our signal.
+  for (const re of KNOWN_NON_BOOKING_PATTERNS) {
+    if (re.test(url)) {
+      return { hit: true, evidence: [`Non-booking sub-page: ${re.source}`] };
+    }
+  }
+
+  // Otherwise let UNKNOWN handle it (e.g. genuinely unfamiliar pages where
+  // we want the user to teach the classifier). This keeps the state
+  // conservative.
+  return { hit: false, evidence: [] };
 }
 
 function detectLoggedOut(doc: Document, url: string): { hit: boolean; evidence: string[] } {

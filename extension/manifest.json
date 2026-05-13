@@ -39,6 +39,15 @@
       "js": ["src/content/content-script.ts"],
       "run_at": "document_idle",
       "all_frames": false
+    },
+    {
+      "matches": [
+        "https://torly.ai/visa-master/activated*",
+        "https://*.torly.ai/visa-master/activated*"
+      ],
+      "js": ["src/content/license-relay.ts"],
+      "run_at": "document_idle",
+      "all_frames": false
     }
   ],
 
@@ -51,7 +60,9 @@
   ],
 
   "host_permissions": [
-    "https://*.tlscontact.com/*"
+    "https://*.tlscontact.com/*",
+    "https://torly.ai/*",
+    "https://*.torly.ai/*"
   ],
 
   "optional_host_permissions": [
@@ -63,7 +74,9 @@
       "resources": [
         "src/welcome/welcome.html",
         "src/settings/settings.html",
-        "public/icons/*"
+        "src/premium/premium.html",
+        "public/icons/*",
+        "qrcode/*"
       ],
       "matches": ["<all_urls>"]
     }

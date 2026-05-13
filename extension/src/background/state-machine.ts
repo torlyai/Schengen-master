@@ -34,6 +34,7 @@ import {
   notifyMonitoringStart as tgMonStart,
   notifyMonitoringPaused as tgMonPaused,
 } from './telegram';
+import { maybeAutoLoginToTls } from './tls-auto-login';
 
 // 15 min auto-stop window for CLOUDFLARE and LOGGED_OUT, per wireframes §5/§13.
 const AUTOSTOP_MIN = 15;
@@ -162,8 +163,24 @@ export async function transitionTo(next: ExtState, ctx: TransitionCtx = {}): Pro
 
   if (next === 'LOGGED_OUT' && prev !== 'LOGGED_OUT') {
     const target = await getTarget();
-    await notify('LOGGED_OUT', target?.centre ?? null);
-    tgBlocker('LOGGED_OUT', target).catch(() => { /* silent */ });
+    // Premium auto-login bridge — PRD §11.3. If the install has a
+    // licence + saved credentials, try filling the login form
+    // first. The auto-login runs async; if it succeeds, the content
+    // script's detection on the post-login redirect transitions us
+    // out of LOGGED_OUT. If it declines (no creds, cooldown,
+    // fail-count exceeded), the normal notification path runs.
+    maybeAutoLoginToTls().then((attempted) => {
+      if (!attempted) {
+        // Free tier (or Premium without creds) — surface the
+        // standard "log back in" prompt.
+        notify('LOGGED_OUT', target?.centre ?? null).catch(() => {});
+        tgBlocker('LOGGED_OUT', target).catch(() => {});
+      }
+    }).catch(() => {
+      // Auto-login crashed — still surface the notification.
+      notify('LOGGED_OUT', target?.centre ?? null).catch(() => {});
+      tgBlocker('LOGGED_OUT', target).catch(() => {});
+    });
   }
 
   // Monitoring started/resumed — fire on any rising edge into NO_SLOTS from
