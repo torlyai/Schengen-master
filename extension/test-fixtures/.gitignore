@@ -1,0 +1,20 @@
+# TLS DOM captures contain real (even if redacted) account data.
+# They live in the dev workspace repo (Schengen-visa) but MUST NOT
+# leak into the public release repo (torlyai/Schengen-master).
+#
+# Ignore everything inside tls-dom/ except this .gitignore, the README,
+# and a single empty .keep file per centre so the directory structure
+# is preserved.
+
+tls-dom/**/*.html
+tls-dom/**/*.har
+tls-dom/**/*.json
+tls-dom/**/*.png
+tls-dom/**/*.mp4
+tls-dom/**/*.webm
+tls-dom/**/*.log
+
+# Allowlist: doc + structure
+!tls-dom/README.md
+!tls-dom/SELECTORS.md
+!tls-dom/**/.keep

@@ -10,7 +10,11 @@
     "package": "node scripts/package.mjs",
     "release": "npm run build && npm run package",
     "typecheck": "tsc --noEmit",
-    "icons": "node scripts/generate-icons.mjs"
+    "icons": "node scripts/generate-icons.mjs",
+    "test:e2e": "npm run build && playwright test",
+    "test:e2e:ui": "npm run build && playwright test --ui",
+    "test:e2e:headless": "npm run build && playwright test --headed=false",
+    "test:e2e:install": "playwright install chromium"
   },
   "dependencies": {
     "react": "^18.3.1",
@@ -18,6 +22,7 @@
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.0-beta.25",
+    "@playwright/test": "^1.60.0",
     "@types/chrome": "^0.0.268",
     "@types/node": "^20.14.10",
     "@types/react": "^18.3.3",
