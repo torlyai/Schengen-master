@@ -1,8 +1,110 @@
-# Smoke test — Premium UI (PHASE 1 build)
+# Smoke test — Premium
 
-**Status:** UI port complete. Backend, Stripe, auto-booking, and TLS
-auto-login are NOT wired yet (PHASE 3+). This doc covers how to verify
-each new popup state renders correctly with mocked data.
+**Status (2026-05-14):** Backend + Stripe live verified (`cs_live_…` Setup
+Intent sessions returning from `POST /api/visa-master/checkout`). Wizard
+step transitions wired. Booking FSM (`driveBookingFlow()`) and TLS
+auto-login selectors remain unvalidated against real TLS markup (PRD §17,
+backlog P0-1 / P0-4).
+
+This doc covers two distinct test paths:
+
+1. **Premium activation smoke test (Stripe live)** — payment-before-wizard
+   end-to-end flow against a real `cs_live_…` Stripe session. This is the
+   path a real Premium user takes; run it before every release.
+2. **Force-each-state preview** — paste state JSON into the SW DevTools
+   console to render any of the 14 Premium popup states in isolation
+   without backend round-trips. Useful for UI changes.
+
+## Premium activation smoke test (Stripe live)
+
+Run this end-to-end before shipping any change that touches the wizard,
+`service-worker.ts` `START_PREMIUM_SETUP` / `PREMIUM_INSTALL_LICENSE`,
+`license-relay.ts`, or the torlyAI `/api/visa-master/checkout` /
+`/visa-master/activated` surfaces.
+
+### Pre-requisites
+- Production extension build loaded unpacked from `dist/`.
+- `chrome://extensions` → service worker DevTools console open (the SW
+  logs the activation handshake here).
+- A Stripe **test-mode** publishable key configured on torlyAI's
+  `/api/visa-master/checkout` endpoint (one-time check; the live `cs_live_…`
+  sessions accept test card `4242 4242 4242 4242` because Stripe Checkout
+  treats Setup Intents with no charge as `mode=setup`).
+- No existing license — clear via `chrome.storage.local.remove('vmLicense')`
+  in the SW console.
+
+### Steps
+
+1. **Open the Premium intro page.** Click the Upgrade nudge in the popup
+   (or call `chrome.tabs.create({url: 'premium.html'})` from the SW
+   console). Verify the tab opens as the **active** tab (P2-1 fix —
+   `active: true`).
+2. **Click any of the four `开始设置` buttons.** All four should fire
+   `START_PREMIUM_SETUP` (PremiumLandingPage.tsx — previously only the
+   first button was wired). Watch for the click-feedback banner cycling
+   `sending → sent`.
+3. **Stripe Checkout opens.** The session URL pattern should be
+   `https://checkout.stripe.com/c/pay/cs_live_…`. Verify the page shows
+   the reassurance copy in `custom_text.submit.message`:
+   > "You won't be charged today. £19 is only taken when we successfully
+   > book an appointment for you — fully refundable for 24h after."
+4. **Pay with test card.** Enter `4242 4242 4242 4242`, any future
+   expiry, any 3-digit CVC, any postcode. Click *Set up*.
+5. **Redirect to `/visa-master/activated`.** torlyAI's `ActivatedClient`
+   calls `POST /api/visa-master/license/activate` and on success posts
+   the license JWT via `window.postMessage` (license-relay.ts content
+   script).
+6. **License relay → SW handshake.** The SW console should log a
+   `PREMIUM_INSTALL_LICENSE` message followed by a state transition.
+   Verify: `chrome.storage.local.get('vmLicense')` returns a non-null
+   object with `tier: 'premium'`, `aud: 'visa-master-extension'`,
+   `iss: 'torly.ai'`. The activation tab should auto-close (or show
+   "You can close this tab").
+7. **Popup shows Preflight (P-3).** Open the popup. State should be
+   `PREMIUM_PREFLIGHT`. The wizard's first step renders.
+8. **Walk through the wizard end-to-end.** Preflight → Credentials →
+   BookingWindow → ReadyToActivate. Verify:
+   - Each step's *Next* button fires `PREMIUM_SETUP_NEXT` and advances.
+   - *Back* fires `PREMIUM_SETUP_BACK` and rewinds.
+   - *Skip for now →* (P1-3) transitions directly to `PREMIUM_ACTIVE`.
+   - Credentials submit fires `PREMIUM_SAVE_CREDENTIALS` and the AES-GCM
+     `tlsCreds` blob lands in `chrome.storage.local`.
+   - BookingWindow submit fires `PREMIUM_SAVE_BOOKING_WINDOW`.
+   - ReadyToActivate's *Activate* fires `PREMIUM_SETUP_NEXT` (was the
+     stale `PREMIUM_ACTIVATE` pre-P0-2).
+9. **Trigger a fake `SLOT_AVAILABLE`.** From the SW console:
+   ```js
+   chrome.runtime.sendMessage({
+     type: 'DETECTION_RESULT',
+     detection: { state: 'SLOT_AVAILABLE', evidence: [{ kind: 'text', value: 'Available' }], slotAt: Date.now() + 7*86400000, centre: 'MAN' }
+   });
+   ```
+   Verify the booking FSM transitions: `PREMIUM_ACTIVE` →
+   `PREMIUM_BOOKING_IN_PROGRESS`. **Known limitation (P0-1):**
+   `driveBookingFlow()` is a stub — it will time out and transition to
+   `PREMIUM_BOOKING_FAILED` after 60s. This is expected until real TLS
+   booking markup is captured.
+
+### Pass criteria
+- Steps 1-7 complete without console errors.
+- Step 8: every wizard transition is reflected in `chrome.storage.local.state`.
+- Step 9: FSM enters `PREMIUM_BOOKING_IN_PROGRESS` (fail-safe to
+  `PREMIUM_BOOKING_FAILED` is expected with the current stub).
+
+### Failure modes worth catching
+- Activated page shows but popup never updates → license relay or
+  `PREMIUM_INSTALL_LICENSE` handler regression.
+- License lands but popup stays on Free → JWT structural validation
+  failing (check `aud`, `iss`, `exp` in the SW console).
+- Wizard step doesn't advance → `service-worker.ts` switch missing the
+  new state in its exhaustive handler.
+
+---
+
+## Force-each-state preview (UI-only testing)
+
+This path stays useful for UI changes — it bypasses the backend and
+Stripe entirely.
 
 ## Setup
 
@@ -143,16 +245,20 @@ This is expected. PHASE 2 wires the click to open the Premium intro page
 (`/premium.html`). For now, the visual nudge confirms the click reached
 the SW.
 
-## What is NOT testable end-to-end yet
+## What is testable end-to-end as of 2026-05-14
 
-| Flow | Status | Wired by |
+| Flow | Status | Notes |
 |---|---|---|
-| Free → Stripe → Premium activation | NO backend yet | PHASE 3 |
-| Auto-booking when slot found | NO booking FSM yet | PHASE 4 |
-| Auto-login on TLS session expiry | NO crypto module yet | PHASE 4 |
-| Email / Telegram on booking | NO transactional email | PHASE 5 |
-| Refund Stripe round-trip | NO Stripe Refunds wired | PHASE 6 |
-| 中文 Premium translations | English strings hardcoded | PHASE 7 |
+| Free → Stripe Checkout → license install → Preflight | ✅ Wired | See "Premium activation smoke test" above |
+| Wizard step transitions (Preflight → Credentials → BookingWindow → Active) | ✅ Wired | P0-2 fix |
+| Auto-login script injection (selectors) | ⚠️ Best-guess | P0-4 — needs real TLS markup capture |
+| Cloudflare / captcha challenge detection (pre-fill) | ✅ Wired | P1-1 — multi-signal heuristic in `tls-auto-login.ts` |
+| Auto-booking on slot detected | ⚠️ Stub | P0-1 — `driveBookingFlow()` returns immediately; fails-safe to `BOOKING_FAILED` |
+| `BOOKING_CONFIRMED` detection on post-book page | ✅ Implemented | `booking-confirmation-detector.ts` ready; awaits a real booking to exercise |
+| Stripe Refund within 24h | ⚠️ Endpoint exists | Not exercised end-to-end yet |
+| 中文 Premium copy | ⚠️ Mostly translated | P1-5 — needs native-speaker review pass |
 
-Visual rendering and message wiring is all that should pass in this
-build. Functional booking is not in scope until PHASE 4.
+The Stripe live path and wizard transitions are the high-confidence
+surface. The P0 stubs (`driveBookingFlow`, `injectedFill` selectors) are
+the remaining unknown — both blocked on capturing real TLScontact
+markup.

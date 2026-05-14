@@ -168,20 +168,55 @@ async function injectedFill(email: string, password: string): Promise<InjectResu
   });
 
   // Helper hoisted into the injected scope. Page-context only.
+  // Bias toward false positives — declining a real login is recoverable
+  // (user signs in manually); filling creds into a challenge burns a 3/h
+  // budget slot and may trip stricter anti-bot. Any one signal trips.
   function detectChallengePage(): { challenge: boolean; signal?: string } {
-    // TODO(user): Author this heuristic — see request below.
-    //
-    // Return { challenge: true, signal: '<what-we-saw>' } if the page is
-    // a Cloudflare Turnstile / reCAPTCHA / "Just a moment..." interstitial.
-    // Return { challenge: false } otherwise.
-    //
-    // Trade-off:
-    //   - False POSITIVE (think it's a challenge when it isn't) →
-    //     auto-login silently declines, user logs in manually. Recoverable.
-    //   - False NEGATIVE (miss a real challenge) → fill creds into the
-    //     wrong page, click Submit, burn a login attempt, possibly trip
-    //     additional anti-bot rate-limiting. NOT recoverable in-session.
-    //   → Bias toward false-positives. When in doubt, treat as challenge.
+    if (
+      document.querySelector('iframe[src*="challenges.cloudflare.com"]') ||
+      document.querySelector('.cf-turnstile') ||
+      document.querySelector('[data-cf-turnstile-sitekey]')
+    ) {
+      return { challenge: true, signal: 'cloudflare-turnstile' };
+    }
+
+    const title = document.title.toLowerCase();
+    if (
+      title.includes('just a moment') ||
+      title.includes('checking your browser') ||
+      title.includes('attention required')
+    ) {
+      return { challenge: true, signal: 'cloudflare-interstitial' };
+    }
+
+    const path = location.pathname.toLowerCase();
+    if (path.includes('/cdn-cgi/challenge') || path.includes('/cdn-cgi/l/chk')) {
+      return { challenge: true, signal: 'cloudflare-challenge-url' };
+    }
+
+    if (
+      document.querySelector('iframe[src*="recaptcha"]') ||
+      document.querySelector('.g-recaptcha[data-sitekey]')
+    ) {
+      return { challenge: true, signal: 'recaptcha' };
+    }
+    if (
+      document.querySelector('iframe[src*="hcaptcha.com"]') ||
+      document.querySelector('.h-captcha[data-sitekey]')
+    ) {
+      return { challenge: true, signal: 'hcaptcha' };
+    }
+
+    // Last-resort: a Cloudflare-rendered challenge page carries a Ray ID
+    // footer and has no <input type="password">. Catches JS-only redirect
+    // variants that don't embed a Turnstile widget yet.
+    const bodyText = document.body?.innerText?.toLowerCase() ?? '';
+    const hasRayId = /cloudflare ray id:/i.test(bodyText);
+    const hasNoPasswordInput = !document.querySelector('input[type="password"]');
+    if (hasRayId && hasNoPasswordInput) {
+      return { challenge: true, signal: 'cloudflare-ray-id-no-form' };
+    }
+
     return { challenge: false };
   }
 }

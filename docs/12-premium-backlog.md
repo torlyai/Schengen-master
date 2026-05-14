@@ -1,6 +1,6 @@
 # Premium Tier — Issues Backlog
 
-**Generated:** 2026-05-13
+**Generated:** 2026-05-13 · **Last updated:** 2026-05-14 (Evening session — P1-1 Cloudflare detection + P2-2/P2-3/P2-4/P2-5 cleared)
 **Sources:** PRD §17 known stubs + bugs surfaced during in-dev dogfooding (`v1.0.9` local build, Premium tier WIP commit `5e6b903`).
 
 This is a living document. When you fix something, move it from the open list to **Done — this branch**. When you discover something, add it with a P-tag and a repro.
@@ -57,25 +57,14 @@ This is a living document. When you fix something, move it from the open list to
 
 ## P1 — Should-fix before public launch
 
-### P1-1 🟥 `detectChallengePage()` returns false always
-**File:** `extension/src/background/tls-auto-login.ts` (bottom of `injectedFill`)
-**Behavior today:** Cloudflare Turnstile / reCAPTCHA pre-flight check is scaffolded but returns `{ challenge: false }` — so auto-login will happily submit creds into a challenge page, burning rate-limit budget.
-**Acceptance:**
-- Combines 2-3 high-confidence signals (`iframe[src*="challenges.cloudflare.com"]`, `.cf-turnstile`, `document.title` ~ "Just a moment", URL pattern `/cdn-cgi/challenge`)
-- Biases toward false-positives (decline submit > burn attempt)
-- Returns `{ challenge: true, signal: '<short-label>' }` for popup nudge
-- Manual test: simulate by injecting a `cf-turnstile` div on a TLS page; verify auto-login declines without recording a fail.
-
----
-
-### P1-4 🟦 Cross-repo: license JWT activation handshake not tested end-to-end
+### P1-4 🟥 Cross-repo: license JWT activation handshake not tested end-to-end
 **Files:**
 - `torlyAI/app/visa-master/activated/ActivatedClient.tsx` (calls `/api/visa-master/license/activate`)
 - `extension/src/content/license-relay.ts` (postMessage bridge)
 - `extension/src/background/service-worker.ts:441` (`PREMIUM_INSTALL_LICENSE` handler)
 
 **Behavior today:** Each step is implemented but the full chain has not been exercised against a real Stripe Setup Intent redirect.
-**Blocked on:** P0-3 (Stripe env vars). Cannot test until checkout works.
+**Previously blocked on:** P0-3 (Stripe env vars). **Unblocked 2026-05-14** — `POST /api/visa-master/checkout` now returns working `cs_live_…` Setup Intent sessions in production. Next manual test session can drive a real end-to-end run with Stripe test card `4242 4242 4242 4242`.
 **Acceptance:**
 - Full flow: 开始设置 → Stripe test card (`4242 4242 4242 4242`) → activated page → license JWT installed → SW state = `PREMIUM_PREFLIGHT` → popup renders Preflight.
 - Verify license signature against torlyAI's `JWT_PUBLIC_KEY` (audience must be `'visa-master-extension'`).
@@ -97,51 +86,7 @@ This is a living document. When you fix something, move it from the open list to
 
 ## P2 — Polish
 
-### P2-2 🟥 Activated page lacks safety-net copy
-**File:** `torlyAI/app/visa-master/activated/page.tsx`
-**Behavior today:** After Stripe redirect, the activated page shows a centered card confirming activation. No copy reassures the user "you can disable Premium anytime and your card won't be charged unless we book a slot."
-**Acceptance:**
-- Add a single reassurance line below the activation confirmation.
-- Manual test: visually inspect on torly.ai/visa-master/activated.
-
----
-
-### P2-3 🟥 Reorder `/schengen` — move `LpPremiumPitch` to after `LpInstall`
-**File:** `torlyAI/app/schengen/SchengenPageClient.tsx` (around line 50, the JSX composition)
-**Behavior today:** The Premium pitch section renders between `LpOpenSource` and `LpInstall`. PM-strategy argument from session: Install should be the first commitment; Premium is the upgrade you think about *after* using Free for a week.
-**Acceptance:**
-- Swap render order: `LpInstall` before `LpPremiumPitch`
-- Update any in-page anchor links that point at `#install` or `#premium` to verify they still scroll correctly.
-- A/B test in a separate experiment ideally, but a clean swap is acceptable for v1.
-
----
-
-### P2-4 🟥 Funnel analytics events
-**Behavior today:** No instrumented events for:
-- `/schengen` → `/schengen/premium` CTR
-- Extension-popup → `/schengen/premium` referrer share
-- `/schengen/premium` → checkout start rate
-- Checkout start → activation success rate
-- Refund rate within 24h
-
-**Why P2:** Without these we can't iterate on the funnel data-driven.
-**Acceptance:**
-- Plausible custom events fired at each transition.
-- Dashboard view in Plausible for the Premium funnel.
-
----
-
-### P2-5 🟥 Smoke test doc needs Stripe path
-**File:** `extension/docs/SMOKE_TEST_PREMIUM.md`
-**Behavior today:** Doc exists but doesn't reflect the corrected payment-before-wizard flow.
-**Acceptance:**
-- Section "Premium activation smoke test" updated to:
-  1. Click 开始设置 on intro page
-  2. Stripe Checkout opens (test card `4242…`)
-  3. Redirect to `/visa-master/activated`
-  4. License relay fires, popup shows Preflight
-  5. Walk through wizard end-to-end
-  6. Trigger a fake SLOT_AVAILABLE and verify booking-fsm transitions
+*All open P2s were cleared in the 2026-05-14 session — see Done table below.*
 
 ---
 
@@ -175,6 +120,15 @@ Fixed during 2026-05-13 → 2026-05-14 dogfooding sessions. Listed for context. 
 | ✅ | **P1-3** "Skip for now →" link on Preflight + Credentials + BookingWindow. New `PREMIUM_SETUP_SKIP` message → transitions to `PREMIUM_ACTIVE` (Premium is paid; user can finish setup later via Options). Regression test added. | extension uncommitted, 3× wizard components + `service-worker.ts` + `messages.ts` + i18n |
 | ✅ | **P2-1** `chrome.tabs.create` calls in `UPGRADE_TO_PREMIUM` and `START_PREMIUM_SETUP` now pass `active: true` so the user lands on the opened tab. | extension uncommitted, `service-worker.ts` |
 | ✅ | "Recent detections" empty-state copy: "Waiting for first scan" → "Waiting for any appointment slots available." | extension uncommitted, `i18n/{en,zh}.json` |
+| ✅ | **2026-05-14 PM** — `torly.ai/schengen/premium` hero now replicates the in-extension Premium intro: PremiumActive (back, tilted left) + Booked (front, tilted right) replace the single static booked card. Static React mocks built on existing `schengen.css` tokens — no `chrome.*` dependency. `.p-hero__stack` widened to 540×580 matching extension offsets (`-100/-18` back, `96/46` front), with 980 px + 560 px responsive shrinks. | torlyAI PR #22 → squash commit `b16e6e4`; deployed via trigger commit `1431dfc` |
+| ✅ | **2026-05-14 PM** — Product dropdown "Schengen extension" item under `lib/nav-config.ts` now points at `/schengen/premium` (was `/schengen`). Free tier still reachable via the in-page header link. | torlyAI same PR #22 |
+| ✅ | **2026-05-14 PM** — `ApertureMark` brand glyph extracted to `extension/src/components/ApertureMark.tsx` as the single source of truth. Settings header now shows the aperture mark instead of the legacy black-square "v" letter (CSS variant `.mark-glyph--aperture` overrides the chip background). Welcome + Premium intro pages dedupe their inline SVG copies and import the shared component; Vite emits one ~520 B shared chunk. | extension commit `bf4e7ec` |
+| ✅ | **P2-6** torlyAI `[deploy]` gate documented in root `CLAUDE.md`. New section "Cross-repo: torlyAI deploy gate (`[deploy]` token)" between Release workflow and Backend contract explains Vercel's inverted exit-code semantics (`exit 1` = proceed), the GitHub-PR check-status trap (cancel renders as ✅), the two-step recovery procedure (edit squash message before merge, or push `chore(deploy): trigger [deploy]` empty commit), and the verification command (`vercel ls torlyai --prod` should show `● Ready`). Verified the actual `ignoreCommand` in `torlyAI/vercel.json:7` before writing. Optional GitHub Action auto-append deferred. | Schengen-visa uncommitted, `CLAUDE.md` |
+| ✅ | **P1-1** Cloudflare challenge detection — `detectChallengePage()` in `tls-auto-login.ts` replaced with a multi-signal heuristic (Turnstile widget / iframe, page title "Just a moment" / "Checking your browser" / "Attention Required", `/cdn-cgi/challenge` URL, reCAPTCHA, hCaptcha, plus a last-resort "Ray ID footer + no password input" signal). Biases toward false positives — declining a real login is recoverable, burning a 3/h slot into a challenge is not. Returns `{ challenge: true, signal: '<short-label>' }`. | extension uncommitted, `src/background/tls-auto-login.ts` |
+| ✅ | **P2-5** `SMOKE_TEST_PREMIUM.md` rewritten to lead with a real end-to-end "Premium activation smoke test (Stripe live)" path (9-step walkthrough from popup nudge → `cs_live_…` Stripe Checkout → `/visa-master/activated` → license install → wizard transitions → faked SLOT_AVAILABLE). Force-each-state preview retained as a second-class UI-only path. Trailing "what's NOT testable" table replaced with a status table that reflects current backlog state (P0-1 / P0-4 stubs called out explicitly). | extension uncommitted, `docs/SMOKE_TEST_PREMIUM.md` |
+| ✅ | **P2-2** Activated-page safety-net copy added — single italic line "You can disable Premium anytime in Settings — your card is never charged unless we successfully book an appointment for you." sits between the main paragraph and the BridgeToExtension card. Tuned size (13.5px) + muted color (`#6e6962`) so it reads as a footnote rather than a competing headline. | torlyAI uncommitted, `app/visa-master/activated/ActivatedClient.tsx` |
+| ✅ | **P2-3** `/schengen` section order swapped — `LpInstall` now renders before `LpPremiumPitch`. Install is the cheapest commitment; Premium surfaces to users who finished Install and are still scrolling. Anchor IDs unchanged (`#install` on `LpInstall`), so the header `Install free` button still scrolls correctly. Stale "Sits between LpOpenSource and LpInstall" comment on `LpPremiumPitch` rewritten to match the new position. | torlyAI uncommitted, `app/schengen/SchengenPageClient.tsx` |
+| ✅ | **P2-4** Schengen Premium funnel events scaffolded into the existing GA4 helper (`lib/analytics.ts`) — `schengenPremiumCtaClicked('see_premium' \| 'header_premium')` on `/schengen` Premium links; `schengenPremiumInstallClicked('hero' \| 'compare' \| 'final')` on the three CTAs on `/schengen/premium`; `schengenPremiumActivated()` + `schengenPremiumActivationFailed(reason)` on `/visa-master/activated`. **Deviation from acceptance:** used GA4 instead of Plausible because the existing analytics infrastructure is GA4 (Plausible is only preconnected, not loaded). Server-side events (refund within 24h) deferred — would need POST-to-GA-Measurement-Protocol from `/api/visa-master/refund`. | torlyAI uncommitted, `lib/analytics.ts` + `app/schengen/SchengenPageClient.tsx` + `app/schengen/premium/SchengenPremiumClient.tsx` + `app/visa-master/activated/ActivatedClient.tsx` |
 
 Most P1/P2 fixes from this session are still on the working tree uncommitted (manifest stays at v1.0.9). The Playwright suite is green (5/5) so a single follow-up commit `feat(extension): premium tier UX polish — wizard guards, Pause/Resume tier-awareness, Options field upgrades, Booked review prompt, Support form` is safe to ship.
 

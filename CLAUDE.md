@@ -130,6 +130,34 @@ npm run dev                # rebuilds on save; press the reload button on the ex
 
 The "Check for updates" button in Settings calls the GitHub Releases API for the latest tag.
 
+## Cross-repo: torlyAI deploy gate (`[deploy]` token)
+
+When you merge anything in the torlyAI repo that touches `app/api/visa-master/*`, `app/visa-master/*`, `app/schengen/*`, or `lib/visa-master/*`, the change does NOT reach production automatically.
+
+`vercel.json` in torlyAI has an `ignoreCommand` that **cancels every deploy whose commit message lacks the literal token `[deploy]`**:
+
+```jsonc
+"ignoreCommand": "if [[ \"$VERCEL_GIT_COMMIT_MESSAGE\" == *\"[deploy]\"* ]]; then exit 1; else exit 0; fi"
+```
+
+(Vercel exit-code semantics are inverted: `exit 1` = proceed, `exit 0` = skip. The token means "proceed".)
+
+**The trap:** the GitHub PR page shows the Vercel check as ✅ success even when the deploy was skipped, because Vercel reports "Canceled" as a successful skip rather than a failure. PRs #21 and #22 both squash-merged and were silently un-deployed until a follow-up `chore(deploy): trigger [deploy]` empty commit was pushed.
+
+**What to do after merging a cross-repo PR:**
+
+1. Edit the squash-merge commit message in the GitHub PR UI to append `[deploy]` *before* clicking "Confirm squash and merge". The default `feat(...): … (#NN)` line is what Vercel sees, so the token has to live there.
+2. If you forgot (or the merge already happened): push an empty trigger commit on `main`:
+   ```bash
+   cd /Users/Jason-uk/AI/AI_Coding/Repositories/torlyAI
+   git checkout main && git pull
+   git commit --allow-empty -m "chore(deploy): trigger [deploy]"
+   git push
+   ```
+3. Verify by running `vercel ls torlyai --prod | head -5` and confirming the latest entry shows `● Ready` (not `● Canceled`). The merge commit SHA must match the one you just pushed.
+
+**Why the gate exists:** the torlyAI repo holds multiple products (Schengen extension backend, Innovator Founder assistant, WordPress proxy, marketing pages). The gate prevents every typo-fix commit from rebuilding the production app and disturbing in-flight feature work; only intentional `[deploy]`-tagged commits ship.
+
 ## Backend contract with torly.ai (Premium)
 
 When editing **anything** that crosses to the server, also update the backend side in the torlyAI repo and reference both commits. The cross-repo contract surfaces are:
