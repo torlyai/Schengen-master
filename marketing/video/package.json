@@ -1,0 +1,24 @@
+{
+  "name": "visa-master-promo",
+  "version": "1.0.0",
+  "description": "75s Remotion promo for Visa Master Chrome extension",
+  "scripts": {
+    "dev": "remotion studio",
+    "build": "remotion render visa-master-promo out/visa-master-promo.mp4 --codec h264"
+  },
+  "dependencies": {
+    "@fontsource/ibm-plex-mono": "^5.0.0",
+    "@fontsource/ibm-plex-sans": "^5.0.0",
+    "@fontsource/ibm-plex-serif": "^5.0.0",
+    "@remotion/cli": "4.0.290",
+    "@remotion/renderer": "4.0.290",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.290"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.1",
+    "@types/react-dom": "18.3.1",
+    "typescript": "^5.4.0"
+  }
+}

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 96" width="480" height="96">
+  <title>Visa Master — wordmark</title>
+  <g>
+    <circle cx="48" cy="48" r="40" fill="none" stroke="#15140f" stroke-width="4"></circle>
+    <path d="M 48,48 L 88,48 A 40,40 0 0 0 76.28,19.72 Z" fill="#1e6f4a"></path>
+    <circle cx="48" cy="48" r="6" fill="#15140f"></circle>
+  </g>
+  <text x="118" y="58" font-family="IBM Plex Serif, Georgia, serif" font-style="italic" font-weight="500" font-size="44" letter-spacing="-0.8" fill="#15140f">Visa Master</text>
+</svg>
