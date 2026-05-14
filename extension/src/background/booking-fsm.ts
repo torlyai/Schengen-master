@@ -30,6 +30,7 @@ import { transitionTo } from './state-machine';
 import { getLicense } from '../shared/license';
 import { captureBooking, requestRefund } from './backend-client';
 import { getTarget } from '../shared/storage';
+import { triggerEmail } from './email';
 import {
   notifyBookingConfirmed,
   notifyBookingFailed,
@@ -321,6 +322,12 @@ export async function handleBookingConfirmed(args: {
       centre: active.centre ?? null,
       reason: `Stripe charge failed: ${result.error}`,
     }).catch(() => { /* fire-and-forget */ });
+    triggerEmail('vm_booking_failed', {
+      centre: active.centre ?? '',
+      slotAtIso: active.slotAt ?? new Date().toISOString(),
+      bookingFailedReason: `Stripe charge failed: ${result.error}`,
+      startedAtEpochSeconds: Math.floor(active.startedAt / 1000),
+    }).catch(() => { /* silent */ });
     return { ok: false, reason: result.error };
   }
 
@@ -358,6 +365,22 @@ export async function handleBookingConfirmed(args: {
     currency: result.data.currency,
   }).catch(() => { /* fire-and-forget */ });
 
+  // Email — PRD 14 §7.1, booking-lifecycle category (default ON).
+  // Backend resolves the recipient from vm_installs.stripe_email; the
+  // extension never sends the email address itself per §14.1.
+  // Idempotency key on the backend side is the bookingId, so a retry
+  // of handleBookingConfirmed with the same booking won't double-email.
+  triggerEmail('vm_booking_confirmed', {
+    centre: active.centre ?? '',
+    subjectCode: '',  // not currently tracked in ActiveBooking; backend renders empty
+    country: '',
+    slotAtIso: active.slotAt ?? new Date().toISOString(),
+    bookingId,
+    amountPence: result.data.amountPence,
+    currency: result.data.currency,
+    chargedAtIso: result.data.capturedAt ?? new Date().toISOString(),
+  }).catch(() => { /* silent — Telegram + desktop already covered the urgent path */ });
+
   return { ok: true, bookingDbId: result.data.bookingDbId };
 }
 
@@ -384,6 +407,13 @@ export async function handleBookingTimeout(): Promise<void> {
     centre: active.centre ?? null,
     reason: 'timeout_60s',
   }).catch(() => { /* fire-and-forget */ });
+  triggerEmail('vm_booking_failed', {
+    centre: active.centre ?? '',
+    slotAtIso: active.slotAt ?? new Date().toISOString(),
+    bookingFailedReason: 'Timed out after 60 seconds — slot was likely taken before we could confirm.',
+    bookingFailedDurationSeconds: 60,
+    startedAtEpochSeconds: Math.floor(active.startedAt / 1000),
+  }).catch(() => { /* silent */ });
 }
 
 /**
@@ -427,5 +457,11 @@ export async function refundActiveBooking(reason: string): Promise<
     amountPence: result.data.amountPence,
     currency: 'gbp',
   }).catch(() => { /* fire-and-forget */ });
+  triggerEmail('vm_refund_issued', {
+    stripeRefundId: result.data.refundId,
+    amountPence: result.data.amountPence,
+    currency: 'gbp',
+    refundIssuedAtIso: new Date().toISOString(),
+  }).catch(() => { /* silent */ });
   return { ok: true, refundId: result.data.refundId };
 }

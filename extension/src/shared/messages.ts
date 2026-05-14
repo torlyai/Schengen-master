@@ -107,6 +107,7 @@ export type Msg =
   | { type: 'UPDATE_SETTINGS'; patch: Partial<SettingsPayload> }
   | { type: 'TEST_TELEGRAM' }
   | { type: 'TEST_WEBHOOK' }
+  | { type: 'TEST_EMAIL' }
   | { type: 'CHECK_UPDATE' }
   // From content script
   | { type: 'DETECTION_RESULT'; state: ExtState; evidence: string[]; url: string }
