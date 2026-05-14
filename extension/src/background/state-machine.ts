@@ -280,13 +280,14 @@ export async function transitionTo(next: ExtState, ctx: TransitionCtx = {}): Pro
     }).catch(() => { /* fire-and-forget */ });
   }
 
-  // PRD 14 §6 row 10 — WRONG_PAGE rising edge. Telegram-only by default
-  // (desktop ping is opt-in per coverage matrix — desktop only fires if
-  // notifDesktop is on AND user navigates the popup). We surface both so
-  // the existing notifDesktop master toggle still gates desktop.
+  // PRD 14 §6 row 10 — WRONG_PAGE rising edge. Telegram-only + webhook;
+  // no desktop ping. The user is logged in to TLS and just needs to
+  // navigate to the booking page — that's a popup-CTA-worthy event, not
+  // a desktop-notification-worthy event. Honouring the coverage matrix
+  // (desktop = −) prevents WRONG_PAGE from training users to dismiss
+  // legitimate higher-severity desktop pings.
   if (next === 'WRONG_PAGE' && prev !== 'WRONG_PAGE' && !ctx.skipNotify) {
     const target = await getTarget();
-    notify('WRONG_PAGE', target?.centre ?? null).catch(() => {});
     tgWrongPage(target).catch(() => { /* silent */ });
     notifyWebhook('wrong_page', {
       centre: target?.centre ?? null,

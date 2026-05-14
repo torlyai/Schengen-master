@@ -179,7 +179,7 @@ Base URL: `https://torly.ai/api/visa-master`. Override at build time with `VITE_
 
 - `src/shared/states.ts` — `ExtState` is the discriminator everywhere. Adding a variant requires updating `badge.ts` config + `popup.tsx` router + `service-worker.ts` switches. The compiler will tell you what's missing.
 - `src/shared/messages.ts` — `Msg` is the SW ↔ UI ↔ content bus. Same exhaustiveness rule.
-- `src/shared/storage.ts` — the keys (`settings`, `state`, `target`, `stats`, `bookingWindow`, `tlsCreds`, `installSalt`, `vmLicense`, `vmInstallId`) are read by multiple contexts. Renaming any breaks installed users on upgrade. Add new keys instead of repurposing.
+- `src/shared/storage.ts` — the keys (`settings`, `state`, `target`, `stats`, `bookingWindow`, `tlsCreds`, `installSalt`, `vmLicense`, `installId`, `webhookInstallId`) are read by multiple contexts. Renaming any breaks installed users on upgrade. Add new keys instead of repurposing. Note: `installId` is the Premium-tier identifier disclosed to torly.ai; `webhookInstallId` is a SEPARATE anonymous UUID used only by the BYO webhook channel so Free users enabling webhook never reveal an identifier we can correlate with anything else.
 - `manifest.json` host permissions — the only domains we touch are `*.tlscontact.com` and `torly.ai`. Don't add a third without updating PRD §11 and the welcome i18n promise list.
 
 ## Known open items (tracked in PRD §17)

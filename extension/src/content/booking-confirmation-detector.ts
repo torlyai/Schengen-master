@@ -18,6 +18,18 @@
 //   - bookingId  (TLS confirmation reference, e.g. TLS-MAN-26445690-0042)
 //   - slotAt     (the booked appointment date/time, ISO 8601)
 //   - centre     (TLS centre display name — best-effort, may be null)
+//
+// PRD 14 OQ-3 resolution (idempotency robustness): the SW falls back to
+// `synthetic-${installId}-${startedAt}` when bookingId scraping returns
+// null (see booking-fsm.ts handleBookingConfirmed). That synthetic key
+// is deterministic per booking ATTEMPT (one ActiveBooking row, one
+// startedAt timestamp), so even on a retry where the scrape still fails
+// the dedupe key is stable. The risk path "same booking rescraped with
+// DIFFERENT partial results across retries" is mitigated by the page
+// being a stable static confirmation render — the same regex on the
+// same DOM yields the same match every time. Future maintainers should
+// not "improve" the scraper to be more permissive without considering
+// whether they're degrading this idempotency property.
 
 /**
  * URL patterns that indicate the TLS post-booking confirmation page.
