@@ -19,7 +19,7 @@ import {
 } from '../shared/storage';
 import { parseTlsUrl } from '../shared/target';
 import { setBadgeForState } from './badge';
-import { notify, clearNotification } from './notifications';
+import { notify, clearNotification, notifyAutoStopDesktop } from './notifications';
 import {
   schedule,
   clear as clearSchedule,
@@ -33,6 +33,9 @@ import {
   notifyBlocker as tgBlocker,
   notifyMonitoringStart as tgMonStart,
   notifyMonitoringPaused as tgMonPaused,
+  notifyUnknown as tgUnknown,
+  notifyWrongPage as tgWrongPage,
+  notifyAutoStop as tgAutoStop,
 } from './telegram';
 import { notifyWebhook } from './webhook';
 import { maybeAutoLoginToTls } from './tls-auto-login';
@@ -226,31 +229,14 @@ export async function transitionTo(next: ExtState, ctx: TransitionCtx = {}): Pro
     });
   }
 
-  // UNKNOWN — needs user classification (PRD §6 row 9).
-  if (next === 'UNKNOWN' && prev !== 'UNKNOWN') {
-    const target = await getTarget();
-    notifyWebhook('unknown_page', {
-      centre: target?.centre ?? null,
-      subjectCode: target?.subjectCode ?? null,
-      country: target?.country ?? null,
-    }).catch(() => { /* fire-and-forget */ });
-  }
-
-  // WRONG_PAGE — logged in but on a non-workflow sub-page (PRD §6 row 10).
-  if (next === 'WRONG_PAGE' && prev !== 'WRONG_PAGE') {
-    const target = await getTarget();
-    notifyWebhook('wrong_page', {
-      centre: target?.centre ?? null,
-      subjectCode: target?.subjectCode ?? null,
-      country: target?.country ?? null,
-    }).catch(() => { /* fire-and-forget */ });
-  }
-
-  // Monitoring started/resumed — fire on any rising edge into NO_SLOTS from
-  // a non-monitoring precursor. skipNotify suppresses user-driven paths
-  // (ackSlot, classifyUnknown) where the user is already at the laptop.
+  // Monitoring started/resumed — fire on any rising edge into NO_SLOTS or
+  // PREMIUM_ACTIVE from a non-monitoring precursor. skipNotify suppresses
+  // user-driven paths (ackSlot, classifyUnknown) where the user is
+  // already at the laptop.
+  // PRD 14 §6 row 18: closes the Premium-side gap where resume from
+  // PAUSED/CLOUDFLARE/LOGGED_OUT into PREMIUM_ACTIVE never pinged.
   if (
-    next === 'NO_SLOTS' &&
+    (next === 'NO_SLOTS' || next === 'PREMIUM_ACTIVE') &&
     !ctx.skipNotify &&
     (prev === 'IDLE' ||
       prev === 'PAUSED' ||
@@ -274,6 +260,35 @@ export async function transitionTo(next: ExtState, ctx: TransitionCtx = {}): Pro
     const target = await getTarget();
     tgMonPaused(target).catch(() => { /* silent */ });
     notifyWebhook('monitoring_paused', {
+      centre: target?.centre ?? null,
+      subjectCode: target?.subjectCode ?? null,
+      country: target?.country ?? null,
+    }).catch(() => { /* fire-and-forget */ });
+  }
+
+  // PRD 14 §6 row 9 — UNKNOWN rising edge. Desktop + Telegram (both opt-in
+  // / default-off respectively). Without this, an away-from-laptop user
+  // never knows the page stopped classifying and polling was suspended.
+  if (next === 'UNKNOWN' && prev !== 'UNKNOWN' && !ctx.skipNotify) {
+    const target = await getTarget();
+    notify('UNKNOWN', target?.centre ?? null).catch(() => {});
+    tgUnknown(target).catch(() => { /* silent */ });
+    notifyWebhook('unknown_page', {
+      centre: target?.centre ?? null,
+      subjectCode: target?.subjectCode ?? null,
+      country: target?.country ?? null,
+    }).catch(() => { /* fire-and-forget */ });
+  }
+
+  // PRD 14 §6 row 10 — WRONG_PAGE rising edge. Telegram-only by default
+  // (desktop ping is opt-in per coverage matrix — desktop only fires if
+  // notifDesktop is on AND user navigates the popup). We surface both so
+  // the existing notifDesktop master toggle still gates desktop.
+  if (next === 'WRONG_PAGE' && prev !== 'WRONG_PAGE' && !ctx.skipNotify) {
+    const target = await getTarget();
+    notify('WRONG_PAGE', target?.centre ?? null).catch(() => {});
+    tgWrongPage(target).catch(() => { /* silent */ });
+    notifyWebhook('wrong_page', {
       centre: target?.centre ?? null,
       subjectCode: target?.subjectCode ?? null,
       country: target?.country ?? null,
@@ -363,15 +378,21 @@ export async function classifyUnknown(resolution: ExtState): Promise<void> {
 /**
  * Called from chrome.alarms.onAlarm when AUTOSTOP_ALARM fires.
  * If we're still stuck in CLOUDFLARE / LOGGED_OUT after 15 min, fall to IDLE.
+ *
+ * PRD 14 §2.1 / §6 row 12 — also surface a desktop + Telegram ping so
+ * the away-from-laptop user knows the watchdog gave up. Without these
+ * the user thinks monitoring is running when it isn't (silent failure).
  */
 export async function onAutoStopTick(): Promise<void> {
   const persisted = await getState();
   if (persisted.state === 'CLOUDFLARE' || persisted.state === 'LOGGED_OUT') {
-    const reason = persisted.state;
+    const blockerKind = persisted.state;
     const target = await getTarget();
     await transitionTo('IDLE');
+    notifyAutoStopDesktop(blockerKind, target?.centre ?? null).catch(() => {});
+    tgAutoStop(blockerKind, target).catch(() => { /* silent */ });
     notifyWebhook('auto_stop', {
-      reason,
+      reason: blockerKind,
       centre: target?.centre ?? null,
       subjectCode: target?.subjectCode ?? null,
       country: target?.country ?? null,

@@ -316,6 +316,222 @@ export async function notifyRefundIssued(args: {
   await postSendMessage(s.telegramBotToken, s.telegramChatId, text);
 }
 
+// ──────────────────────────────────────────────────────────
+// PRD 14 — N-1 Telegram coverage gap-fill
+// Eight new events covering previously-silent state changes.
+// Each is gated on telegramEnabled AND its specific per-event toggle
+// (per PRD §10.2 hybrid-defaults). All functions follow the
+// "never throw" / MarkdownV2-escape contract above.
+// ──────────────────────────────────────────────────────────
+
+/**
+ * UNKNOWN rising edge — content script could not classify the page.
+ * Gated on telegramOnUnknown (default OFF; PRD 14 §10.2 — chatty event).
+ */
+export async function notifyUnknown(target: PersistedTarget | null): Promise<void> {
+  const s = await getSettings();
+  if (!s.telegramEnabled || !s.telegramOnUnknown) return;
+  if (!tokenLooksValid(s.telegramBotToken) || !chatIdLooksValid(s.telegramChatId)) return;
+
+  const centre = mdEscape(target?.centre ?? 'TLScontact');
+  const time = mdEscape(formatLocalTime());
+  const text = [
+    `🤔 *Page needs classification* — ${centre}`,
+    `_${time}_`,
+    '',
+    `Open Visa Master to classify\\.`,
+  ].join('\n');
+
+  await postSendMessage(s.telegramBotToken, s.telegramChatId, text);
+}
+
+/**
+ * WRONG_PAGE rising edge — user is logged in but viewing a non-booking
+ * sub-page (e.g. /travel-groups, /applications, /profile).
+ * Gated on telegramOnWrongPage (default OFF; PRD 14 §10.2).
+ */
+export async function notifyWrongPage(target: PersistedTarget | null): Promise<void> {
+  const s = await getSettings();
+  if (!s.telegramEnabled || !s.telegramOnWrongPage) return;
+  if (!tokenLooksValid(s.telegramBotToken) || !chatIdLooksValid(s.telegramChatId)) return;
+
+  const centre = mdEscape(target?.centre ?? 'TLScontact');
+  const time = mdEscape(formatLocalTime());
+  const text = [
+    `📍 *Wrong page* — ${centre}`,
+    `_${time}_`,
+    '',
+    `Open the booking workflow page\\.`,
+  ].join('\n');
+
+  await postSendMessage(s.telegramBotToken, s.telegramChatId, text);
+}
+
+/**
+ * Auto-stop watchdog: 15 min of unresolved CLOUDFLARE / LOGGED_OUT has
+ * lapsed and the FSM has transitioned to IDLE. Closing the silent gap
+ * surfaced by PRD 14 §2.1.
+ * Gated on telegramAutoStop (default ON — real failure, opt-out).
+ */
+export async function notifyAutoStop(
+  blockerKind: 'CLOUDFLARE' | 'LOGGED_OUT',
+  target: PersistedTarget | null,
+): Promise<void> {
+  const s = await getSettings();
+  if (!s.telegramEnabled || !s.telegramAutoStop) return;
+  if (!tokenLooksValid(s.telegramBotToken) || !chatIdLooksValid(s.telegramChatId)) return;
+
+  const centre = mdEscape(target?.centre ?? 'TLScontact');
+  const blocker = mdEscape(blockerKind === 'CLOUDFLARE' ? 'Cloudflare' : 'logged-out');
+  const time = mdEscape(formatLocalTime());
+  const text = [
+    `🛑 *Monitoring stopped* — ${centre}`,
+    `_${time}_`,
+    '',
+    `${blocker} unresolved for 15 min\\.`,
+    `Open Visa Master to resume\\.`,
+  ].join('\n');
+
+  await postSendMessage(s.telegramBotToken, s.telegramChatId, text);
+}
+
+/**
+ * Premium booking attempt mid-flight. Gives Premium users heads-up
+ * that a £19 charge may follow.
+ * Gated on telegramBookingInProgress (default OFF — chatty; PRD 14 §10.2).
+ */
+export async function notifyBookingInProgress(
+  target: PersistedTarget | null,
+  step: 1 | 2 | 3,
+): Promise<void> {
+  const s = await getSettings();
+  if (!s.telegramEnabled || !s.telegramBookingInProgress) return;
+  if (!tokenLooksValid(s.telegramBotToken) || !chatIdLooksValid(s.telegramChatId)) return;
+
+  const centre = mdEscape(target?.centre ?? 'TLScontact');
+  const time = mdEscape(formatLocalTime());
+  const text = [
+    `⏳ *Booking in progress* — ${centre}`,
+    `Step ${step}/3 · _${time}_`,
+  ].join('\n');
+
+  await postSendMessage(s.telegramBotToken, s.telegramChatId, text);
+}
+
+/**
+ * Refund-prompt: TLS voided the slot inside the 24h refund window.
+ * User must act in the popup to claim the £19 back.
+ * Gated on telegramRefundPrompt (default ON — high-value event).
+ */
+export async function notifyRefundPrompt(args: {
+  centre: string | null;
+  slotAtIso: string | null;
+  refundDeadlineIso: string;
+}): Promise<void> {
+  const s = await getSettings();
+  if (!s.telegramEnabled || !s.telegramRefundPrompt) return;
+  if (!tokenLooksValid(s.telegramBotToken) || !chatIdLooksValid(s.telegramChatId)) return;
+
+  const centre = mdEscape(args.centre ?? 'TLScontact');
+  const slotLine = args.slotAtIso
+    ? mdEscape(
+        new Date(args.slotAtIso).toLocaleString('en-GB', {
+          dateStyle: 'medium',
+          timeStyle: 'short',
+        }),
+      )
+    : null;
+  let deadlineDisplay = args.refundDeadlineIso;
+  try {
+    deadlineDisplay = new Date(args.refundDeadlineIso).toLocaleString('en-GB', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    });
+  } catch {
+    /* fall back to ISO string */
+  }
+  const deadline = mdEscape(deadlineDisplay);
+
+  const text = [
+    `⚠️ *TLS cancelled your slot* — ${centre}`,
+    slotLine ? `Slot was: ${slotLine}` : '',
+    '',
+    `Request refund in the popup\\.`,
+    `Refund window closes ${deadline}\\.`,
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  await postSendMessage(s.telegramBotToken, s.telegramChatId, text);
+}
+
+/**
+ * License approaching expiry. Backend cron drives this.
+ * Gated on telegramLicenseEvents (default ON).
+ */
+export async function notifyLicenseExpiring(args: {
+  daysRemaining: number;
+}): Promise<void> {
+  const s = await getSettings();
+  if (!s.telegramEnabled || !s.telegramLicenseEvents) return;
+  if (!tokenLooksValid(s.telegramBotToken) || !chatIdLooksValid(s.telegramChatId)) return;
+
+  const days = mdEscape(String(args.daysRemaining));
+  const time = mdEscape(formatLocalTime());
+  const text = [
+    `🔑 *Premium licence expiring*`,
+    `Expires in ${days} days\\. _${time}_`,
+  ].join('\n');
+
+  await postSendMessage(s.telegramBotToken, s.telegramChatId, text);
+}
+
+/**
+ * License deactivated on this install — typically because the customer
+ * rebound to another browser. Gated on telegramLicenseEvents (default ON).
+ */
+export async function notifyLicenseDeactivated(): Promise<void> {
+  const s = await getSettings();
+  if (!s.telegramEnabled || !s.telegramLicenseEvents) return;
+  if (!tokenLooksValid(s.telegramBotToken) || !chatIdLooksValid(s.telegramChatId)) return;
+
+  const time = mdEscape(formatLocalTime());
+  const text = [
+    `🔓 *Premium licence deactivated*`,
+    `_${time}_`,
+    '',
+    `This install was rebound to another browser\\.`,
+  ].join('\n');
+
+  await postSendMessage(s.telegramBotToken, s.telegramChatId, text);
+}
+
+/**
+ * Auto-login disabled — fail-count exceeded / cooldown active. Premium
+ * users need to re-enter their TLS password in the popup.
+ * Gated on telegramAutoLoginIssues (default ON — real failure).
+ */
+export async function notifyAutoLoginDisabled(args: {
+  reason: string;
+}): Promise<void> {
+  const s = await getSettings();
+  if (!s.telegramEnabled || !s.telegramAutoLoginIssues) return;
+  if (!tokenLooksValid(s.telegramBotToken) || !chatIdLooksValid(s.telegramChatId)) return;
+
+  const reason = mdEscape(args.reason);
+  const time = mdEscape(formatLocalTime());
+  const text = [
+    `🔒 *Auto-login paused*`,
+    `_${time}_`,
+    '',
+    `${reason}`,
+    '',
+    `Re-enter your TLS password in the popup to resume\\.`,
+  ].join('\n');
+
+  await postSendMessage(s.telegramBotToken, s.telegramChatId, text);
+}
+
 /** Send a probe message. Returns { ok, error? } the UI can render directly. */
 export async function testConnection(): Promise<SendResult> {
   const s = await getSettings();

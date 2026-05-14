@@ -63,6 +63,15 @@ export const DEFAULT_SETTINGS: SettingsPayload = {
   telegramAlsoBlockers: false,
   telegramMonitoringStart: false,
   monthCyclingEnabled: false,
+  // PRD 14 §10.2 — Telegram coverage gap-fill (hybrid defaults)
+  telegramOnUnknown: false,
+  telegramOnWrongPage: false,
+  telegramAutoStop: true,
+  telegramDailySummary: false,
+  telegramBookingInProgress: false,
+  telegramRefundPrompt: true,
+  telegramLicenseEvents: true,
+  telegramAutoLoginIssues: true,
   // PRD 14 §7.9 — BYO Webhook channel (both tiers)
   webhookEnabled: false,
   webhookUrl: '',

@@ -36,8 +36,60 @@ function contentFor(state: ExtState, centre: string | null): NotifContent {
         title: 'Visa Master',
         message: 'TLScontact session expired\nLog back in to resume monitoring',
       };
+    // PRD 14 §6 coverage matrix rows 9, 10 — desktop pings for previously
+    // popup-only states. Body text intentionally short.
+    case 'UNKNOWN':
+      return {
+        title: 'Visa Master',
+        message: `Page needs classification — ${c}\nClick to open Visa Master`,
+      };
+    case 'WRONG_PAGE':
+      return {
+        title: 'Visa Master',
+        message: `Wrong page — ${c}\nOpen the booking workflow page`,
+      };
     default:
       return { title: 'Visa Master', message: 'Status update' };
+  }
+}
+
+/**
+ * PRD 14 §6 row 12 — auto-stop watchdog desktop ping. Separate from
+ * contentFor() because the source state is IDLE by the time we fire,
+ * but the user needs to know *why* monitoring stopped (CLOUDFLARE /
+ * LOGGED_OUT timed out at 15 min).
+ */
+export async function notifyAutoStopDesktop(
+  blockerKind: 'CLOUDFLARE' | 'LOGGED_OUT',
+  centre: string | null,
+): Promise<void> {
+  const settings = await getSettings();
+  if (!settings.notifDesktop) return;
+
+  const c = centre ?? 'your centre';
+  const reason = blockerKind === 'CLOUDFLARE' ? 'Cloudflare' : 'logged-out';
+  const id = `${NOTIF_ID_PREFIX}AUTO_STOP`;
+
+  try {
+    await chrome.notifications.create(id, {
+      type: 'basic',
+      iconUrl: ICON_URL,
+      title: 'Visa Master',
+      message: `Monitoring stopped — ${c}\n${reason} unresolved for 15 min`,
+      priority: 1,
+      silent: true,
+    });
+  } catch {
+    try {
+      await chrome.notifications.create(id, {
+        type: 'basic',
+        iconUrl: ICON_URL,
+        title: 'Visa Master',
+        message: `Monitoring stopped — ${c}`,
+      });
+    } catch {
+      /* ignore */
+    }
   }
 }
 

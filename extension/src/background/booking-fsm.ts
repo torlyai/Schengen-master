@@ -29,10 +29,13 @@ import type { StatusPayload } from '../shared/messages';
 import { transitionTo } from './state-machine';
 import { getLicense } from '../shared/license';
 import { captureBooking, requestRefund } from './backend-client';
+import { getTarget } from '../shared/storage';
 import {
   notifyBookingConfirmed,
   notifyBookingFailed,
   notifyRefundIssued,
+  notifyBookingInProgress,
+  notifyRefundPrompt,
 } from './telegram';
 import { notifyWebhook } from './webhook';
 
@@ -165,14 +168,18 @@ async function beginBooking(slotAt: string | null): Promise<void> {
   await setActiveBooking(active);
   await transitionTo('PREMIUM_BOOKING_IN_PROGRESS', {});
 
-  // Webhook — PRD 14 §6 row 19. Telegram booking-in-progress is gated
-  // behind a separate opt-in (chatty); webhook uses the booking class
-  // toggle, which defaults ON. Receivers that don't want this event
-  // can drop it server-side.
+  // PRD 14 §6 row 19 — Telegram heads-up that a £19-charge attempt is
+  // in flight. Gated on telegramBookingInProgress (default OFF — chatty).
+  // Webhook is gated on the booking class toggle (default ON).
+  const target = await getTarget();
+  notifyBookingInProgress(target, 1).catch(() => {
+    /* silent — Telegram is opt-in and best-effort */
+  });
   notifyWebhook('booking_in_progress', {
     slotAtIso: slotAt,
     startedAtIso: new Date(active.startedAt).toISOString(),
   }).catch(() => { /* fire-and-forget */ });
+
 
   // Kick off the DOM-driving alarm. The content script is responsible
   // for clicking through the booking form steps. PRD §14: "Premium
@@ -185,6 +192,27 @@ async function beginBooking(slotAt: string | null): Promise<void> {
   // then, fail the attempt cleanly with no charge.
   await chrome.alarms.create('VM_BOOKING_TIMEOUT', {
     delayInMinutes: BOOKING_BUDGET_MS / 60_000,
+  });
+}
+
+/**
+ * PRD 14 §6 row 22 — TLS voided the slot inside the 24h refund window
+ * and the backend's auto-refund cron has notified the install. Drives
+ * the popup to PREMIUM_REFUND_PROMPT and fires Telegram (gated on
+ * telegramRefundPrompt, default ON).
+ *
+ * TODO: backend cron will invoke this via a new BACKEND_REFUND_PROMPT
+ * message routed through the SW. For now this is the helper any future
+ * wire-up should call; nothing in the FSM triggers it automatically.
+ */
+export async function triggerRefundPrompt(args: {
+  centre: string | null;
+  slotAtIso: string | null;
+  refundDeadlineIso: string;
+}): Promise<void> {
+  await transitionTo('PREMIUM_REFUND_PROMPT', {});
+  notifyRefundPrompt(args).catch(() => {
+    /* silent */
   });
 }
 

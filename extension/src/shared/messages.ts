@@ -66,6 +66,15 @@ export interface SettingsPayload {
   // page's default. Off by default to preserve the passive, scanner-only
   // posture; see src/content/month-cycler.ts for the policy.
   monthCyclingEnabled: boolean;
+  // PRD 14 §10.2 — Telegram coverage gap-fill
+  telegramOnUnknown: boolean;
+  telegramOnWrongPage: boolean;
+  telegramAutoStop: boolean;
+  telegramDailySummary: boolean;
+  telegramBookingInProgress: boolean;
+  telegramRefundPrompt: boolean;
+  telegramLicenseEvents: boolean;
+  telegramAutoLoginIssues: boolean;
   // PRD 14 §7.9 — BYO Webhook channel (both tiers)
   webhookEnabled: boolean;
   webhookUrl: string;
