@@ -44,7 +44,27 @@ export const test = base.extend<{
     });
 
     await use(context);
-    await context.close();
+
+    // Inspection mode — keep the browser open after the test finishes so
+    // the user can poke around in the extension. Triggered by running:
+    //   KEEP_BROWSER=1 npm run test:e2e
+    // or via the dedicated `npm run test:e2e:keep` shortcut.
+    // The promise resolves when the user closes the Chromium window
+    // manually (last tab close fires the BrowserContext 'close' event).
+    if (process.env.KEEP_BROWSER === '1') {
+      // eslint-disable-next-line no-console
+      console.log(
+        '\n[KEEP_BROWSER=1] Test finished. Browser left open for inspection.\n' +
+          '                 Close the Chromium window to end the run.\n',
+      );
+      await new Promise<void>((resolve) => {
+        context.once('close', () => resolve());
+      });
+    }
+
+    await context.close().catch(() => {
+      /* may already be closed if KEEP_BROWSER user closed it manually */
+    });
     fs.rmSync(userDataDir, { recursive: true, force: true });
   },
 

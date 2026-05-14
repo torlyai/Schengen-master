@@ -7,7 +7,11 @@ import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests/specs',
-  timeout: 30_000,
+  // Disable the per-test timeout in KEEP_BROWSER mode — the fixture's
+  // inspection pause is intentionally indefinite (resolves on window close).
+  // Otherwise Playwright would kill the fixture teardown at 30s and report
+  // "Tearing down context exceeded the test timeout".
+  timeout: process.env.KEEP_BROWSER === '1' ? 0 : 30_000,
   expect: { timeout: 8_000 },
 
   // Extension + chrome.storage.local are shared state — keep serial

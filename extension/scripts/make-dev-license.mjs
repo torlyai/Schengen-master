@@ -70,14 +70,76 @@ const clearSnippet = `(async () => {
   console.log('cleared — restart popup');
 })();`;
 
+// --mode picks what to print so output is *only* paste-ready JS for
+// the install/uninstall paths. Default (`--mode info`) prints all three
+// sections with prose headers — friendly for first-time read, but the
+// prose itself is not valid JS, so pasting the whole transcript fails.
+// Use `--mode install | --copy` to get exactly one paste-safe block.
+const mode = argMap.mode ?? 'info';
+const copyToClipboard = args.includes('--copy');
+
+async function maybeCopy(payload) {
+  if (!copyToClipboard) return false;
+  // macOS: pbcopy. Linux: xclip/xsel. Windows: clip. Use whichever is on PATH.
+  const { spawn } = await import('node:child_process');
+  const candidates = [
+    ['pbcopy', []],
+    ['xclip', ['-selection', 'clipboard']],
+    ['xsel', ['--clipboard', '--input']],
+    ['clip', []],
+  ];
+  for (const [cmd, cmdArgs] of candidates) {
+    try {
+      await new Promise((resolve, reject) => {
+        const p = spawn(cmd, cmdArgs, { stdio: ['pipe', 'ignore', 'ignore'] });
+        p.on('error', reject);
+        p.on('exit', (code) => (code === 0 ? resolve() : reject(new Error(`${cmd} exited ${code}`))));
+        p.stdin.end(payload);
+      });
+      return true;
+    } catch {
+      /* try next clipboard tool */
+    }
+  }
+  return false;
+}
+
+const blocks = {
+  install: snippet,
+  uninstall: clearSnippet,
+  jwt: jwt,
+};
+
+if (mode === 'install' || mode === 'uninstall' || mode === 'jwt') {
+  const out = blocks[mode];
+  if (await maybeCopy(out)) {
+    console.error(`✓ ${mode} payload copied to clipboard (${out.length} chars)`);
+  } else if (copyToClipboard) {
+    console.error('⚠ no clipboard tool found (tried pbcopy/xclip/xsel/clip) — printing instead');
+    process.stdout.write(out);
+  } else {
+    process.stdout.write(out);
+  }
+  process.exit(0);
+}
+
 console.log('────────────────────────────────────────────────────────────');
 console.log(`Minted ${tier} JWT — expires in ${hours}h (${new Date(expMs).toISOString()})`);
 console.log(`installId: ${installId}`);
 console.log(`stripe_email: ${email}`);
 console.log('────────────────────────────────────────────────────────────');
-console.log('\nINSTALL — paste into popup DevTools console (right-click popup → Inspect):\n');
+console.log('\nTip: avoid this 3-section dump and just pipe one block to your');
+console.log('clipboard:\n');
+console.log('  node scripts/make-dev-license.mjs --mode install --copy');
+console.log('  node scripts/make-dev-license.mjs --mode uninstall --copy');
+console.log('  node scripts/make-dev-license.mjs --mode jwt --copy');
+console.log('');
+console.log('============ INSTALL (copy ↓↓↓ ONLY these lines ↓↓↓) ============');
 console.log(snippet);
-console.log('\nUNINSTALL — paste into the same console to revert to Free:\n');
+console.log('============ END INSTALL ============\n');
+console.log('============ UNINSTALL (copy ↓↓↓ ONLY these lines ↓↓↓) ============');
 console.log(clearSnippet);
-console.log('\nRaw JWT (for testing /api/visa-master/license/* endpoints):');
+console.log('============ END UNINSTALL ============\n');
+console.log('============ RAW JWT (for /api/visa-master/license/* endpoints) ============');
 console.log(jwt);
+console.log('============ END RAW JWT ============');

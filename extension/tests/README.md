@@ -10,10 +10,14 @@ npm install
 npx playwright install chromium
 
 # Every run
-npm run test:e2e            # builds + runs tests, headed (default)
-npm run test:e2e:ui         # interactive UI mode
-npm run test:e2e:headless   # for CI
+npm run test:e2e                                # builds + runs tests, headed (default)
+npm run test:e2e:ui                             # interactive UI mode
+npm run test:e2e:headless                       # for CI
+npm run test:e2e:keep                           # leaves browser open after suite for inspection
+npm run test:e2e:keep -- --grep "happy path"    # ↑ but only run one test (no browser parade)
 ```
+
+`test:e2e:keep` sets `KEEP_BROWSER=1`. After each test finishes, the fixture pauses on a `context.once('close')` listener — close the Chromium window manually to end the test run. Combine with `--grep "<test name>"` to avoid running every test in sequence with the browser open between each one.
 
 `test:e2e` runs `npm run build` first — tests run against `dist/`, not `src/`, so stale builds will fail in confusing ways.
 

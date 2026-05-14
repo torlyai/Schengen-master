@@ -67,6 +67,59 @@ test.describe('Premium setup wizard', () => {
     await waitForState(popup, 'PREMIUM_PREFLIGHT');
   });
 
+  test('P1-6: wizard states survive out-of-band DETECTION_RESULT (no override)', async ({
+    context,
+    extensionId,
+  }) => {
+    const popup = await openPopup(context, extensionId);
+    await installDevLicense(popup);
+    await waitForState(popup, 'PREMIUM_PREFLIGHT');
+
+    // Simulate a content script on a TLS tab firing DETECTION_RESULT with
+    // LOGGED_OUT — this is exactly the situation that knocked users out
+    // of the wizard during manual testing before the applyDetection guard.
+    await popup.evaluate(() =>
+      chrome.runtime.sendMessage({
+        type: 'DETECTION_RESULT',
+        state: 'LOGGED_OUT',
+        evidence: ['test-injected-detection'],
+        url: 'https://visas-fr.tlscontact.com/workflow/appointment-booking/gbMNC2fr/12345',
+      }),
+    );
+
+    // Give the SW a moment to process. State must still be PREFLIGHT.
+    await popup.waitForTimeout(500);
+    const stateAfter = await readState(popup);
+    expect(stateAfter).toBe('PREMIUM_PREFLIGHT');
+  });
+
+  test('P1-3: SETUP_SKIP from any wizard step lands on PREMIUM_ACTIVE', async ({
+    context,
+    extensionId,
+  }) => {
+    const popup = await openPopup(context, extensionId);
+    await installDevLicense(popup);
+    await waitForState(popup, 'PREMIUM_PREFLIGHT');
+
+    // Skip from PREFLIGHT.
+    await popup.evaluate(() =>
+      chrome.runtime.sendMessage({ type: 'PREMIUM_SETUP_SKIP' }),
+    );
+    await waitForState(popup, 'PREMIUM_ACTIVE');
+
+    // Reset and try again, this time from CREDENTIALS.
+    await popup.evaluate(() =>
+      chrome.runtime.sendMessage({ type: 'PREMIUM_SETUP_RESET' }),
+    );
+    await waitForState(popup, 'PREMIUM_PREFLIGHT');
+    await popup.locator('button.btn--primary.btn--block').first().click();
+    await waitForState(popup, 'PREMIUM_SETUP_CREDENTIALS');
+    await popup.evaluate(() =>
+      chrome.runtime.sendMessage({ type: 'PREMIUM_SETUP_SKIP' }),
+    );
+    await waitForState(popup, 'PREMIUM_ACTIVE');
+  });
+
   test('SETUP_RESET from any wizard step returns to PREFLIGHT', async ({
     context,
     extensionId,
