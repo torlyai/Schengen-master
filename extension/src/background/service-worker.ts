@@ -55,6 +55,7 @@ import { testConnection as testTelegram } from './telegram';
 import { checkForUpdate } from './update-checker';
 import {
   getLicense,
+  getTier,
   clearLicense,
   installLicenseFromJwt,
   getOrCreateInstallId,
@@ -407,35 +408,15 @@ async function handle(msg: Msg): Promise<unknown> {
 
     case 'UPGRADE_TO_PREMIUM': {
       // Free-tier nudge clicked. Open the in-extension Premium intro
-      // page in a new tab. PRD docs/09 §7 / wireframes docs/10 P-17.
+      // page in a new tab and focus it. PRD docs/09 §7 / wireframes
+      // docs/10 P-17.
       const url = chrome.runtime.getURL('src/premium/premium.html');
       try {
-        await chrome.tabs.create({ url });
+        await chrome.tabs.create({ url, active: true });
       } catch {
         /* SW may not have tabs permission on some Chromium variants */
       }
       return { ok: true };
-    }
-
-    case 'PREMIUM_ACTIVATE': {
-      // P-7 "Activate" button. Hit /api/visa-master/checkout to get a
-      // Stripe Checkout session URL, open it in a new tab. After
-      // checkout succeeds, the user lands on
-      // torly.ai/visa-master/activated which posts back to the
-      // extension via the license-relay content script (→ the
-      // PREMIUM_INSTALL_LICENSE case below).
-      const installId = await getOrCreateInstallId();
-      const result = await startCheckout(installId);
-      if (!result.ok) {
-        console.error('[Premium] checkout failed', result);
-        return { ok: false, error: result.error };
-      }
-      try {
-        await chrome.tabs.create({ url: result.data.checkoutUrl });
-      } catch {
-        /* ignore */
-      }
-      return { ok: true, data: { url: result.data.checkoutUrl } };
     }
 
     case 'PREMIUM_INSTALL_LICENSE': {
@@ -484,7 +465,9 @@ async function handle(msg: Msg): Promise<unknown> {
         return { ok: false, error: result.error };
       }
       try {
-        await chrome.tabs.create({ url: result.data.checkoutUrl });
+        // active:true so the user lands on the Stripe tab immediately —
+        // without this they have to hunt for it in the tab bar (P2-1).
+        await chrome.tabs.create({ url: result.data.checkoutUrl, active: true });
       } catch {
         /* SW may not have tabs permission on some Chromium variants */
       }
@@ -493,15 +476,16 @@ async function handle(msg: Msg): Promise<unknown> {
 
     case 'OPEN_PREMIUM_OPTIONS': {
       // Header More button on PREMIUM_ACTIVE → swap to PREMIUM_OPTIONS.
-      // Same transition pattern; the body component handles "Back".
+      // StatusPayload return mirrors the wizard handlers — useStatus.send()
+      // needs a payload-shaped response to re-render the popup.
       await transitionTo('PREMIUM_OPTIONS', {});
-      return { ok: true };
+      return buildStatusPayload();
     }
 
     case 'CLOSE_PREMIUM_OPTIONS': {
       // Body Back link or "Never mind" on RefundPrompt → return to ACTIVE.
       await transitionTo('PREMIUM_ACTIVE', {});
-      return { ok: true };
+      return buildStatusPayload();
     }
 
     case 'PREMIUM_REQUEST_REFUND': {
@@ -524,8 +508,18 @@ async function handle(msg: Msg): Promise<unknown> {
         visaProcessingDays: msg.visaProcessingDays,
         minDaysNotice: msg.minDaysNotice,
         includePrimeTime: msg.includePrimeTime,
+        // groupId is optional on the message because the wizard's step 3
+        // doesn't collect it (that field is surfaced in PremiumOptions
+        // post-setup). Pass through only if the sender supplied it.
+        ...(msg.groupId !== undefined ? { groupId: msg.groupId } : {}),
       });
-      await transitionTo('PREMIUM_SETUP_READY', {});
+      // From the wizard step 3 we should advance to READY. From the
+      // Options page we should stay on OPTIONS — don't ratchet state
+      // backwards into the wizard.
+      const cur = (await getState()).state;
+      if (cur === 'PREMIUM_SETUP_BOOKING_WINDOW') {
+        await transitionTo('PREMIUM_SETUP_READY', {});
+      }
       return buildStatusPayload();
     }
 
@@ -585,6 +579,17 @@ async function handle(msg: Msg): Promise<unknown> {
       return buildStatusPayload();
     }
 
+    case 'PREMIUM_SETUP_SKIP': {
+      // P1-3: user bails out of the wizard. Premium is already paid for
+      // (Stripe Setup Intent ran before the wizard), so we drop them on
+      // PREMIUM_ACTIVE rather than IDLE. They can finish setup later via
+      // PREMIUM_OPTIONS. Auto-login won't work until credentials are
+      // saved; slot-window filtering won't apply until booking window
+      // is set — both degraded but valid.
+      await transitionTo('PREMIUM_ACTIVE', {});
+      return buildStatusPayload();
+    }
+
     default: {
       const exhaustive: never = msg;
       throw new Error(`Unknown message type: ${(exhaustive as { type: string }).type}`);
@@ -595,12 +600,13 @@ async function handle(msg: Msg): Promise<unknown> {
 // ---------- Status payload assembly ----------
 
 async function buildStatusPayload(): Promise<StatusPayload> {
-  const [settings, state, target, stats, bookingWindow] = await Promise.all([
+  const [settings, state, target, stats, bookingWindow, tier] = await Promise.all([
     getSettings(),
     getState(),
     getTarget(),
     getStats(),
     getBookingWindow(),
+    getTier(),
   ]);
 
   // Resolve current cadence minutes (smart mode may differ from settings.cadenceMinutes).
@@ -610,6 +616,7 @@ async function buildStatusPayload(): Promise<StatusPayload> {
 
   return {
     state: state.state,
+    tier,
     lastCheckTs: state.lastCheckTs,
     nextCheckTs: state.nextCheckTs,
     cadenceMin: cadence.minutes,

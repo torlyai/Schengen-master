@@ -5,6 +5,7 @@ import Popup from '../shell/Popup';
 import Footer from '../shell/Footer';
 import { Pause as IcoPause, Refresh } from '../../components/Icons';
 import UpgradeLine from '../../components/premium/UpgradeLine';
+import FirstRunHint from '../../components/FirstRunHint';
 import { useLicense } from '../../hooks/useLicense';
 import type { StatusPayload } from '../../shared/messages';
 import type { Msg } from '../../shared/messages';
@@ -91,6 +92,8 @@ export const Monitoring: React.FC<StateProps> = ({ status, send }) => {
           <Refresh /> {t('popup.monitoring.checkNow')}
         </button>
       </div>
+
+      <FirstRunHint />
 
       {/* PRD §5.2 — quiet upgrade line for Free users only. Premium users
           see PremiumActive (P-11) instead of this state entirely. */}

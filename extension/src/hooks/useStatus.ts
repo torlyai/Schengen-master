@@ -69,6 +69,7 @@ function buildMockStatus(): StatusPayload {
   const state = getMockState();
   return {
     state,
+    tier: 'free',
     lastCheckTs: now - 2 * 60 * 1000,
     nextCheckTs: now + 2 * 60 * 1000 + 14 * 1000,
     cadenceMin: 4,

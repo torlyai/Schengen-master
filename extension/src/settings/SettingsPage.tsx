@@ -8,6 +8,7 @@ import type { SettingsPayload } from '../shared/messages';
 import { sendMessage, useStatus } from '../hooks/useStatus';
 import { LANGUAGES } from '../i18n';
 import { useT, useSyncLang, tInline } from '../i18n/useT';
+import LangToggle from '../components/LangToggle';
 
 // ---------- Update-check helpers ----------
 
@@ -109,15 +110,19 @@ export const SettingsPage: React.FC = () => {
 
   return (
     <div className="page-shell">
+      <div className="settings-main">
       <header className="settings-header">
         <div className="mark">
           <span className="mark-glyph">v</span>
           <h1>{t('settings.title')}</h1>
         </div>
-        <span>Visa Master · v1.0.0</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <LangToggle />
+          <span>Visa Master · v1.0.0</span>
+        </div>
       </header>
 
-      <Section title={t('settings.section.monitoring')}>
+      <Section id="monitoring" title={t('settings.section.monitoring')}>
         <Field label={t('settings.target')}>
           <div className="field__value">
             {status?.target?.centre ?? t('settings.target.none')}{' '}
@@ -142,7 +147,7 @@ export const SettingsPage: React.FC = () => {
         </Field>
       </Section>
 
-      <Section title={t('settings.section.windows')}>
+      <Section id="windows" title={t('settings.section.windows')}>
         <Toggle
           label={t('settings.windows.toggle')}
           on={settings.releaseWindowsEnabled}
@@ -217,7 +222,7 @@ export const SettingsPage: React.FC = () => {
         )}
       </Section>
 
-      <Section title={t('settings.section.detection')}>
+      <Section id="detection" title={t('settings.section.detection')}>
         <Toggle
           label={t('settings.detection.monthCycling')}
           sub={t('settings.detection.monthCyclingSub')}
@@ -226,7 +231,7 @@ export const SettingsPage: React.FC = () => {
         />
       </Section>
 
-      <Section title={t('settings.section.notifications')}>
+      <Section id="notifications" title={t('settings.section.notifications')}>
         <Toggle
           label={t('settings.notif.desktop')}
           on={settings.notifDesktop}
@@ -249,7 +254,7 @@ export const SettingsPage: React.FC = () => {
         />
       </Section>
 
-      <Section title={t('settings.section.telegram')}>
+      <Section id="telegram" title={t('settings.section.telegram')}>
         <Toggle
           label={t('settings.tg.enable')}
           sub={t('settings.tg.enableSub')}
@@ -259,7 +264,7 @@ export const SettingsPage: React.FC = () => {
         {settings.telegramEnabled && <TelegramWizard settings={settings} patch={patch} />}
       </Section>
 
-      <Section title={t('settings.section.language')}>
+      <Section id="language" title={t('settings.section.language')}>
         <Field label={t('settings.lang.ui')}>
           <select
             className="select"
@@ -287,7 +292,7 @@ export const SettingsPage: React.FC = () => {
         <div className="field__hint">{t('settings.lang.note')}</div>
       </Section>
 
-      <Section title={t('settings.section.privacy')}>
+      <Section id="privacy" title={t('settings.section.privacy')}>
         <Toggle
           label={t('settings.privacy.telemetry')}
           sub={t('settings.privacy.telemetrySub')}
@@ -296,7 +301,11 @@ export const SettingsPage: React.FC = () => {
         />
       </Section>
 
-      <Section title={t('settings.section.about')}>
+      <Section id="support" title={t('settings.section.support')}>
+        <SupportSection />
+      </Section>
+
+      <Section id="about" title={t('settings.section.about')}>
         <Field label={t('settings.about.version')}>
           <UpdateCheckRow />
         </Field>
@@ -346,6 +355,8 @@ export const SettingsPage: React.FC = () => {
         </div>
       </Section>
 
+      </div>
+      <SettingsToc />
     </div>
   );
 };
@@ -433,8 +444,23 @@ const UpdateCheckRow: React.FC = () => {
   );
 };
 
-const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
-  <section className="section">
+// Section IDs double as in-page anchor targets for SettingsToc. Stable
+// slugs — change them only if you're willing to break any bookmarks /
+// settings.html#section deep-links shared by users.
+const SECTIONS = [
+  { id: 'monitoring',    labelKey: 'settings.section.monitoring' },
+  { id: 'windows',       labelKey: 'settings.section.windows' },
+  { id: 'detection',     labelKey: 'settings.section.detection' },
+  { id: 'notifications', labelKey: 'settings.section.notifications' },
+  { id: 'telegram',      labelKey: 'settings.section.telegram' },
+  { id: 'language',      labelKey: 'settings.section.language' },
+  { id: 'privacy',       labelKey: 'settings.section.privacy' },
+  { id: 'support',       labelKey: 'settings.section.support' },
+  { id: 'about',         labelKey: 'settings.section.about' },
+] as const;
+
+const Section: React.FC<{ id?: string; title: string; children: React.ReactNode }> = ({ id, title, children }) => (
+  <section id={id} className="section">
     <h2 className="section__h">
       <span className="mark-square" />
       {title}
@@ -442,6 +468,53 @@ const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title
     <div className="section__body">{children}</div>
   </section>
 );
+
+// Sticky right-rail table-of-contents. Uses IntersectionObserver with a
+// thin "active band" near the top of the viewport so exactly one section
+// reads as active while scrolling — picking the topmost intersecting
+// section avoids flicker when adjacent sections both touch the band.
+const SettingsToc: React.FC = () => {
+  const { t } = useT();
+  const [activeId, setActiveId] = useState<string>(SECTIONS[0].id);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (visible[0]) setActiveId(visible[0].target.id);
+      },
+      // Active band = 0%–35% of viewport height. A section is "active"
+      // once its top crosses below the 0% line AND while any part of it
+      // still sits above the 35% line (rootMargin bottom = -65%).
+      { rootMargin: '0px 0px -65% 0px', threshold: 0 },
+    );
+    SECTIONS.forEach((s) => {
+      const el = document.getElementById(s.id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <aside className="settings-toc" aria-label={t('settings.toc.label')}>
+      <div className="settings-toc__label">{t('settings.toc.label')}</div>
+      <ul className="settings-toc__list">
+        {SECTIONS.map((s) => (
+          <li key={s.id}>
+            <a
+              className={`settings-toc__link${activeId === s.id ? ' settings-toc__link--active' : ''}`}
+              href={`#${s.id}`}
+            >
+              {t(s.labelKey)}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </aside>
+  );
+};
 
 const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
   <div className="field">
@@ -1158,6 +1231,161 @@ const CadencePicker: React.FC<{
           </span>
         </span>
       </label>
+    </div>
+  );
+};
+
+// ---------- Support section ----------
+
+const SUPPORT_EMAIL = 'support@torly.ai';
+
+const SupportSection: React.FC = () => {
+  const { t } = useT();
+  const [message, setMessage] = useState('');
+  const [attachDebug, setAttachDebug] = useState(true);
+  const [includeScreenshot, setIncludeScreenshot] = useState(false);
+  const [installId, setInstallId] = useState<string>('—');
+  const [copied, setCopied] = useState(false);
+
+  // Hydrate install ID from chrome.storage.local — same key used by
+  // license.ts:getOrCreateInstallId. Falls back to '—' if unavailable
+  // (e.g. dev preview without chrome.runtime).
+  useEffect(() => {
+    const c: any = (globalThis as any).chrome;
+    c?.storage?.local?.get?.('installId').then((r: { installId?: string }) => {
+      if (r?.installId) setInstallId(r.installId);
+    });
+  }, []);
+
+  const copyInstallId = async () => {
+    try {
+      await navigator.clipboard.writeText(installId);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* clipboard blocked — surface the install ID inline instead */
+    }
+  };
+
+  // Send via mailto: until a backend support endpoint exists. The user's
+  // own mail client handles delivery and stores the sent copy for them
+  // — no server needed today. When a backend ticket endpoint ships,
+  // replace this with a POST to /api/visa-master/support.
+  // Screenshot attachment is deferred until then; the checkbox stays
+  // visible but disabled with an explanatory tooltip.
+  const sendSupport = () => {
+    const debugFooter = attachDebug
+      ? [
+          '',
+          '— Debug info —',
+          `Extension version: ${getCurrentVersion()}`,
+          `Install ID: ${installId}`,
+          `User agent: ${navigator.userAgent}`,
+          `Language: ${navigator.language}`,
+          `Timestamp: ${new Date().toISOString()}`,
+        ].join('\n')
+      : `\n\nInstall ID: ${installId}`;
+    const body = `${message}\n${debugFooter}`;
+    const subject = `Visa Master support — install ${installId.slice(0, 8)}`;
+    const href = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = href;
+  };
+
+  const canSend = message.trim().length > 0;
+
+  return (
+    <div>
+      <p className="field__hint" style={{ marginTop: 0, marginBottom: 10 }}>
+        {t('settings.support.intro')}
+      </p>
+      <textarea
+        className="field__input"
+        rows={5}
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        placeholder={t('settings.support.placeholder')}
+        style={{ width: '100%', resize: 'vertical', fontFamily: 'inherit', fontSize: 13 }}
+      />
+
+      <label
+        className={`check-row${attachDebug ? ' check-row--on' : ''}`}
+        onClick={() => setAttachDebug((v) => !v)}
+        style={{ cursor: 'pointer', marginTop: 12 }}
+      >
+        <span className="check-box">{attachDebug && '✓'}</span>
+        <span>
+          <strong>{t('settings.support.attachDebug')}</strong>
+          <div className="field__hint" style={{ marginTop: 2 }}>
+            {t('settings.support.attachDebug.hint')}
+          </div>
+        </span>
+      </label>
+
+      <label
+        className={`check-row${includeScreenshot ? ' check-row--on' : ''}`}
+        onClick={() => setIncludeScreenshot((v) => !v)}
+        style={{ cursor: 'not-allowed', opacity: 0.55, marginTop: 4 }}
+        title={t('settings.support.screenshot.disabled')}
+      >
+        <span className="check-box">{includeScreenshot && '✓'}</span>
+        <span>
+          <strong>{t('settings.support.screenshot')}</strong>
+          <div className="field__hint" style={{ marginTop: 2 }}>
+            {t('settings.support.screenshot.hint')}
+          </div>
+        </span>
+      </label>
+
+      <p className="field__hint" style={{ marginTop: 12, lineHeight: 1.55 }}>
+        {t('settings.support.privacy')}
+      </p>
+
+      <button
+        className="btn btn--primary btn--block"
+        onClick={sendSupport}
+        disabled={!canSend}
+        style={{ marginTop: 8 }}
+      >
+        {t('settings.support.send')}
+      </button>
+
+      <p className="field__hint" style={{ marginTop: 10, lineHeight: 1.55 }}>
+        {t('settings.support.replyNote')}
+      </p>
+
+      <div
+        style={{
+          marginTop: 8,
+          fontFamily: 'var(--mono)',
+          fontSize: 11.5,
+          color: 'var(--muted)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          flexWrap: 'wrap',
+        }}
+      >
+        <span>
+          <span style={{ color: 'var(--ink-2)' }}>{t('settings.support.installLabel')}</span>{' '}
+          {installId}
+        </span>
+        <button
+          type="button"
+          onClick={copyInstallId}
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: 0,
+            color: 'var(--accent, #4a8)',
+            cursor: 'pointer',
+            font: 'inherit',
+            textDecoration: 'underline',
+            textUnderlineOffset: 3,
+          }}
+        >
+          {copied ? t('settings.support.copied') : t('settings.support.copy')}
+        </button>
+      </div>
     </div>
   );
 };

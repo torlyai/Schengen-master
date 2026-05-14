@@ -20,6 +20,11 @@ import { SetupFailedRetry } from './states/premium/SetupFailedRetry';
 import { SetupFailedStale } from './states/premium/SetupFailedStale';
 import { PremiumActive } from './states/premium/PremiumActive';
 import { PremiumOptions } from './states/premium/PremiumOptions';
+import { PremiumPaused } from './states/premium/PremiumPaused';
+import UpgradeLine from '../components/premium/UpgradeLine';
+import FirstRunHint from '../components/FirstRunHint';
+import { useLicense } from '../hooks/useLicense';
+import { useFirstRunCounter } from '../hooks/useFirstRunHint';
 import { BookingInProgress } from './states/premium/BookingInProgress';
 import { Booked } from './states/premium/Booked';
 import { BookingFailed } from './states/premium/BookingFailed';
@@ -34,6 +39,11 @@ export const App: React.FC = () => {
 
   // Keep i18n in sync with the user's chosen UI language.
   useSyncLang(status?.uiLang);
+
+  // Increment popup-open counter once per mount. Components downstream
+  // consume the count via useFirstRunHint to decide whether to render
+  // the first-5-sessions onboarding callout.
+  useFirstRunCounter();
 
   if (!status) {
     return (
@@ -53,7 +63,14 @@ export const App: React.FC = () => {
     case 'LOGGED_OUT':
       return <LoggedOut status={status} send={send} />;
     case 'PAUSED':
-      return <Paused status={status} send={send} />;
+      // Premium users get a tier-aware paused screen — same RESUME message
+      // semantics, but keeps the Premium chrome instead of dropping back to
+      // Free-tier UI.
+      return status.tier === 'premium' ? (
+        <PremiumPaused status={status} send={send} />
+      ) : (
+        <Paused status={status} send={send} />
+      );
     case 'UNKNOWN':
       return <Unknown status={status} send={send} />;
     case 'WRONG_PAGE':
@@ -92,14 +109,18 @@ export const App: React.FC = () => {
       return <RefundPrompt status={status} send={send} />;
     case 'IDLE':
     default:
-      return <IdlePlaceholder status={status} />;
+      return <IdlePlaceholder status={status} send={send} />;
   }
 };
 
 const TLS_FALLBACK_URL = 'https://www.tlscontact.com/';
 
-const IdlePlaceholder: React.FC<{ status?: StatusPayload }> = ({ status }) => {
+const IdlePlaceholder: React.FC<{
+  status?: StatusPayload;
+  send: (msg: import('../shared/messages').Msg) => Promise<unknown>;
+}> = ({ status, send }) => {
   const { t } = useT();
+  const { tier } = useLicense();
   const targetUrl = status?.target?.url;
   const href = targetUrl || TLS_FALLBACK_URL;
   const label = targetUrl ? t('popup.idle.gotoTarget') : t('popup.idle.openTls');
@@ -147,6 +168,10 @@ const IdlePlaceholder: React.FC<{ status?: StatusPayload }> = ({ status }) => {
       <button className="btn btn--primary btn--block" onClick={openInTab}>
         {label} ↗
       </button>
+
+      <FirstRunHint />
+
+      {tier === 'free' && <UpgradeLine send={send} />}
     </Popup>
   );
 };

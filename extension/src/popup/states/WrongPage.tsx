@@ -13,6 +13,7 @@ import Popup from '../shell/Popup';
 import { ArrowOut } from '../../components/Icons';
 import type { Msg, StatusPayload } from '../../shared/messages';
 import { relativePast } from '../format';
+import { useT, tInline } from '../../i18n/useT';
 
 export interface StateProps {
   status: StatusPayload;
@@ -20,23 +21,23 @@ export interface StateProps {
 }
 
 export const WrongPage: React.FC<StateProps> = ({ status, send }) => {
+  const { t } = useT();
   // The SW knows the target URL only after the user has visited a
   // workflow page at least once. Until then we have nothing better to
   // suggest than the TLScontact root.
   const hasTarget = !!status.target?.url;
 
   return (
-    <Popup stateTone="amber" headerLeft={<span>Wrong page</span>}>
+    <Popup stateTone="amber" headerLeft={<span>{t('popup.wrongPage.title')}</span>}>
       <div className="hero" style={{ borderTop: 0, paddingTop: 4 }}>
-        <div className="hero__label">You're signed in</div>
+        <div className="hero__label">{t('popup.wrongPage.eyebrow')}</div>
         <div className="hero__value" style={{ fontSize: 17, lineHeight: 1.2 }}>
-          But this isn't the booking page
+          {t('popup.wrongPage.headline')}
         </div>
         <div className="hero__sub">
-          Visa Master watches the <strong>appointment-booking</strong> page on
-          TLScontact for slot openings. The current tab is a different step
-          in the application flow — open the booking page to start
-          monitoring.
+          {tInline(t('popup.wrongPage.body'), {
+            booking: <strong>{t('popup.wrongPage.bodyEmphasis')}</strong>,
+          })}
         </div>
       </div>
 
@@ -47,8 +48,8 @@ export const WrongPage: React.FC<StateProps> = ({ status, send }) => {
       >
         <ArrowOut />{' '}
         {hasTarget
-          ? 'Open your booking page'
-          : 'Open TLScontact'}
+          ? t('popup.wrongPage.cta.target')
+          : t('popup.wrongPage.cta.tls')}
       </button>
 
       {hasTarget && status.target && (
@@ -71,10 +72,9 @@ export const WrongPage: React.FC<StateProps> = ({ status, send }) => {
       )}
 
       <div className="note" style={{ marginTop: 12 }}>
-        Last check {relativePast(status.lastCheckTs)}.
+        {t('popup.wrongPage.lastCheck', { time: relativePast(status.lastCheckTs) })}
         <br />
-        We won't watch the wrong page — open the booking step and we'll pick
-        it up automatically.
+        {t('popup.wrongPage.footnote')}
       </div>
     </Popup>
   );

@@ -46,6 +46,22 @@ export const Preflight: React.FC<PremiumStateProps> = ({ send }) => {
       >
         {t('premium.preflight.cta')}
       </button>
+      <button
+        type="button"
+        onClick={() => send({ type: 'PREMIUM_SETUP_SKIP' })}
+        style={{
+          display: 'block',
+          margin: '10px auto 0',
+          background: 'none',
+          border: 'none',
+          color: 'var(--muted)',
+          fontSize: 12,
+          cursor: 'pointer',
+          padding: 4,
+        }}
+      >
+        {t('premium.setup.skip')}
+      </button>
     </Popup>
   );
 };

@@ -58,15 +58,12 @@ export const SetupBookingWindow: React.FC<PremiumStateProps> = ({ send }) => {
 
       <div className="field">
         <div className="field__label">{t('premium.setupBookingWindow.travelDate.label')}</div>
-        <div className="field__row">
-          <input
-            className="field__input"
-            type="date"
-            value={travelDate}
-            onChange={(e) => setTravelDate(e.target.value)}
-          />
-          <span className="field__row-adorn">📅</span>
-        </div>
+        <input
+          className="field__input"
+          type="date"
+          value={travelDate}
+          onChange={(e) => setTravelDate(e.target.value)}
+        />
       </div>
 
       <div className="field">
@@ -123,6 +120,22 @@ export const SetupBookingWindow: React.FC<PremiumStateProps> = ({ send }) => {
         onClick={submit}
       >
         {t('premium.common.continue')}
+      </button>
+      <button
+        type="button"
+        onClick={() => send({ type: 'PREMIUM_SETUP_SKIP' })}
+        style={{
+          display: 'block',
+          margin: '10px auto 0',
+          background: 'none',
+          border: 'none',
+          color: 'var(--muted)',
+          fontSize: 12,
+          cursor: 'pointer',
+          padding: 4,
+        }}
+      >
+        {t('premium.setup.skip')}
       </button>
     </Popup>
   );

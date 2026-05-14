@@ -36,6 +36,9 @@ insurance/**
 !extension/public/qrcode/*.png
 !extension/public/qrcode/*.jpeg
 !extension/public/qrcode/*.jpg
+!extension/public/icons/*.png
+!extension/public/brand/*.png
+!extension/public/brand/*.svg
 
 # ---- Office documents (filled forms, statements, letters) ----
 *.docx

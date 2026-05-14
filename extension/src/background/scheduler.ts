@@ -199,7 +199,14 @@ export async function applyResolvedCadence(): Promise<{ minutes: number; mode: C
  * Some states (CLOUDFLARE, LOGGED_OUT, UNKNOWN, PAUSED, IDLE) suppress polling.
  */
 export function stateAllowsPolling(state: ExtState): boolean {
-  return state === 'NO_SLOTS' || state === 'SLOT_AVAILABLE';
+  return (
+    state === 'NO_SLOTS' ||
+    state === 'SLOT_AVAILABLE' ||
+    // PREMIUM_ACTIVE is the Premium counterpart to NO_SLOTS — the
+    // "watching for slots" state. Without polling here, the popup's
+    // "Next scan" countdown stays at — forever.
+    state === 'PREMIUM_ACTIVE'
+  );
 }
 
 /**

@@ -6,7 +6,7 @@ import Popup from '../../shell/Popup';
 import Footer from '../../shell/Footer';
 import { Pause as IcoPause } from '../../../components/Icons';
 import { countdownMS, relativePast } from '../../format';
-import { useT } from '../../../i18n/useT';
+import { useT, countryName } from '../../../i18n/useT';
 import type { PremiumStateProps } from './_shared';
 
 export const PremiumActive: React.FC<PremiumStateProps> = ({ status, send }) => {
@@ -18,6 +18,7 @@ export const PremiumActive: React.FC<PremiumStateProps> = ({ status, send }) => 
   }, []);
 
   const centre = status.target?.centre ?? 'TLScontact';
+  const country = status.target ? countryName(status.target.country, t) : '—';
   const groupId = status.groupId ?? '—';
   const recent: { t: string; v: string }[] = [
     // The SW will populate this in PHASE 4 from the actual scan log.
@@ -49,9 +50,10 @@ export const PremiumActive: React.FC<PremiumStateProps> = ({ status, send }) => 
       onOpenMore={() => send({ type: 'OPEN_PREMIUM_OPTIONS' })}
     >
       <div className="p-status">
+        <div className="p-status__eyebrow">{t('premium.active.eyebrow')}</div>
         <div className="p-status__t">{t('premium.active.title')}</div>
         <div className="p-status__sub">
-          {t('premium.active.sub', { centre, groupId })}
+          {t('premium.active.sub', { centre, country, groupId })}
         </div>
       </div>
 
@@ -89,6 +91,23 @@ export const PremiumActive: React.FC<PremiumStateProps> = ({ status, send }) => 
             {status.acceptingFrom ?? '—'} → {status.acceptingTo ?? '—'}
           </span>
         </div>
+        {status.travelDate && (
+          <div
+            style={{
+              fontFamily: 'var(--mono)',
+              fontSize: 10.5,
+              color: 'var(--muted)',
+              letterSpacing: '0.02em',
+              marginTop: 2,
+              marginBottom: 4,
+            }}
+          >
+            {t('premium.active.window.trip', {
+              travelDate: status.travelDate,
+              days: status.visaProcessingDays ?? 21,
+            })}
+          </div>
+        )}
         <div className="kvline">
           <span className="kvline__k">{t('premium.active.window.primeTime')}</span>
           <span className="kvline__v">
@@ -119,6 +138,44 @@ export const PremiumActive: React.FC<PremiumStateProps> = ({ status, send }) => 
             </div>
           ))}
         </div>
+      </div>
+
+      <div
+        className="p-section"
+        style={{
+          marginTop: 16,
+          padding: '12px 14px',
+          border: '1px solid var(--rule)',
+          borderRadius: 8,
+          background: 'var(--surface-2, transparent)',
+        }}
+      >
+        <div className="p-section__h" style={{ marginTop: 0 }}>
+          {t('premium.active.keepScanning.h')}
+        </div>
+        <ul
+          style={{
+            margin: '6px 0 0',
+            padding: 0,
+            listStyle: 'none',
+            fontSize: 11.5,
+            color: 'var(--ink-2)',
+            lineHeight: 1.55,
+          }}
+        >
+          <li style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
+            <span style={{ flexShrink: 0 }}>•</span>
+            <span>{t('premium.active.keepScanning.b1')}</span>
+          </li>
+          <li style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
+            <span style={{ flexShrink: 0 }}>•</span>
+            <span>{t('premium.active.keepScanning.b2')}</span>
+          </li>
+          <li style={{ display: 'flex', gap: 8 }}>
+            <span style={{ flexShrink: 0 }}>•</span>
+            <span>{t('premium.active.keepScanning.b3')}</span>
+          </li>
+        </ul>
       </div>
     </Popup>
   );

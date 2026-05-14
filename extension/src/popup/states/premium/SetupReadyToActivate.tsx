@@ -1,6 +1,7 @@
-// P-7 — Setup step 4: review + activate. Clicking activate fires the
-// PREMIUM_ACTIVATE message which the SW handles by opening Stripe Checkout
-// on torly.ai (PHASE 3 backend integration).
+// P-7 — Setup step 4: review + activate. The wizard's final CTA fires
+// PREMIUM_SETUP_NEXT which the SW handles by transitioning
+// PREMIUM_SETUP_READY → PREMIUM_ACTIVE. Stripe checkout itself ran
+// earlier (before the wizard) via START_PREMIUM_SETUP — see PRD §10.
 import React from 'react';
 import Popup from '../../shell/Popup';
 import { useT } from '../../../i18n/useT';

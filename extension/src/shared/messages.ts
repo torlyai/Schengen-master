@@ -6,9 +6,14 @@
 // message type, ADD a variant, don't change an existing one.
 
 import type { ExtState, CadenceMode } from './states';
+import type { Tier } from './license';
 
 export interface StatusPayload {
   state: ExtState;
+  // Tier of the installed licence. Lets the popup router make
+  // tier-aware decisions (e.g. PAUSED → render Premium-aware paused
+  // UI vs Free-tier Paused.tsx).
+  tier: Tier;
   lastCheckTs: number | null;
   nextCheckTs: number | null;
   cadenceMin: number;
@@ -102,13 +107,14 @@ export type Msg =
   | { type: 'PREMIUM_SETUP_NEXT' }                       // wizard step forward
   | { type: 'PREMIUM_SETUP_BACK' }                       // wizard step back
   | { type: 'PREMIUM_SETUP_RESET' }                      // Start over
+  | { type: 'PREMIUM_SETUP_SKIP' }                       // "Skip for now" → ACTIVE
   | { type: 'PREMIUM_SAVE_CREDENTIALS'; email: string; password: string }
   | { type: 'PREMIUM_SAVE_BOOKING_WINDOW';
       travelDate: string;
       visaProcessingDays: number;
       minDaysNotice: number;
-      includePrimeTime: boolean }
-  | { type: 'PREMIUM_ACTIVATE' }                         // → Stripe Checkout
+      includePrimeTime: boolean;
+      groupId?: string | null }
   | { type: 'PREMIUM_CANCEL' }                           // popup Cancel button
   | { type: 'OPEN_PREMIUM_OPTIONS' }                     // header More → P-12
   | { type: 'CLOSE_PREMIUM_OPTIONS' }                    // P-12 ← Back

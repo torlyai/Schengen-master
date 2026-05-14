@@ -603,18 +603,47 @@ button {
   margin-bottom: 64px;
 }
 .welcome__mark {
-  display: inline-flex; align-items: center; gap: 10px;
+  display: inline-flex; align-items: center; gap: 12px;
+  color: var(--ink);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.welcome__mark-icon {
+  display: inline-grid; place-items: center;
+  width: 32px; height: 32px;
   color: var(--ink);
 }
-.welcome__mark-glyph {
-  width: 28px; height: 28px;
-  background: var(--ink); color: var(--paper);
-  border-radius: 6px;
-  display: grid; place-items: center;
+.welcome__mark-word {
   font-family: var(--serif);
   font-style: italic;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 500;
+  color: var(--ink);
+  letter-spacing: -0.012em;
+}
+.welcome__brow-right {
+  display: inline-flex; align-items: center; gap: 16px;
+}
+.welcome__brow-tag {
+  display: inline-flex; align-items: center;
+}
+
+/* Staggered first-paint reveal — applied to top-level welcome sections. */
+@keyframes welcomeReveal {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.welcome__stagger {
+  opacity: 0;
+  animation: welcomeReveal 600ms cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+  animation-delay: 0ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  .welcome__stagger {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .welcome__hero {
@@ -893,6 +922,67 @@ body.vm-page {
   margin: 0 auto;
   padding: 48px 24px 72px;
 }
+
+/* Side TOC for the Settings page. Hidden by default; promoted to a sticky
+   right rail at viewport widths that comfortably fit content + nav. */
+.settings-toc { display: none; }
+
+@media (min-width: 1180px) {
+  .page-shell {
+    max-width: 1220px;
+    display: grid;
+    grid-template-columns: minmax(0, 960px) 220px;
+    gap: 40px;
+    align-items: start;
+  }
+  .settings-main { min-width: 0; }
+  .settings-toc {
+    display: block;
+    position: sticky;
+    top: 24px;
+    align-self: start;
+  }
+}
+
+.settings-toc__label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--muted);
+  margin: 0 0 12px;
+  padding-left: 14px;
+}
+.settings-toc__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-left: 1px solid var(--rule);
+}
+.settings-toc__link {
+  display: block;
+  padding: 7px 14px;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--muted);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  margin-left: -1px; /* overlap parent border so the active rule replaces it cleanly */
+  transition: color 120ms ease, border-color 120ms ease;
+}
+.settings-toc__link:hover { color: var(--ink); }
+.settings-toc__link--active {
+  color: var(--ink);
+  border-left-color: var(--ink);
+  font-weight: 600;
+}
+
+/* Anchored sections get a little breathing room when scrolled-to. */
+.section { scroll-margin-top: 24px; }
 
 /* Pulse animation used by the slot-found dot */
 .dot--red.pulse, .dot--green.pulse { position: relative; }
@@ -1237,25 +1327,47 @@ body.vm-page {
   padding-bottom: 1px;
 }
 
-/* Quiet single-line upsell above the footer */
+/* Free-tier upgrade CTA above the footer. Block layout, visible button. */
 .upline {
   margin-top: 16px;
   padding-top: 14px;
   border-top: 1px dashed var(--rule);
-  font-size: 11.5px;
-  line-height: 1.5;
-  color: var(--muted);
+  text-align: center;
 }
-.upline__line { margin-bottom: 6px; }
-.upline__link {
+.upline__line {
+  font-size: 12px;
+  color: var(--ink-2);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+.upline__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  background: var(--green-ink, #2a7d2e);
+  color: #fff;
+  border: 1px solid var(--green-ink, #2a7d2e);
+  border-radius: 6px;
+  padding: 9px 14px;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: filter 0.12s ease;
+}
+.upline__btn:hover { filter: brightness(1.08); }
+.upline__btn-star { font-size: 11px; line-height: 1; }
+.upline__btn-arrow { font-size: 12px; line-height: 1; opacity: 0.85; }
+.upline__sub {
+  margin-top: 6px;
   font-family: var(--mono);
   font-size: 10.5px;
+  color: var(--muted);
   letter-spacing: 0.02em;
-  color: var(--ink-2);
-  border-bottom: 1px solid var(--rule);
-  padding-bottom: 1px;
 }
-.upline__link strong { color: var(--green-ink); font-weight: 500; }
 
 /* Trust callout (green) — used in setup + booked */
 .callout-trust {
@@ -1522,6 +1634,14 @@ body.vm-page {
   gap: 4px;
   margin-bottom: 14px;
 }
+.p-status__eyebrow {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--ink-2);
+  text-transform: uppercase;
+}
 .p-status__t {
   font-family: var(--serif);
   font-style: italic;
@@ -1769,15 +1889,31 @@ body.vm-page {
 .tier-card {
   padding: 22px 24px 24px;
   border: 1px solid var(--hair);
-  border-radius: 8px;
+  border-radius: 10px;
   background: var(--surface);
   display: flex;
   flex-direction: column;
   gap: 14px;
+  position: relative;
+  transition: transform 220ms cubic-bezier(0.2, 0.7, 0.2, 1),
+              box-shadow 220ms ease;
+}
+.tier-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 40px -22px rgba(15, 74, 48, 0.18);
 }
 .tier-card--premium {
-  border: 2px solid var(--green-hair);
-  background: linear-gradient(180deg, var(--green-soft) 0%, var(--surface) 80%);
+  border: 1px solid var(--green-hair);
+  background: linear-gradient(180deg, var(--green-soft) 0%, var(--surface) 70%);
+  box-shadow: 0 12px 32px -22px rgba(30, 111, 74, 0.35);
+}
+.tier-card--premium:hover {
+  box-shadow: 0 22px 48px -22px rgba(30, 111, 74, 0.45);
+}
+.tier-card__aperture {
+  display: inline-grid; place-items: center;
+  opacity: 0.85;
+  pointer-events: none;
 }
 
 .tier-card__h {
@@ -2046,22 +2182,42 @@ body.vm-page {
   display: flex; justify-content: center;
   align-items: center;
 }
-/* Stacked popup arrangement for hero */
+/* Stacked popup arrangement for hero — PremiumActive (monitor) sits
+   behind, Booked sits front-right. Increased offset on the back card so
+   more of the Monitor popup is readable (useful preview, not just decor). */
 .p-hero__stack {
   position: relative;
   width: 100%;
-  max-width: 460px;
-  height: 460px;
+  max-width: 540px;
+  height: 580px;
   display: flex;
   align-items: center;
   justify-content: center;
+  /* Cards extend beyond the box visually; never clip them — Chinese
+     popup chrome wraps to extra lines and was getting cut at the top
+     in earlier offsets. */
+  overflow: visible;
 }
+.p-hero__mock { overflow: visible; }
 .p-hero__stack .popup {
   position: absolute;
   transition: transform 200ms ease;
 }
-.p-hero__stack .popup:nth-child(1) { transform: translate(-46px, -36px) rotate(-3.5deg); opacity: 0.78; filter: blur(0.3px); }
-.p-hero__stack .popup:nth-child(2) { transform: translate(46px, 6px) rotate(2.5deg); z-index: 2; box-shadow: 0 30px 80px -28px rgba(15,74,48,0.45), 0 4px 0 rgba(20,18,12,0.04); }
+.p-hero__stack .popup:nth-child(1) {
+  /* Back card (PremiumActive / Monitor). Less negative Y than before
+     so the eyebrow + italic headline are fully visible in both locales. */
+  transform: translate(-100px, -18px) rotate(-3.5deg);
+  opacity: 0.94;
+}
+.p-hero__stack .popup:nth-child(2) {
+  /* Front card (Booked) — shifted down/right enough that the back
+     card's left half (headline + scan loop + booking window) reads
+     cleanly underneath. */
+  transform: translate(96px, 46px) rotate(2.5deg);
+  z-index: 2;
+  box-shadow: 0 30px 80px -28px rgba(15,74,48,0.45),
+              0 4px 0 rgba(20,18,12,0.04);
+}
 @media (max-width: 720px) {
   .p-hero__stack { height: 540px; }
 }

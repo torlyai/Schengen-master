@@ -35,6 +35,7 @@ import {
   notifyMonitoringPaused as tgMonPaused,
 } from './telegram';
 import { maybeAutoLoginToTls } from './tls-auto-login';
+import { getTier } from '../shared/license';
 
 // 15 min auto-stop window for CLOUDFLARE and LOGGED_OUT, per wireframes §5/§13.
 const AUTOSTOP_MIN = 15;
@@ -87,6 +88,32 @@ export async function applyDetection(
   // PAUSED state overrides incoming detections — they're informational only
   // until the user resumes.
   if (prev === 'PAUSED') {
+    return;
+  }
+
+  // P1-6: setup-wizard and booking-FSM states are user-driven flows that
+  // must not be knocked out by background detections. A user mid-wizard
+  // could have a TLS tab open reporting LOGGED_OUT — without this guard,
+  // the wizard would be replaced by the Free LOGGED_OUT screen.
+  // PREMIUM_ACTIVE is intentionally NOT sticky — it's the Premium
+  // equivalent of NO_SLOTS and needs to transition to SLOT_AVAILABLE
+  // (which booking-fsm listens for) when a slot is detected.
+  const STICKY_PREMIUM = new Set<ExtState>([
+    'PREMIUM_PREFLIGHT',
+    'PREMIUM_SETUP_CREDENTIALS',
+    'PREMIUM_SETUP_SIGNING_IN',
+    'PREMIUM_SETUP_BOOKING_WINDOW',
+    'PREMIUM_SETUP_READY',
+    'PREMIUM_VERIFICATION_GATE',
+    'PREMIUM_SETUP_FAILED_RETRY',
+    'PREMIUM_SETUP_FAILED_STALE',
+    'PREMIUM_OPTIONS',
+    'PREMIUM_BOOKING_IN_PROGRESS',
+    'PREMIUM_BOOKED',
+    'PREMIUM_BOOKING_FAILED',
+    'PREMIUM_REFUND_PROMPT',
+  ]);
+  if (STICKY_PREMIUM.has(prev)) {
     return;
   }
 
@@ -250,10 +277,12 @@ export async function pause(): Promise<void> {
 }
 
 export async function resume(): Promise<void> {
-  // After resume, we don't know the state until the next detection. Reload
-  // the watched tab to get a fresh signal; we go to NO_SLOTS as a polling-
-  // permitted holding state.
-  await transitionTo('NO_SLOTS');
+  // After resume, we don't know the state until the next detection.
+  // Tier-aware holding state: Premium users return to PREMIUM_ACTIVE
+  // (so the popup keeps Premium chrome); Free users go to NO_SLOTS.
+  // Both states allow polling via stateAllowsPolling().
+  const tier = await getTier();
+  await transitionTo(tier === 'premium' ? 'PREMIUM_ACTIVE' : 'NO_SLOTS');
 }
 
 export async function ackSlot(): Promise<void> {

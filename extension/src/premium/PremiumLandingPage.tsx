@@ -16,7 +16,25 @@ import { sendMessage } from '../hooks/useStatus';
 import { PremiumActive } from '../popup/states/premium/PremiumActive';
 import { Booked } from '../popup/states/premium/Booked';
 import { useT } from '../i18n/useT';
+import LangToggle from '../components/LangToggle';
 import type { StatusPayload } from '../shared/messages';
+
+// Inline aperture mark — same as the welcome page brand glyph.
+// Matches the new icon-{16,32,48,128}.png set.
+const ApertureMark: React.FC<{ size?: number }> = ({ size = 24 }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 96 96"
+    width={size}
+    height={size}
+    aria-hidden="true"
+    style={{ display: 'inline-block', verticalAlign: 'middle' }}
+  >
+    <circle cx="48" cy="48" r="40" fill="none" stroke="currentColor" strokeWidth="4" />
+    <path d="M 48,48 L 88,48 A 40,40 0 0 0 76.28,19.72 Z" fill="var(--green, #1e6f4a)" />
+    <circle cx="48" cy="48" r="6" fill="currentColor" />
+  </svg>
+);
 
 const SOURCE_URL = 'https://github.com/torlyai/Schengen-master';
 
@@ -24,6 +42,7 @@ const SOURCE_URL = 'https://github.com/torlyai/Schengen-master';
 // machinery runs on this page — these are static visual anchors.
 const MOCK_ACTIVE_STATUS: StatusPayload = {
   state: 'PREMIUM_ACTIVE',
+  tier: 'premium',
   lastCheckTs: Date.now() - 5 * 60_000,
   nextCheckTs: Date.now() + 4 * 60_000 + 35_000,
   cadenceMin: 4,
@@ -46,7 +65,7 @@ const MOCK_ACTIVE_STATUS: StatusPayload = {
 const MOCK_BOOKED_STATUS: StatusPayload = {
   ...MOCK_ACTIVE_STATUS,
   state: 'PREMIUM_BOOKED',
-  slotDetectedTs: Date.parse('2026-06-04T10:30:00Z'),
+  slotDetectedTs: Date.parse('2026-06-08T10:30:00Z'),
   bookingConfirmation: 'TLS-MAN-26445690-0042',
 };
 
@@ -67,8 +86,18 @@ const Header: React.FC<{ onStart: () => void }> = ({ onStart }) => {
             href="https://torly.ai/"
             target="_blank"
             rel="noreferrer"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}
           >
-            <span className="nav__brand-glyph">v</span>
+            <span
+              className="nav__brand-icon"
+              style={{
+                display: 'inline-grid',
+                placeItems: 'center',
+                color: 'var(--ink)',
+              }}
+            >
+              <ApertureMark size={26} />
+            </span>
             Visa Master
             <span className="nav__brand-dot">{t('premium.intro.nav.brandDot')}</span>
           </a>
@@ -78,14 +107,9 @@ const Header: React.FC<{ onStart: () => void }> = ({ onStart }) => {
             <a className="nav__lnk" href="#faq">{t('premium.intro.nav.faq')}</a>
           </nav>
           <span className="nav__spacer" />
-          <a
-            className="nav__cta"
-            href={SOURCE_URL}
-            target="_blank"
-            rel="noreferrer"
-          >
-            {t('premium.intro.nav.source')}
-          </a>
+          <span style={{ marginRight: 12 }}>
+            <LangToggle />
+          </span>
           <a
             className="nav__btn"
             href="#"
@@ -293,13 +317,6 @@ const Compare: React.FC<{ onStart: () => void }> = ({ onStart }) => {
           </div>
         </div>
 
-        <div className="note-row" style={{ marginTop: 28 }}>
-          {t('premium.intro.compare.note.before')}
-          <strong style={{ color: 'var(--ink-2)' }}>{t('premium.intro.compare.note.visaready')}</strong>
-          {t('premium.intro.compare.note.middle')}
-          <strong style={{ color: 'var(--ink-2)' }}>{t('premium.intro.compare.note.tlsbooker')}</strong>
-          {t('premium.intro.compare.note.after')}
-        </div>
       </div>
     </section>
   );
