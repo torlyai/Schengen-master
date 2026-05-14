@@ -2571,6 +2571,151 @@ body.vm-page {
 }
 @media (max-width: 720px) { .lp__container { padding: 0 20px; } }
 
+/* ─────────────── LOCAL HEADER (sticky) ─────────────── */
+/* Used by src/premium/PremiumLandingPage.tsx. Ported from torly.ai */
+/* schengen.css. Unscoped (no .lp prefix) because the Premium intro */
+/* page renders without an .lp wrapper. */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(246, 243, 238, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--rule);
+}
+.nav__inner {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+.nav__brand {
+  display: flex; align-items: center; gap: 9px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: -0.005em;
+  text-decoration: none;
+}
+.nav__brand-glyph {
+  width: 24px; height: 24px;
+  border-radius: 5px;
+  background: var(--ink);
+  color: var(--paper);
+  display: grid; place-items: center;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 13px;
+  font-weight: 500;
+}
+.nav__brand-dot {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  font-style: normal;
+  margin-left: 4px;
+  font-weight: 400;
+}
+.nav__links {
+  display: flex; align-items: center; gap: 22px;
+  margin-left: 16px;
+}
+.nav__lnk {
+  font-size: 13.5px;
+  color: var(--ink-2);
+  text-decoration: none;
+  letter-spacing: -0.002em;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.nav__lnk:hover { color: var(--ink); }
+.nav__spacer { flex: 1; }
+.nav__cta {
+  font-size: 13px;
+  color: var(--ink-2);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.nav__cta:hover { color: var(--ink); }
+.nav__btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.nav__btn:hover { background: #000; }
+@media (max-width: 1080px) { .nav__links { gap: 18px; } }
+@media (max-width: 980px)  { .nav__links { display: none; } }
+@media (max-width: 540px)  { .nav__cta { display: none; } }
+
+/* ─────────────── FINAL CTA ─────────────── */
+/* Used by the Final section of src/premium/PremiumLandingPage.tsx. */
+/* Ported from torly.ai schengen.css (unscoped — convention matches */
+/* the rest of this stylesheet). */
+.final {
+  text-align: center;
+  padding: 120px 0 96px;
+  background: var(--paper-2);
+  border-top: 1px solid var(--rule);
+}
+.final__h {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 64px;
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  margin: 0 0 36px;
+  text-wrap: balance;
+}
+.final__h em { font-style: italic; color: var(--green); }
+@media (max-width: 720px) { .final__h { font-size: 42px; } }
+.final__cta {
+  display: inline-flex; align-items: center; gap: 12px;
+  background: var(--green);
+  color: #f6fbf6;
+  padding: 18px 28px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  border: 1px solid var(--green-ink);
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 12px 32px -12px rgba(15,74,48,0.5);
+  cursor: pointer;
+}
+.final__cta:hover { background: var(--green-ink); }
+.final__meta {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  margin-top: 20px;
+}
+.final__trust {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 14px;
+  display: inline-flex; gap: 12px; align-items: center;
+}
+.final__trust .sep {
+  width: 3px; height: 3px; border-radius: 50%;
+  background: var(--rule);
+  display: inline-block;
+}
+
 /* Reusable section eyebrow */
 .eyebrow {
   font-family: var(--mono);

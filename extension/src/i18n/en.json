@@ -466,6 +466,11 @@
   "premium.intro.nav.source": "Source",
   "premium.intro.nav.start": "Start setup",
 
+  "premium.intro.banner.sending": "Opening Stripe Checkout…",
+  "premium.intro.banner.sent": "✓ Stripe Checkout opened in a new tab. Enter your card to put it on file — £0 charged today.",
+  "premium.intro.banner.error": "Couldn't reach the checkout server. Check your connection and try again.",
+  "premium.intro.banner.dismiss": "Dismiss",
+
   "premium.intro.hero.eyebrow": "Visa Master · Premium",
   "premium.intro.hero.h1.before": "Catch your TLS slot —",
   "premium.intro.hero.h1.emph": "and let us book it",

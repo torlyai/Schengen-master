@@ -468,6 +468,11 @@
   "premium.intro.nav.source": "源代码",
   "premium.intro.nav.start": "开始设置",
 
+  "premium.intro.banner.sending": "正在打开 Stripe 付款页…",
+  "premium.intro.banner.sent": "✓ 已在新标签页打开 Stripe Checkout。请填写银行卡信息以保存付款方式 — 今天不会扣款。",
+  "premium.intro.banner.error": "无法连接到付款服务。请检查网络后重试。",
+  "premium.intro.banner.dismiss": "关闭",
+
   "premium.intro.hero.eyebrow": "Visa Master · Premium",
   "premium.intro.hero.h1.before": "抢到你的 TLS 时段 —",
   "premium.intro.hero.h1.emph": "让我们替你预订",

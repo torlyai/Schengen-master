@@ -69,7 +69,7 @@ export const SetupReadyToActivate: React.FC<PremiumStateProps> = ({
       <button
         className="btn btn--primary btn--block btn--lg"
         style={{ marginTop: 14 }}
-        onClick={() => send({ type: 'PREMIUM_ACTIVATE' })}
+        onClick={() => send({ type: 'PREMIUM_SETUP_NEXT' })}
       >
         {t('premium.setupReady.cta')}
       </button>

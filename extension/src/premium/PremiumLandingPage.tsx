@@ -56,7 +56,7 @@ const noopSend = async () => ({});
 // Sections
 // ──────────────────────────────────────────────────────────────
 
-const Header: React.FC = () => {
+const Header: React.FC<{ onStart: () => void }> = ({ onStart }) => {
   const { t } = useT();
   return (
     <header className="nav">
@@ -86,7 +86,14 @@ const Header: React.FC = () => {
           >
             {t('premium.intro.nav.source')}
           </a>
-          <a className="nav__btn" href="#setup">
+          <a
+            className="nav__btn"
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              onStart();
+            }}
+          >
             {t('premium.intro.nav.start')}
           </a>
         </div>
@@ -95,7 +102,7 @@ const Header: React.FC = () => {
   );
 };
 
-const Hero: React.FC = () => {
+const Hero: React.FC<{ onStart: () => void }> = ({ onStart }) => {
   const { t } = useT();
   return (
     <section className="p-hero">
@@ -145,7 +152,14 @@ const Hero: React.FC = () => {
             </div>
 
             <div>
-              <a className="p-hero__cta" href="#setup">
+              <a
+                className="p-hero__cta"
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onStart();
+                }}
+              >
                 {t('premium.intro.hero.cta')}
                 <span className="p-hero__cta-arrow">→</span>
               </a>
@@ -171,7 +185,7 @@ const Hero: React.FC = () => {
   );
 };
 
-const Compare: React.FC = () => {
+const Compare: React.FC<{ onStart: () => void }> = ({ onStart }) => {
   const { t } = useT();
   return (
     <section id="compare" className="sec sec--first" style={{ paddingTop: 8, borderTop: 'none' }}>
@@ -265,7 +279,14 @@ const Compare: React.FC = () => {
                 </span>
               </li>
             </ul>
-            <a className="cmp__cta cmp__cta--green" href="#setup">
+            <a
+              className="cmp__cta cmp__cta--green"
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                onStart();
+              }}
+            >
               {t('premium.intro.compare.premium.cta')}
               <span style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 20, opacity: 0.85 }}>→</span>
             </a>
@@ -486,29 +507,96 @@ const FooterStrip: React.FC = () => {
 // ──────────────────────────────────────────────────────────────
 
 export const PremiumLandingPage: React.FC = () => {
+  const { t } = useT();
+  const [status, setStatus] = React.useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+
   const startSetup = () => {
+    setStatus('sending');
     sendMessage({ type: 'START_PREMIUM_SETUP' })
-      .catch(() => {})
-      .finally(() => {
-        // Close the intro tab; the popup will be on PREMIUM_PREFLIGHT.
-        try {
-          window.close();
-        } catch {
-          /* some browsers refuse to close non-script-opened tabs */
-        }
+      .then((resp: unknown) => {
+        // The SW returns { ok: false, error } when /api/visa-master/checkout
+        // fails (network, Stripe down). Treat that as an error so the
+        // banner surfaces it rather than falsely claiming success.
+        const r = resp as { ok?: boolean } | null;
+        setStatus(r && r.ok === false ? 'error' : 'sent');
+        // Don't try to close — the user wants to see the Stripe tab opening
+        // and may want to come back to this page if Stripe redirect fails.
+      })
+      .catch(() => {
+        setStatus('error');
       });
   };
 
   return (
     <div className="lp">
-      <Header />
-      <Hero />
-      <Compare />
+      {status !== 'idle' && (
+        <SetupStatusBanner status={status} t={t} onDismiss={() => setStatus('idle')} />
+      )}
+      <Header onStart={startSetup} />
+      <Hero onStart={startSetup} />
+      <Compare onStart={startSetup} />
       <HowItWorks />
       <Disclose />
       <Faq />
       <Final onStart={startSetup} />
       <FooterStrip />
+    </div>
+  );
+};
+
+const SetupStatusBanner: React.FC<{
+  status: 'sending' | 'sent' | 'error';
+  t: (k: string) => string;
+  onDismiss: () => void;
+}> = ({ status, t, onDismiss }) => {
+  const bg =
+    status === 'error' ? 'var(--red-soft, #f5dfdb)' :
+    status === 'sent' ? 'var(--green-soft, #e7efe7)' :
+    'var(--paper-2)';
+  const border =
+    status === 'error' ? 'var(--red-hair, #e3a89e)' :
+    status === 'sent' ? 'var(--green-hair, #c7d8c9)' :
+    'var(--rule)';
+  const label =
+    status === 'error' ? t('premium.intro.banner.error') :
+    status === 'sent' ? t('premium.intro.banner.sent') :
+    t('premium.intro.banner.sending');
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 60,
+        background: bg,
+        borderBottom: `1px solid ${border}`,
+        padding: '12px 24px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 16,
+        fontSize: 14,
+        color: 'var(--ink)',
+      }}
+    >
+      <span>{label}</span>
+      {status !== 'sending' && (
+        <button
+          onClick={onDismiss}
+          style={{
+            background: 'transparent',
+            border: '1px solid var(--ink)',
+            borderRadius: 4,
+            padding: '4px 10px',
+            fontSize: 12,
+            cursor: 'pointer',
+            color: 'var(--ink)',
+          }}
+        >
+          {t('premium.intro.banner.dismiss')}
+        </button>
+      )}
     </div>
   );
 };

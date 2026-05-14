@@ -441,13 +441,15 @@ async function handle(msg: Msg): Promise<unknown> {
     case 'PREMIUM_INSTALL_LICENSE': {
       // The content script on torly.ai/visa-master/activated relayed
       // the JWT to us. Persist it (license.ts will refuse malformed or
-      // expired tokens). Then transition to PREMIUM_ACTIVE so the
-      // popup immediately reflects the new tier.
+      // expired tokens). Then transition to PREMIUM_PREFLIGHT so the
+      // in-popup setup wizard runs (TLS creds + booking window) — the
+      // user is now a paid Premium tier but hasn't configured automation.
+      // The wizard's final step transitions to PREMIUM_ACTIVE.
       const installed = await installLicenseFromJwt(msg.licenseToken);
       if (!installed) {
         return { ok: false, error: 'Invalid licence token' };
       }
-      await transitionTo('PREMIUM_ACTIVE', {});
+      await transitionTo('PREMIUM_PREFLIGHT', {});
       return { ok: true, data: { tier: installed.tier } };
     }
 
@@ -462,13 +464,31 @@ async function handle(msg: Msg): Promise<unknown> {
     }
 
     case 'START_PREMIUM_SETUP': {
-      // User clicked "Start setup" on the intro page. Flip popup state to
-      // PREMIUM_PREFLIGHT so the in-popup wizard takes over. PHASE 4 will
-      // also seed any prerequisite state (target URL, etc.) but for PHASE
-      // 2 a clean transition is enough — the Preflight component renders
-      // entirely from local state.
-      await transitionTo('PREMIUM_PREFLIGHT', {});
-      return { ok: true };
+      // User clicked "Start setup" on the intro page. The £19 success-fee
+      // model commits the user via Stripe FIRST (Setup Intent — £0 today,
+      // card on file), then the in-popup wizard runs post-payment.
+      //
+      // Flow:
+      //   1. POST /api/visa-master/checkout to get the Stripe Checkout URL.
+      //   2. Open it in a new tab.
+      //   3. After Stripe success → torly.ai/visa-master/activated →
+      //      license-relay → PREMIUM_INSTALL_LICENSE → wizard starts.
+      //
+      // We deliberately DO NOT transition to PREMIUM_PREFLIGHT here —
+      // doing so before payment would let users enter TLS creds without
+      // ever committing financially.
+      const installId = await getOrCreateInstallId();
+      const result = await startCheckout(installId);
+      if (!result.ok) {
+        console.error('[Premium] checkout failed', result);
+        return { ok: false, error: result.error };
+      }
+      try {
+        await chrome.tabs.create({ url: result.data.checkoutUrl });
+      } catch {
+        /* SW may not have tabs permission on some Chromium variants */
+      }
+      return { ok: true, data: { url: result.data.checkoutUrl } };
     }
 
     case 'OPEN_PREMIUM_OPTIONS': {
@@ -505,6 +525,7 @@ async function handle(msg: Msg): Promise<unknown> {
         minDaysNotice: msg.minDaysNotice,
         includePrimeTime: msg.includePrimeTime,
       });
+      await transitionTo('PREMIUM_SETUP_READY', {});
       return { ok: true };
     }
 
@@ -512,7 +533,12 @@ async function handle(msg: Msg): Promise<unknown> {
       // P-4 setup step 1. AES-GCM encrypted at rest via
       // src/shared/crypto.ts. Never transmitted to torly.ai or any
       // other server — PRD §11.1 invariant.
+      //
+      // Lazy validation: we don't probe TLS during setup (would need
+      // an open TLS tab + working auto-login selectors — P0-4). Real
+      // creds get tested the first time a LOGGED_OUT state arises.
       await setTlsCredentials({ email: msg.email, password: msg.password });
+      await transitionTo('PREMIUM_SETUP_BOOKING_WINDOW', {});
       return { ok: true };
     }
 
@@ -524,18 +550,36 @@ async function handle(msg: Msg): Promise<unknown> {
       return { ok: true };
     }
 
-    case 'PREMIUM_SETUP_NEXT':
-    case 'PREMIUM_SETUP_BACK':
+    case 'PREMIUM_SETUP_NEXT': {
+      // Two transitions are NEXT-driven (steps with no input to save):
+      //   PREFLIGHT → CREDENTIALS    (Preflight checklist → step 1 form)
+      //   READY     → ACTIVE         (final wizard CTA — see SetupReadyToActivate)
+      // CREDENTIALS→BOOKING_WINDOW and BOOKING_WINDOW→READY are driven by
+      // their respective SAVE messages, not NEXT.
+      const { state } = await getState();
+      if (state === 'PREMIUM_PREFLIGHT') {
+        await transitionTo('PREMIUM_SETUP_CREDENTIALS', {});
+      } else if (state === 'PREMIUM_SETUP_READY') {
+        await transitionTo('PREMIUM_ACTIVE', {});
+      }
+      return { ok: true };
+    }
+
+    case 'PREMIUM_SETUP_BACK': {
+      const { state } = await getState();
+      if (state === 'PREMIUM_SETUP_CREDENTIALS') {
+        await transitionTo('PREMIUM_PREFLIGHT', {});
+      } else if (state === 'PREMIUM_SETUP_BOOKING_WINDOW') {
+        await transitionTo('PREMIUM_SETUP_CREDENTIALS', {});
+      } else if (state === 'PREMIUM_SETUP_READY') {
+        await transitionTo('PREMIUM_SETUP_BOOKING_WINDOW', {});
+      }
+      return { ok: true };
+    }
+
     case 'PREMIUM_SETUP_RESET': {
-      // Wizard navigation stubs — the popup state components own
-      // their local form state and emit save events on Continue.
-      // The state-machine transition that walks the wizard is
-      // implicit (the popup re-renders the next step on the next
-      // SAVE_* message). PHASE 4 doesn't need explicit step
-      // transitions in the SW.
-      // eslint-disable-next-line no-console
-      console.log('[Premium] wizard nav (no-op):', msg.type);
-      return { ok: true, data: { noop: true } };
+      await transitionTo('PREMIUM_PREFLIGHT', {});
+      return { ok: true };
     }
 
     default: {
