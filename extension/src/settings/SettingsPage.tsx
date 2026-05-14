@@ -57,6 +57,17 @@ const DEFAULT_SETTINGS: SettingsPayload = {
   telegramAlsoBlockers: false,
   telegramMonitoringStart: false,
   monthCyclingEnabled: false,
+  // PRD 14 §7.9 — BYO Webhook channel (UI integration is a follow-up).
+  webhookEnabled: false,
+  webhookUrl: '',
+  webhookSecret: '',
+  webhookEvents: {
+    slot: true,
+    blockers: true,
+    monitoringStart: false,
+    booking: true,
+    license: true,
+  },
 };
 
 function useSettings(): {

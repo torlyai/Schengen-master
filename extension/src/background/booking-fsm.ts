@@ -34,6 +34,7 @@ import {
   notifyBookingFailed,
   notifyRefundIssued,
 } from './telegram';
+import { notifyWebhook } from './webhook';
 
 // ───────────── Persisted active-booking state ─────────────
 
@@ -164,6 +165,15 @@ async function beginBooking(slotAt: string | null): Promise<void> {
   await setActiveBooking(active);
   await transitionTo('PREMIUM_BOOKING_IN_PROGRESS', {});
 
+  // Webhook — PRD 14 §6 row 19. Telegram booking-in-progress is gated
+  // behind a separate opt-in (chatty); webhook uses the booking class
+  // toggle, which defaults ON. Receivers that don't want this event
+  // can drop it server-side.
+  notifyWebhook('booking_in_progress', {
+    slotAtIso: slotAt,
+    startedAtIso: new Date(active.startedAt).toISOString(),
+  }).catch(() => { /* fire-and-forget */ });
+
   // Kick off the DOM-driving alarm. The content script is responsible
   // for clicking through the booking form steps. PRD §14: "Premium
   // does automate form submission inside the user's TLScontact
@@ -279,6 +289,10 @@ export async function handleBookingConfirmed(args: {
     }).catch(() => {
       /* silent */
     });
+    notifyWebhook('booking_failed', {
+      centre: active.centre ?? null,
+      reason: `Stripe charge failed: ${result.error}`,
+    }).catch(() => { /* fire-and-forget */ });
     return { ok: false, reason: result.error };
   }
 
@@ -305,6 +319,17 @@ export async function handleBookingConfirmed(args: {
     /* silent — Telegram is opt-in and best-effort */
   });
 
+  // BYO Webhook (PRD 14 §6 row 20) — fields mirror Telegram payload.
+  // No TLS credentials, no DOM contents; bookingId is the TLS-format
+  // string already approved for off-device disclosure per CLAUDE.md.
+  notifyWebhook('booked', {
+    centre: active.centre ?? null,
+    slotAtIso: active.slotAt ?? null,
+    bookingId,
+    amountPence: result.data.amountPence,
+    currency: result.data.currency,
+  }).catch(() => { /* fire-and-forget */ });
+
   return { ok: true, bookingDbId: result.data.bookingDbId };
 }
 
@@ -327,6 +352,10 @@ export async function handleBookingTimeout(): Promise<void> {
   }).catch(() => {
     /* silent */
   });
+  notifyWebhook('booking_failed', {
+    centre: active.centre ?? null,
+    reason: 'timeout_60s',
+  }).catch(() => { /* fire-and-forget */ });
 }
 
 /**
@@ -365,5 +394,10 @@ export async function refundActiveBooking(reason: string): Promise<
   }).catch(() => {
     /* silent */
   });
+  notifyWebhook('refund_issued', {
+    refundId: result.data.refundId,
+    amountPence: result.data.amountPence,
+    currency: 'gbp',
+  }).catch(() => { /* fire-and-forget */ });
   return { ok: true, refundId: result.data.refundId };
 }

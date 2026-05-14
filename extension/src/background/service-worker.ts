@@ -52,6 +52,7 @@ import {
   transitionTo,
 } from './state-machine';
 import { testConnection as testTelegram } from './telegram';
+import { testWebhookConnection } from './webhook';
 import { checkForUpdate } from './update-checker';
 import {
   getLicense,
@@ -369,6 +370,9 @@ async function handle(msg: Msg): Promise<unknown> {
 
     case 'TEST_TELEGRAM':
       return await testTelegram();
+
+    case 'TEST_WEBHOOK':
+      return await testWebhookConnection();
 
     case 'DETECTION_RESULT': {
       await applyDetection(msg.state, msg.evidence, msg.url);

@@ -66,6 +66,17 @@ export interface SettingsPayload {
   // page's default. Off by default to preserve the passive, scanner-only
   // posture; see src/content/month-cycler.ts for the policy.
   monthCyclingEnabled: boolean;
+  // PRD 14 §7.9 — BYO Webhook channel (both tiers)
+  webhookEnabled: boolean;
+  webhookUrl: string;
+  webhookSecret: string;  // optional; empty = no HMAC signing
+  webhookEvents: {
+    slot: boolean;
+    blockers: boolean;
+    monitoringStart: boolean;
+    booking: boolean;
+    license: boolean;
+  };
 }
 
 // Discriminated union of every message the SW expects to receive,
@@ -86,6 +97,7 @@ export type Msg =
   | { type: 'SETTINGS'; payload: SettingsPayload }
   | { type: 'UPDATE_SETTINGS'; patch: Partial<SettingsPayload> }
   | { type: 'TEST_TELEGRAM' }
+  | { type: 'TEST_WEBHOOK' }
   | { type: 'CHECK_UPDATE' }
   // From content script
   | { type: 'DETECTION_RESULT'; state: ExtState; evidence: string[]; url: string }

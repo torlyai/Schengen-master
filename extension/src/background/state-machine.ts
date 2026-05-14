@@ -34,6 +34,7 @@ import {
   notifyMonitoringStart as tgMonStart,
   notifyMonitoringPaused as tgMonPaused,
 } from './telegram';
+import { notifyWebhook } from './webhook';
 import { maybeAutoLoginToTls } from './tls-auto-login';
 import { getTier } from '../shared/license';
 
@@ -186,6 +187,11 @@ export async function transitionTo(next: ExtState, ctx: TransitionCtx = {}): Pro
     const target = await getTarget();
     await notify('CLOUDFLARE', target?.centre ?? null);
     tgBlocker('CLOUDFLARE', target).catch(() => { /* silent */ });
+    notifyWebhook('blocker_cloudflare', {
+      centre: target?.centre ?? null,
+      subjectCode: target?.subjectCode ?? null,
+      country: target?.country ?? null,
+    }).catch(() => { /* fire-and-forget */ });
   }
 
   if (next === 'LOGGED_OUT' && prev !== 'LOGGED_OUT') {
@@ -202,12 +208,42 @@ export async function transitionTo(next: ExtState, ctx: TransitionCtx = {}): Pro
         // standard "log back in" prompt.
         notify('LOGGED_OUT', target?.centre ?? null).catch(() => {});
         tgBlocker('LOGGED_OUT', target).catch(() => {});
+        notifyWebhook('blocker_logged_out', {
+          centre: target?.centre ?? null,
+          subjectCode: target?.subjectCode ?? null,
+          country: target?.country ?? null,
+        }).catch(() => {});
       }
     }).catch(() => {
       // Auto-login crashed — still surface the notification.
       notify('LOGGED_OUT', target?.centre ?? null).catch(() => {});
       tgBlocker('LOGGED_OUT', target).catch(() => {});
+      notifyWebhook('blocker_logged_out', {
+        centre: target?.centre ?? null,
+        subjectCode: target?.subjectCode ?? null,
+        country: target?.country ?? null,
+      }).catch(() => {});
     });
+  }
+
+  // UNKNOWN — needs user classification (PRD §6 row 9).
+  if (next === 'UNKNOWN' && prev !== 'UNKNOWN') {
+    const target = await getTarget();
+    notifyWebhook('unknown_page', {
+      centre: target?.centre ?? null,
+      subjectCode: target?.subjectCode ?? null,
+      country: target?.country ?? null,
+    }).catch(() => { /* fire-and-forget */ });
+  }
+
+  // WRONG_PAGE — logged in but on a non-workflow sub-page (PRD §6 row 10).
+  if (next === 'WRONG_PAGE' && prev !== 'WRONG_PAGE') {
+    const target = await getTarget();
+    notifyWebhook('wrong_page', {
+      centre: target?.centre ?? null,
+      subjectCode: target?.subjectCode ?? null,
+      country: target?.country ?? null,
+    }).catch(() => { /* fire-and-forget */ });
   }
 
   // Monitoring started/resumed — fire on any rising edge into NO_SLOTS from
@@ -225,6 +261,11 @@ export async function transitionTo(next: ExtState, ctx: TransitionCtx = {}): Pro
     const target = await getTarget();
     const isResume = prev === 'PAUSED' || prev === 'CLOUDFLARE' || prev === 'LOGGED_OUT';
     tgMonStart(target, isResume ? 'resumed' : 'started').catch(() => { /* silent */ });
+    notifyWebhook(isResume ? 'monitoring_resumed' : 'monitoring_started', {
+      centre: target?.centre ?? null,
+      subjectCode: target?.subjectCode ?? null,
+      country: target?.country ?? null,
+    }).catch(() => { /* fire-and-forget */ });
   }
 
   // Monitoring paused — fire on rising edge into PAUSED (user clicked the
@@ -232,6 +273,11 @@ export async function transitionTo(next: ExtState, ctx: TransitionCtx = {}): Pro
   if (next === 'PAUSED' && prev !== 'PAUSED') {
     const target = await getTarget();
     tgMonPaused(target).catch(() => { /* silent */ });
+    notifyWebhook('monitoring_paused', {
+      centre: target?.centre ?? null,
+      subjectCode: target?.subjectCode ?? null,
+      country: target?.country ?? null,
+    }).catch(() => { /* fire-and-forget */ });
   }
 
   // Tell the content script to clear/apply the tab affordance.
@@ -250,6 +296,15 @@ async function onSlotFound(_prevState: PersistedState): Promise<void> {
   } catch {
     /* Telegram failures must never crash the SW */
   }
+
+  // Webhook (PRD 14 §6 row 4) — same payload fields as Telegram. No
+  // URL, no DOM contents; data-minimisation guard in webhook.ts strips
+  // any credential-shaped keys defensively.
+  notifyWebhook('slot_available', {
+    centre: target?.centre ?? null,
+    subjectCode: target?.subjectCode ?? null,
+    country: target?.country ?? null,
+  }).catch(() => { /* fire-and-forget */ });
 }
 
 async function applyTabAffordance(state: ExtState): Promise<void> {
@@ -312,6 +367,14 @@ export async function classifyUnknown(resolution: ExtState): Promise<void> {
 export async function onAutoStopTick(): Promise<void> {
   const persisted = await getState();
   if (persisted.state === 'CLOUDFLARE' || persisted.state === 'LOGGED_OUT') {
+    const reason = persisted.state;
+    const target = await getTarget();
     await transitionTo('IDLE');
+    notifyWebhook('auto_stop', {
+      reason,
+      centre: target?.centre ?? null,
+      subjectCode: target?.subjectCode ?? null,
+      country: target?.country ?? null,
+    }).catch(() => { /* fire-and-forget */ });
   }
 }

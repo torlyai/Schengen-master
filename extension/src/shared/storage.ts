@@ -63,6 +63,17 @@ export const DEFAULT_SETTINGS: SettingsPayload = {
   telegramAlsoBlockers: false,
   telegramMonitoringStart: false,
   monthCyclingEnabled: false,
+  // PRD 14 §7.9 — BYO Webhook channel (both tiers)
+  webhookEnabled: false,
+  webhookUrl: '',
+  webhookSecret: '',
+  webhookEvents: {
+    slot: true,
+    blockers: true,
+    monitoringStart: false,
+    booking: true,
+    license: true,
+  },
 };
 
 export const DEFAULT_STATE: PersistedState = {
