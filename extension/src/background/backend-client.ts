@@ -81,8 +81,16 @@ export interface LicenseResp {
 export async function activateLicense(
   installId: string,
   setupIntentId: string,
+  uiLang?: 'en' | 'zh-CN',
 ): Promise<ApiResult<LicenseResp>> {
-  return postJson<LicenseResp>('/license/activate', { installId, setupIntentId });
+  // uiLang is forwarded so the backend can store it as
+  // vm_installs.preferred_email_locale (PRD 14 §15 / N-3a). Backend
+  // defaults to 'en' if absent — older extension builds work unchanged.
+  return postJson<LicenseResp>('/license/activate', {
+    installId,
+    setupIntentId,
+    ...(uiLang ? { uiLang } : {}),
+  });
 }
 
 export async function rebindLicense(
