@@ -14,25 +14,9 @@ import { sendMessage } from '../hooks/useStatus';
 import { LANGUAGES, setLang } from '../i18n';
 import { useT } from '../i18n/useT';
 import LangToggle from '../components/LangToggle';
+import { ApertureMark } from '../components/ApertureMark';
 
 const SOURCE_URL = 'https://github.com/torlyai/Schengen-master';
-
-// Inline aperture mark. Matches the new icon set
-// (extension/public/icons/icon-*.png + extension/public/brand/mark.svg).
-// Inlined to inherit color and avoid a runtime asset load on first paint.
-const ApertureMark: React.FC<{ size?: number }> = ({ size = 28 }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 96 96"
-    width={size}
-    height={size}
-    aria-hidden="true"
-  >
-    <circle cx="48" cy="48" r="40" fill="none" stroke="currentColor" strokeWidth="4" />
-    <path d="M 48,48 L 88,48 A 40,40 0 0 0 76.28,19.72 Z" fill="var(--green, #1e6f4a)" />
-    <circle cx="48" cy="48" r="6" fill="currentColor" />
-  </svg>
-);
 
 export const WelcomePage: React.FC = () => {
   const { t } = useT();

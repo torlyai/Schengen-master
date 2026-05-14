@@ -1027,6 +1027,16 @@ body.vm-page {
   font-family: var(--serif); font-style: italic;
   font-size: 14px; font-weight: 500;
 }
+/* Aperture variant: the SVG carries its own brand color (green wedge +
+   ink ring via currentColor) — drop the black chip + paper background
+   so the mark reads as the same glyph used on welcome + premium intro. */
+.settings-header .mark-glyph--aperture {
+  background: transparent;
+  color: var(--ink);
+  border-radius: 0;
+  width: auto; height: auto;
+  padding: 0;
+}
 
 .section {
   padding: 28px 0;

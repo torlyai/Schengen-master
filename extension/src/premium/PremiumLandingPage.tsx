@@ -17,24 +17,8 @@ import { PremiumActive } from '../popup/states/premium/PremiumActive';
 import { Booked } from '../popup/states/premium/Booked';
 import { useT } from '../i18n/useT';
 import LangToggle from '../components/LangToggle';
+import { ApertureMark } from '../components/ApertureMark';
 import type { StatusPayload } from '../shared/messages';
-
-// Inline aperture mark — same as the welcome page brand glyph.
-// Matches the new icon-{16,32,48,128}.png set.
-const ApertureMark: React.FC<{ size?: number }> = ({ size = 24 }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 96 96"
-    width={size}
-    height={size}
-    aria-hidden="true"
-    style={{ display: 'inline-block', verticalAlign: 'middle' }}
-  >
-    <circle cx="48" cy="48" r="40" fill="none" stroke="currentColor" strokeWidth="4" />
-    <path d="M 48,48 L 88,48 A 40,40 0 0 0 76.28,19.72 Z" fill="var(--green, #1e6f4a)" />
-    <circle cx="48" cy="48" r="6" fill="currentColor" />
-  </svg>
-);
 
 const SOURCE_URL = 'https://github.com/torlyai/Schengen-master';
 

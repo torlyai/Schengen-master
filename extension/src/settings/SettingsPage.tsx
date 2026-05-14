@@ -9,6 +9,7 @@ import { sendMessage, useStatus } from '../hooks/useStatus';
 import { LANGUAGES } from '../i18n';
 import { useT, useSyncLang, tInline } from '../i18n/useT';
 import LangToggle from '../components/LangToggle';
+import { ApertureMark } from '../components/ApertureMark';
 
 // ---------- Update-check helpers ----------
 
@@ -113,7 +114,9 @@ export const SettingsPage: React.FC = () => {
       <div className="settings-main">
       <header className="settings-header">
         <div className="mark">
-          <span className="mark-glyph">v</span>
+          <span className="mark-glyph mark-glyph--aperture">
+            <ApertureMark size={24} />
+          </span>
           <h1>{t('settings.title')}</h1>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
