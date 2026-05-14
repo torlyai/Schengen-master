@@ -29,6 +29,10 @@ insurance/**
 *.tiff
 *.tif
 *.bmp
+
+# ---- Exceptions: Web Store listing assets (versioned screenshots) ----
+!extension/screenshots/**/*.png
+!extension/screenshots/**/*.jpg
 *.gif
 
 # Allow-list: brand/contact assets that ship as part of the extension.

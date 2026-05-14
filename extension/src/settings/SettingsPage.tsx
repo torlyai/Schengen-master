@@ -132,7 +132,7 @@ export const SettingsPage: React.FC = () => {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <LangToggle />
-          <span>Visa Master · v1.0.0</span>
+          <span>Visa Master · v{chrome.runtime.getManifest().version}</span>
         </div>
       </header>
 
