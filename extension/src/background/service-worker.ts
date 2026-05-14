@@ -526,7 +526,7 @@ async function handle(msg: Msg): Promise<unknown> {
         includePrimeTime: msg.includePrimeTime,
       });
       await transitionTo('PREMIUM_SETUP_READY', {});
-      return { ok: true };
+      return buildStatusPayload();
     }
 
     case 'PREMIUM_SAVE_CREDENTIALS': {
@@ -539,7 +539,7 @@ async function handle(msg: Msg): Promise<unknown> {
       // creds get tested the first time a LOGGED_OUT state arises.
       await setTlsCredentials({ email: msg.email, password: msg.password });
       await transitionTo('PREMIUM_SETUP_BOOKING_WINDOW', {});
-      return { ok: true };
+      return buildStatusPayload();
     }
 
     case 'PREMIUM_FORGET_CREDENTIALS': {
@@ -556,13 +556,16 @@ async function handle(msg: Msg): Promise<unknown> {
       //   READY     → ACTIVE         (final wizard CTA — see SetupReadyToActivate)
       // CREDENTIALS→BOOKING_WINDOW and BOOKING_WINDOW→READY are driven by
       // their respective SAVE messages, not NEXT.
+      // Returns StatusPayload so useStatus.send() re-renders the popup
+      // — without that, the wizard would advance in storage but the
+      // popup React tree would stay on the previous step.
       const { state } = await getState();
       if (state === 'PREMIUM_PREFLIGHT') {
         await transitionTo('PREMIUM_SETUP_CREDENTIALS', {});
       } else if (state === 'PREMIUM_SETUP_READY') {
         await transitionTo('PREMIUM_ACTIVE', {});
       }
-      return { ok: true };
+      return buildStatusPayload();
     }
 
     case 'PREMIUM_SETUP_BACK': {
@@ -574,12 +577,12 @@ async function handle(msg: Msg): Promise<unknown> {
       } else if (state === 'PREMIUM_SETUP_READY') {
         await transitionTo('PREMIUM_SETUP_BOOKING_WINDOW', {});
       }
-      return { ok: true };
+      return buildStatusPayload();
     }
 
     case 'PREMIUM_SETUP_RESET': {
       await transitionTo('PREMIUM_PREFLIGHT', {});
-      return { ok: true };
+      return buildStatusPayload();
     }
 
     default: {
