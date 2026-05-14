@@ -43,43 +43,6 @@ This is a living document. When you fix something, move it from the open list to
 
 ---
 
-### P0-2 🟥 Wizard step transitions are unwired in the SW
-**Files:**
-- `extension/src/background/service-worker.ts:527-538` (current no-op handlers)
-- `extension/src/popup/states/premium/Preflight.tsx:45` (fires `PREMIUM_SETUP_NEXT`)
-- `extension/src/popup/states/premium/SetupCredentials.tsx:19` (fires `PREMIUM_SAVE_CREDENTIALS`)
-- `extension/src/popup/states/premium/SetupBookingWindow.tsx` (TBD which message)
-- `extension/src/popup/states/premium/VerificationGate.tsx:41` (`PREMIUM_SETUP_NEXT`)
-- `extension/src/popup/states/premium/SetupFailedRetry.tsx:37` (`PREMIUM_SETUP_NEXT`)
-- `extension/src/popup/states/premium/SetupFailedStale.tsx:45` (`PREMIUM_SETUP_NEXT`)
-
-**Behavior today:** The popup wizard renders the right component for each state (Preflight → Credentials → BookingWindow → Ready → Active), but the SW handles `PREMIUM_SETUP_NEXT` / `PREMIUM_SETUP_BACK` / `PREMIUM_SETUP_RESET` as `console.log` no-ops. So clicking "继续设置" on Preflight fires the message but no state transition happens — user is stuck.
-
-`PREMIUM_SAVE_CREDENTIALS` (SetupCredentials Continue button) is not handled at all in the SW switch — likely also a silent failure.
-
-**Why it blocks release:** Users get stuck on every wizard step post-payment. They've paid £0 (card on file), license is installed, but they can't configure the automation.
-**Acceptance:**
-- `PREMIUM_SETUP_NEXT` from `PREMIUM_PREFLIGHT` → `PREMIUM_SETUP_CREDENTIALS`
-- `PREMIUM_SAVE_CREDENTIALS` → encrypt + persist creds → `PREMIUM_SETUP_SIGNING_IN` → kick auto-login test → on success `PREMIUM_SETUP_BOOKING_WINDOW`
-- `PREMIUM_SETUP_NEXT` from `PREMIUM_SETUP_BOOKING_WINDOW` (after a SAVE) → `PREMIUM_SETUP_READY`
-- `PREMIUM_SETUP_NEXT` from `PREMIUM_SETUP_READY` → `PREMIUM_ACTIVE`
-- Each step exposes a Back affordance that fires `PREMIUM_SETUP_BACK`
-- Manual test: complete the wizard end-to-end after Stripe activation; verify popup reaches `PREMIUM_ACTIVE`.
-
----
-
-### P0-3 🟩 Stripe backend verified live ✅ — see Done table
-**File:** `torlyAI/app/api/visa-master/checkout/route.ts` and `lib/visa-master/stripe.ts`
-**Behavior today:** Extension calls `POST https://torly.ai/api/visa-master/checkout` and expects `{ checkoutUrl, sessionId }`. Unknown whether `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET` are configured in Vercel env vars for the torlyai project.
-**Why it blocks release:** Without working `/checkout`, the entire flow stalls at "Couldn't reach the checkout server".
-**Acceptance:**
-- Verify Stripe live + test mode env vars are set in Vercel (Production + Preview).
-- Run `vercel env ls` and confirm presence (counts only, not values).
-- Test by clicking 开始设置 on intro page → expect Stripe Checkout tab to open with a working session.
-- Stripe Setup Intent mode confirmed (collects card, charges £0).
-
----
-
 ### P0-4 🟦 `injectedFill()` selectors are best-guess
 **File:** `extension/src/background/tls-auto-login.ts:78-141`
 **PRD ref:** §17 risk #2.
@@ -102,28 +65,6 @@ This is a living document. When you fix something, move it from the open list to
 - Biases toward false-positives (decline submit > burn attempt)
 - Returns `{ challenge: true, signal: '<short-label>' }` for popup nudge
 - Manual test: simulate by injecting a `cf-turnstile` div on a TLS page; verify auto-login declines without recording a fail.
-
----
-
-### P1-2 🟥 `START_PREMIUM_SETUP` and `PREMIUM_ACTIVATE` are functionally redundant
-**File:** `extension/src/background/service-worker.ts:420-439` (`PREMIUM_ACTIVATE`) and `:464-490` (`START_PREMIUM_SETUP` after fix)
-**Behavior today:** After this session's fix, both message types open Stripe Checkout. `PREMIUM_ACTIVATE` was the original "P-7 Activate button" handler (designed to fire from end-of-wizard), `START_PREMIUM_SETUP` is the intro-page button. With the corrected flow (Stripe before wizard), both do the same thing.
-**Why P1:** Code smell, not a bug. Two paths to the same outcome makes maintenance harder.
-**Acceptance:**
-- Pick one canonical message (recommend `START_PREMIUM_SETUP` since it's what the intro page already fires)
-- Update any wizard component that fires `PREMIUM_ACTIVATE` to fire the canonical message
-- Remove the dead handler
-- Update the Msg union in `src/shared/messages.ts`
-
----
-
-### P1-3 🟥 No "Cancel setup" affordance on `PREMIUM_PREFLIGHT`
-**File:** `extension/src/popup/states/premium/Preflight.tsx`
-**Behavior today:** Once a user reaches Preflight (post-payment in the corrected flow), there's no way back to a non-wizard state. If they want to step away and resume later, fine — the state persists. But there's no "abandon and come back" or "go back to settings" exit ramp from any wizard step.
-**Acceptance:**
-- Add a small "Later" / "Skip for now" link in each wizard step that transitions to `PREMIUM_ACTIVE` (with a flag that the wizard wasn't completed, so the popup nudges to finish)
-- Or: a "Cancel Premium" link that fires `PREMIUM_CANCEL` (already wired in SW:454)
-- Manual test: enter wizard, click cancel, verify return to a non-wizard state.
 
 ---
 
@@ -155,15 +96,6 @@ This is a living document. When you fix something, move it from the open list to
 ---
 
 ## P2 — Polish
-
-### P2-1 🟥 Intro page tab doesn't auto-switch focus to Stripe tab
-**File:** `extension/src/background/service-worker.ts:481-488` (`START_PREMIUM_SETUP`, `chrome.tabs.create` call)
-**Behavior today:** `chrome.tabs.create({ url })` opens a new tab but doesn't make it active by default. User sees the banner change on the intro page but has to manually find the Stripe tab.
-**Acceptance:**
-- Pass `{ url, active: true }` to focus the Stripe tab.
-- Manual test: click 开始设置, expect to land on Stripe immediately.
-
----
 
 ### P2-2 🟥 Activated page lacks safety-net copy
 **File:** `torlyAI/app/visa-master/activated/page.tsx`
@@ -215,7 +147,7 @@ This is a living document. When you fix something, move it from the open list to
 
 ## Done — this branch (audit trail)
 
-These were fixed during the 2026-05-13 dogfooding session. Listed for context.
+Fixed during 2026-05-13 → 2026-05-14 dogfooding sessions. Listed for context. Items reference commits where available; the rest are uncommitted on the working tree as of 2026-05-14.
 
 | ID | What | Where |
 |---|---|---|
@@ -230,9 +162,21 @@ These were fixed during the 2026-05-13 dogfooding session. Listed for context.
 | ✅ | `tls-auto-login.ts` Cloudflare challenge scaffolding + Promise type lie fixed | extension uncommitted |
 | ✅ | **P0-3** Stripe live verification — `POST /api/visa-master/checkout` returned a working `cs_live_…` Setup Intent session (2026-05-14 session). Implies prod env vars (`STRIPE_SECRET_KEY`) are configured | torlyAI uncommitted, `app/api/visa-master/checkout/route.ts` |
 | ✅ | **P0-2** Wizard step transitions wired — `PREMIUM_SETUP_NEXT/BACK/RESET` + `PREMIUM_SAVE_CREDENTIALS`/`_BOOKING_WINDOW` now transition state; `SetupReadyToActivate` fires `PREMIUM_SETUP_NEXT` (was the stale `PREMIUM_ACTIVATE`). Lazy credential validation chosen — see code comment for rationale | extension uncommitted, `service-worker.ts` + `SetupReadyToActivate.tsx` |
-| ✅ | Stripe Setup Intent page now shows reassurance copy (`custom_text.submit.message`): "You won't be charged today. £19 is only taken when we successfully book an appointment for you — fully refundable for 24h after." | torlyAI uncommitted, `app/api/visa-master/checkout/route.ts` |
+| ✅ | Stripe Setup Intent page now shows reassurance copy (`custom_text.submit.message`): "You won't be charged today. £19 is only taken when we successfully book an appointment for you — fully refundable for 24h after." | torlyAI commit `1b22580`, `app/api/visa-master/checkout/route.ts` |
+| ✅ | Various PREMIUM UI bugs caught during 2026-05-14 manual testing: Edit options dead, Back to Active dead, Pause dropped to Free, Next-scan stuck at —, duplicate calendar icon, resume() not tier-aware. All have StatusPayload-return / tier-aware fixes. | extension uncommitted, `service-worker.ts`, `state-machine.ts`, `App.tsx`, `PremiumActive.tsx`, `PremiumPaused.tsx`, `PremiumOptions.tsx`, `SetupBookingWindow.tsx` |
+| ✅ | New `PremiumPaused` component — Premium users keep the tier badge + monitoring chrome when paused, instead of dropping to Free-tier `Paused.tsx`. Routed via new `tier` field on StatusPayload. | extension uncommitted, `popup/states/premium/PremiumPaused.tsx` + `App.tsx` |
+| ✅ | Booking Window UX upgrades: Group ID input (8-digit numeric), Visa Centre read-only display, Min Days Notice input + hint, Processing Days hint, live-update Accepting range as user types, Trip+buffer line in PremiumActive. | extension uncommitted, `PremiumOptions.tsx` + `PremiumActive.tsx` + i18n |
+| ✅ | Cancel/Manage card tucked behind `▸ Manage subscription` disclosure. | extension uncommitted, `PremiumOptions.tsx` |
+| ✅ | "Keep Visa Master scanning" reminder block at bottom of PREMIUM_ACTIVE (pinned tab, same desktop, plugged in). | extension uncommitted, `PremiumActive.tsx` + i18n |
+| ✅ | Booked page review prompt: 5 stars + "Helped you book?" copy + "Leave a review on the Chrome Web Store" CTA + dismissibility persisted via `chrome.storage.local.vmReviewDismissed`. Web Store URL configurable via `VITE_CHROME_WEB_STORE_REVIEW_URL`. | extension uncommitted, `Booked.tsx` + i18n |
+| ✅ | Settings → Support section: textarea + Attach debug info checkbox + Install ID with copy button. Send via `mailto:support@torly.ai` until backend ticket endpoint exists. | extension uncommitted, `SettingsPage.tsx` + i18n |
+| ✅ | **P1-6** `applyDetection` guard: setup wizard + booking-FSM + options states are sticky against out-of-band detections. Regression test added. | extension uncommitted, `state-machine.ts` + `tests/specs/wizard.spec.ts` |
+| ✅ | **P1-2** `PREMIUM_ACTIVATE` removed (functionally identical to `START_PREMIUM_SETUP`). Msg union shrunk; one canonical activation path. | extension uncommitted, `service-worker.ts` + `messages.ts` |
+| ✅ | **P1-3** "Skip for now →" link on Preflight + Credentials + BookingWindow. New `PREMIUM_SETUP_SKIP` message → transitions to `PREMIUM_ACTIVE` (Premium is paid; user can finish setup later via Options). Regression test added. | extension uncommitted, 3× wizard components + `service-worker.ts` + `messages.ts` + i18n |
+| ✅ | **P2-1** `chrome.tabs.create` calls in `UPGRADE_TO_PREMIUM` and `START_PREMIUM_SETUP` now pass `active: true` so the user lands on the opened tab. | extension uncommitted, `service-worker.ts` |
+| ✅ | "Recent detections" empty-state copy: "Waiting for first scan" → "Waiting for any appointment slots available." | extension uncommitted, `i18n/{en,zh}.json` |
 
-These changes are sitting on the extension working tree uncommitted (manifest stays at v1.0.9). Recommend folding them into a single follow-up commit `feat(extension): premium tier UX fixes — payment-first flow, banner, CSS gaps` once P0-2 is solved (so the wizard actually works end-to-end before we commit the surrounding scaffolding).
+Most P1/P2 fixes from this session are still on the working tree uncommitted (manifest stays at v1.0.9). The Playwright suite is green (5/5) so a single follow-up commit `feat(extension): premium tier UX polish — wizard guards, Pause/Resume tier-awareness, Options field upgrades, Booked review prompt, Support form` is safe to ship.
 
 ---
 
