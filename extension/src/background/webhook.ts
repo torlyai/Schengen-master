@@ -56,7 +56,11 @@ export type WebhookEvent =
   | 'refund_issued'
   | 'license_expiring'
   | 'license_deactivated'
-  | 'auto_login_disabled';
+  | 'auto_login_disabled'
+  // Probe event fired only by testWebhookConnection(). Distinct from
+  // every real event so receivers can hard-filter test traffic out of
+  // their main webhook handler (e.g. a Slack channel route).
+  | 'webhook_test';
 
 export interface WebhookPayload {
   event: WebhookEvent;
@@ -96,6 +100,12 @@ function classify(event: WebhookEvent): EventClass {
     case 'license_deactivated':
     case 'auto_login_disabled':
       return 'license';
+    case 'webhook_test':
+      // Test pings are user-initiated; they bypass the per-class
+      // sub-toggles in testWebhookConnection(). This classification
+      // exists only to satisfy the exhaustive switch — it's never
+      // consulted in the gating path.
+      return 'slot';
   }
 }
 
@@ -298,10 +308,10 @@ export async function notifyWebhook(
  * receiver. Returns `{ ok, error? }` the UI can render directly,
  * mirroring `testConnection` in telegram.ts.
  *
- * The probe goes out as the `slot_available` event class because we
- * don't have a separate `webhook_test` event slot in the union — but
- * the body's `payload.test = true` flag lets the receiver distinguish
- * it from a real slot notification.
+ * The probe goes out as the dedicated `webhook_test` event (distinct
+ * from `slot_available`) so receivers can hard-filter test traffic out
+ * of their main handler — e.g. a Slack channel route that drops events
+ * whose X-Visa-Master-Event header equals `webhook_test`.
  */
 export async function testWebhookConnection(): Promise<DispatchResult> {
   let settings;
@@ -330,7 +340,7 @@ export async function testWebhookConnection(): Promise<DispatchResult> {
       : await getOrCreateWebhookInstallId();
 
   const envelope: WebhookPayload = {
-    event: 'slot_available',
+    event: 'webhook_test',
     tier,
     installId,
     ts: new Date().toISOString(),
@@ -340,5 +350,5 @@ export async function testWebhookConnection(): Promise<DispatchResult> {
   const body = JSON.stringify(envelope);
 
   // Treat as an explicit user-triggered call — surface failures.
-  return dispatch(settings.webhookUrl, 'slot_available', body, settings.webhookSecret ?? '');
+  return dispatch(settings.webhookUrl, 'webhook_test', body, settings.webhookSecret ?? '');
 }

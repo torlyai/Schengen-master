@@ -36,17 +36,14 @@ function contentFor(state: ExtState, centre: string | null): NotifContent {
         title: 'Visa Master',
         message: 'TLScontact session expired\nLog back in to resume monitoring',
       };
-    // PRD 14 §6 coverage matrix rows 9, 10 — desktop pings for previously
-    // popup-only states. Body text intentionally short.
+    // PRD 14 §6 coverage matrix row 9 — desktop ping for UNKNOWN (page
+    // needs classification). WRONG_PAGE is intentionally not handled
+    // here: the matrix specifies desktop = − for that state (it's a
+    // popup-CTA event, not a desktop-notification event).
     case 'UNKNOWN':
       return {
         title: 'Visa Master',
         message: `Page needs classification — ${c}\nClick to open Visa Master`,
-      };
-    case 'WRONG_PAGE':
-      return {
-        title: 'Visa Master',
-        message: `Wrong page — ${c}\nOpen the booking workflow page`,
       };
     default:
       return { title: 'Visa Master', message: 'Status update' };
