@@ -497,6 +497,11 @@
   "premium.booked.review.body": "一条简短的评价能帮我们触达下一个被困在 TLS 不停刷新的人 — 不到一分钟即可完成。",
   "premium.booked.review.cta": "前往 Chrome 应用商店评价",
   "premium.booked.review.dismiss": "关闭评价提示",
+  "premium.booked.done.cta": "完成 — 停止监控",
+  "premium.booked.done.toast": "监控已暂停。可随时在弹窗中恢复。",
+  "premium.booked.refundExpired.title": "退款窗口已关闭",
+  "premium.booked.refundExpired.body": "我们已恢复名额监控。您可以继续或在此停止。",
+  "premium.booked.refundExpired.continue": "继续监控",
 
   "premium.bookingFailed.headerActive": "运行中",
   "premium.bookingFailed.tier": "重试",
@@ -518,6 +523,13 @@
   "premium.refund.request": "申请退款",
   "premium.refund.nevermind": "算了",
   "premium.refund.note": "退款会在 5–10 个工作日内到账。",
+  "premium.refund.note.v2": "退款会在 5–10 个工作日内到账。我们会记录退款证据以确保真实性 — 可疑模式会被审查。",
+  "premium.refund.evidence.label": "TLS 是怎么通知你的?",
+  "premium.refund.evidence.placeholder": "例如:\"TLS 今天给我发邮件说我的预约因运营原因被取消 — 也没提供新时段。\"",
+  "premium.refund.evidence.minCount": "{n} / 至少 {min} 字",
+  "premium.refund.evidence.metReq": "✓ 已填 {n} 字",
+  "premium.refund.evidence.overMax": "字数过多 — 请控制在 {max} 字以内",
+  "premium.refund.evidence.emailFull": "通过邮件发送完整证据(含截图) ↗",
 
   "premium.intro.nav.brandDot": " · Premium",
   "premium.intro.nav.compare": "对比",
@@ -657,5 +669,23 @@
   "premium.intro.final.t3": "MIT 开源",
 
   "premium.intro.footer": "© 2026 Torly AI Ltd · 与 TLScontact、法国政府或任何领事馆无关联。Visa Master 是开源软件 · MIT 协议。Premium 添加了 Stripe 与一个小型授权 API;其他与免费版完全相同。",
-  "premium.intro.footer.linkOss": "开源"
+  "premium.intro.footer.linkOss": "开源",
+
+  "premium.attribution.title": "快速提问（可选）",
+  "premium.attribution.question": "你是如何得知 Visa Master 的？",
+  "premium.attribution.placeholder": "— 请选择 —",
+  "premium.attribution.choice.reddit": "Reddit",
+  "premium.attribution.choice.twitter": "Twitter / X",
+  "premium.attribution.choice.tiktok": "TikTok",
+  "premium.attribution.choice.youtube": "YouTube",
+  "premium.attribution.choice.friend": "朋友告诉我的",
+  "premium.attribution.choice.google": "Google 搜索",
+  "premium.attribution.choice.cws_organic": "Chrome 应用商店浏览",
+  "premium.attribution.choice.other": "其他（请告诉我们）",
+  "premium.attribution.choice.skip": "跳过",
+  "premium.attribution.detailPlaceholder": "请告诉我们来源…（最多 200 字）",
+  "premium.attribution.helper": "只是帮助我们了解该把精力放在哪个渠道。你可以跳过 — 完全没问题。",
+
+  "welcome.tiers.premium.bullet.5": "浏览器类型与版本、扩展版本、操作系统（用于技术支持诊断）",
+  "welcome.tiers.premium.bullet.6": "你对「你是如何得知我们的？」问题的回答（可选）"
 }

@@ -29,7 +29,7 @@ import type { StatusPayload } from '../shared/messages';
 import { transitionTo } from './state-machine';
 import { getLicense } from '../shared/license';
 import { captureBooking, requestRefund } from './backend-client';
-import { getTarget } from '../shared/storage';
+import { getTarget, getState } from '../shared/storage';
 import {
   notifyBookingConfirmed,
   notifyBookingFailed,
@@ -58,9 +58,12 @@ interface ActiveBooking {
 }
 
 const ACTIVE_BOOKING_KEY = 'activeBooking';
+const PREVIOUS_BOOKING_KEY = 'previousBooking';
 const LAST_BOOKED_KEY = 'lastBookedAt';
 const BOOKING_BUDGET_MS = 60_000;
 const BOOKING_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+const REFUND_WINDOW_MS = 24 * 60 * 60 * 1000;
+export const REFUND_WINDOW_EXPIRED_ALARM = 'VM_REFUND_WINDOW_EXPIRED';
 
 export async function getActiveBooking(): Promise<ActiveBooking | null> {
   const v = await chrome.storage.local.get(ACTIVE_BOOKING_KEY);
@@ -73,6 +76,18 @@ export async function setActiveBooking(b: ActiveBooking | null): Promise<void> {
   } else {
     await chrome.storage.local.set({ [ACTIVE_BOOKING_KEY]: b });
   }
+}
+
+export async function getPreviousBooking(): Promise<ActiveBooking | null> {
+  const v = await chrome.storage.local.get(PREVIOUS_BOOKING_KEY);
+  return (v[PREVIOUS_BOOKING_KEY] as ActiveBooking | undefined) ?? null;
+}
+
+async function archiveActiveBooking(): Promise<void> {
+  const active = await getActiveBooking();
+  if (!active) return;
+  await chrome.storage.local.set({ [PREVIOUS_BOOKING_KEY]: active });
+  await chrome.storage.local.remove(ACTIVE_BOOKING_KEY);
 }
 
 async function getLastBookedAt(): Promise<number | null> {
@@ -334,6 +349,10 @@ export async function handleBookingConfirmed(args: {
 
   await transitionTo('PREMIUM_BOOKED', {});
 
+  // N-7: schedule auto-return to PREMIUM_ACTIVE when the 24h refund window
+  // closes. chrome.alarms survives SW eviction; setTimeout wouldn't.
+  await scheduleRefundWindowExpiredAlarm(active.capturedAt);
+
   // Fire Telegram notification. Email is sent server-side by Stripe
   // (the receipt) and by the backend's webhook handler (PHASE 5
   // transactional emails — out of scope for the extension).
@@ -391,7 +410,10 @@ export async function handleBookingTimeout(): Promise<void> {
  * captured booking on the install (refund window is 24h — backend
  * enforces).
  */
-export async function refundActiveBooking(reason: string): Promise<
+export async function refundActiveBooking(
+  reason: string,
+  evidenceText: string,
+): Promise<
   { ok: true; refundId: string } | { ok: false; error: string }
 > {
   const active = await getActiveBooking();
@@ -407,6 +429,10 @@ export async function refundActiveBooking(reason: string): Promise<
     bookingDbId: active.bookingDbId ?? undefined,
     stripePaymentIntentId: active.stripePaymentIntentId ?? undefined,
     reason,
+    // PRD 20 (N-8): omit when empty so the backend treats it as the
+    // legacy/admin path. The popup UI guarantees a non-empty string
+    // when this function is invoked from PREMIUM_REQUEST_REFUND.
+    evidenceText: evidenceText.trim() ? evidenceText : undefined,
   });
 
   if (!result.ok) {
@@ -415,6 +441,7 @@ export async function refundActiveBooking(reason: string): Promise<
 
   // Refunded — clear the active booking; the user can keep scanning.
   await setActiveBooking(null);
+  await chrome.alarms.clear(REFUND_WINDOW_EXPIRED_ALARM);
   await transitionTo('PREMIUM_ACTIVE', {});
   notifyRefundIssued({
     amountPence: result.data.amountPence,
@@ -428,4 +455,80 @@ export async function refundActiveBooking(reason: string): Promise<
     currency: 'gbp',
   }).catch(() => { /* fire-and-forget */ });
   return { ok: true, refundId: result.data.refundId };
+}
+
+// ───────────── N-7: multi-booking after refund window ─────────────
+
+async function scheduleRefundWindowExpiredAlarm(capturedAtIso: string | undefined): Promise<void> {
+  if (!capturedAtIso) return;
+  const capturedAtMs = Date.parse(capturedAtIso);
+  if (!Number.isFinite(capturedAtMs)) return;
+  const fireAt = capturedAtMs + REFUND_WINDOW_MS;
+  // chrome.alarms.create accepts a past `when` — it fires immediately on the
+  // next event loop. That's fine; the handler is idempotent.
+  await chrome.alarms.create(REFUND_WINDOW_EXPIRED_ALARM, { when: fireAt });
+}
+
+/**
+ * Called by the SW alarm handler when VM_REFUND_WINDOW_EXPIRED fires.
+ *
+ * Idempotent: checks current state and the existence of an activeBooking
+ * before doing anything. Safe to invoke from multiple paths (the popup's
+ * "Continue watching" CTA in §9.2 of PRD 19 calls this too).
+ */
+export async function handleRefundWindowExpired(): Promise<void> {
+  const active = await getActiveBooking();
+  if (!active) {
+    // User refunded or stopped watching before the alarm fired. No-op.
+    return;
+  }
+  const state = await getState();
+  if (state.state !== 'PREMIUM_BOOKED') {
+    // We're not in the booked state — someone else moved us. Don't clobber.
+    await chrome.alarms.clear(REFUND_WINDOW_EXPIRED_ALARM);
+    return;
+  }
+  await archiveActiveBooking();
+  await chrome.alarms.clear(REFUND_WINDOW_EXPIRED_ALARM);
+  await transitionTo('PREMIUM_ACTIVE', {});
+}
+
+/**
+ * Handler for PREMIUM_STOP_WATCHING (P-14 "Done — stop watching" button).
+ * Available from PREMIUM_BOOKED at any point in the booking lifecycle.
+ * Transitions to PAUSED; the existing PAUSED-resume affordance lets the
+ * user come back later.
+ */
+export async function handleStopWatching(): Promise<void> {
+  await archiveActiveBooking();
+  await chrome.alarms.clear(REFUND_WINDOW_EXPIRED_ALARM);
+  await transitionTo('PAUSED', {});
+}
+
+/**
+ * One-shot migration for users upgrading from v1.1 → v1.2 while in
+ * PREMIUM_BOOKED. v1.1 never scheduled the refund-window alarm, so without
+ * this they would be permanently stuck.
+ *
+ * Run from service-worker.ts on every cold start. Idempotent.
+ */
+export async function migrateStrandedBookedState(): Promise<void> {
+  const active = await getActiveBooking();
+  if (!active?.capturedAt) return;
+  const capturedAtMs = Date.parse(active.capturedAt);
+  if (!Number.isFinite(capturedAtMs)) return;
+  const elapsed = Date.now() - capturedAtMs;
+
+  if (elapsed >= REFUND_WINDOW_MS) {
+    // Refund window already closed. Move on.
+    await handleRefundWindowExpired();
+    return;
+  }
+
+  // Refund window still open. Ensure the alarm is scheduled. (chrome.alarms
+  // are restored across reloads but a v1.1 install never set one.)
+  const existing = await chrome.alarms.get(REFUND_WINDOW_EXPIRED_ALARM);
+  if (!existing) {
+    await scheduleRefundWindowExpiredAlarm(active.capturedAt);
+  }
 }

@@ -70,6 +70,11 @@ import {
   handleBookingConfirmed,
   handleBookingTimeout,
   refundActiveBooking,
+  handleRefundWindowExpired,
+  handleStopWatching,
+  migrateStrandedBookedState,
+  getActiveBooking,
+  REFUND_WINDOW_EXPIRED_ALARM,
 } from './booking-fsm';
 
 // ---------- Install / startup ----------
@@ -109,6 +114,10 @@ chrome.runtime.onStartup?.addListener(async () => {
     // have dropped the POLL_ALARM (sleep/wake on macOS in particular).
     // If state still expects polling, ensure the alarm is registered.
     await healPollAlarm();
+    // PRD 19 (N-7) §11: rescue any v1.1 install left stranded in
+    // PREMIUM_BOOKED past its refund window. Idempotent; no-op for
+    // installs with no activeBooking.
+    await migrateStrandedBookedState();
   } catch {
     /* ignore */
   }
@@ -193,6 +202,13 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     // a BOOKING_CONFIRMED message. Fail the attempt cleanly with
     // no charge (PRD §12).
     await handleBookingTimeout();
+    return;
+  }
+
+  if (alarm.name === REFUND_WINDOW_EXPIRED_ALARM) {
+    // PRD 19 (N-7): 24h refund window has closed. Auto-return to
+    // PREMIUM_ACTIVE so the user can book a second slot if needed.
+    await handleRefundWindowExpired();
     return;
   }
 });
@@ -486,9 +502,21 @@ async function handle(msg: Msg): Promise<unknown> {
       return buildStatusPayload();
     }
 
+    case 'OPEN_REFUND_PROMPT': {
+      // PRD 20 (N-8): Booked screen "Slot was cancelled by TLS" link
+      // navigates here so the user can fill the required evidence text
+      // before firing the actual refund.
+      await transitionTo('PREMIUM_REFUND_PROMPT', {});
+      return buildStatusPayload();
+    }
+
     case 'CLOSE_PREMIUM_OPTIONS': {
-      // Body Back link or "Never mind" on RefundPrompt → return to ACTIVE.
-      await transitionTo('PREMIUM_ACTIVE', {});
+      // Body Back link or "Never mind" on RefundPrompt → return to the
+      // sensible prior state. If a booking is still active (user backed
+      // out of the refund flow), return to PREMIUM_BOOKED rather than
+      // dropping them into PREMIUM_ACTIVE (which would hide the booking).
+      const active = await getActiveBooking();
+      await transitionTo(active ? 'PREMIUM_BOOKED' : 'PREMIUM_ACTIVE', {});
       return buildStatusPayload();
     }
 
@@ -496,9 +524,17 @@ async function handle(msg: Msg): Promise<unknown> {
       // PRD §6.5. PHASE 4: booking-fsm.ts persists the booking IDs at
       // capture time, so we can refund without a server lookup.
       // Backend enforces the 24h window — if elapsed, we surface the
-      // backend's 409 response back to the popup.
-      const result = await refundActiveBooking(msg.reason);
+      // backend's 409 response back to the popup. PRD 20 (N-8) adds
+      // evidenceText, validated client-side (≥20 chars in RefundPrompt).
+      const result = await refundActiveBooking(msg.reason, msg.evidenceText);
       return result;
+    }
+
+    case 'PREMIUM_STOP_WATCHING': {
+      // PRD 19 (N-7): user explicitly opts out of further monitoring
+      // from the P-14 Booked screen. Archive the booking and pause.
+      await handleStopWatching();
+      return buildStatusPayload();
     }
 
     case 'PREMIUM_SAVE_BOOKING_WINDOW': {

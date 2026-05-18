@@ -11,6 +11,12 @@
 //     the hero shows a single PremiumActive mock for the visual anchor.
 //
 // Hi-fi files preserved as reference at /tmp/tls-design/premium-parts.jsx.
+//
+// v1.2.0: Added AttributionQuestion block (PRD 17 §7.4, wireframe §13a).
+// Shown once per install, between FAQ and Final CTA, before the user clicks
+// "Activate Premium". Saves answer to chrome.storage.local (attributionSource,
+// attributionDetail, attributionAsked) so the next activateLicense() call
+// picks them up automatically.
 import React from 'react';
 import { sendMessage } from '../hooks/useStatus';
 import { PremiumActive } from '../popup/states/premium/PremiumActive';
@@ -19,8 +25,178 @@ import { useT } from '../i18n/useT';
 import LangToggle from '../components/LangToggle';
 import { ApertureMark } from '../components/ApertureMark';
 import type { StatusPayload } from '../shared/messages';
+import {
+  getAttribution,
+  setAttribution,
+  type AttributionSource,
+} from '../shared/storage';
 
 const SOURCE_URL = 'https://github.com/torlyai/Schengen-master';
+
+// ──────────────────────────────────────────────────────────────
+// Attribution question (v1.2.0 — PRD 17 §7.4, wireframe §13a)
+// ──────────────────────────────────────────────────────────────
+
+/** Maps the raw storage value to its i18n key suffix for the dropdown. */
+const ATTRIBUTION_CHOICES: { value: AttributionSource; key: string }[] = [
+  { value: 'reddit', key: 'reddit' },
+  { value: 'twitter', key: 'twitter' },
+  { value: 'tiktok', key: 'tiktok' },
+  { value: 'youtube', key: 'youtube' },
+  { value: 'friend', key: 'friend' },
+  { value: 'google', key: 'google' },
+  { value: 'cws_organic', key: 'cws_organic' },
+  { value: 'other', key: 'other' },
+  { value: 'skip', key: 'skip' },
+];
+
+/**
+ * AttributionQuestion — renders the "How did you hear about Visa Master?"
+ * optional dropdown shown once before the user activates Premium.
+ *
+ * Behaviour per wireframe §13a:
+ * - Hidden if `attributionAsked === true` in storage (already answered).
+ * - Dropdown immediately saves the selection and marks the question as asked.
+ * - Selecting "Other" reveals a free-text input (max 200 chars).
+ * - The saved values are picked up by activateLicense() automatically.
+ */
+const AttributionQuestion: React.FC = () => {
+  const { t } = useT();
+  const [loaded, setLoaded] = React.useState(false);
+  const [alreadyAsked, setAlreadyAsked] = React.useState(false);
+  const [selectedSource, setSelectedSource] = React.useState<AttributionSource | ''>('');
+  const [otherDetail, setOtherDetail] = React.useState('');
+
+  // Load persisted state on mount — if the user has already answered,
+  // don't render the question again.
+  React.useEffect(() => {
+    getAttribution().then((attr) => {
+      if (attr.attributionAsked) {
+        setAlreadyAsked(true);
+      } else if (attr.attributionSource) {
+        // Partial state: question opened but not fully committed (e.g. the
+        // user navigated away and came back). Restore their selection.
+        setSelectedSource(attr.attributionSource);
+        setOtherDetail(attr.attributionDetail ?? '');
+      }
+      setLoaded(true);
+    });
+  }, []);
+
+  // Don't render anything until we know the attribution state, to avoid
+  // a brief flash of the question for users who already answered.
+  if (!loaded || alreadyAsked) return null;
+
+  const handleSourceChange = async (value: string) => {
+    if (!value) return; // placeholder selected — do nothing yet
+    const source = value as AttributionSource;
+    setSelectedSource(source);
+    // Save immediately. If the user closes the page right after selecting,
+    // we still capture the answer (high-intent abandoner data — PRD §7.4.2).
+    await setAttribution({
+      attributionAsked: true,
+      attributionSource: source,
+      // Preserve existing detail if user switches back to 'other'.
+      attributionDetail: source === 'other' ? otherDetail || null : null,
+    });
+  };
+
+  const handleDetailChange = async (value: string) => {
+    const trimmed = value.slice(0, 200); // client-side max enforcement
+    setOtherDetail(trimmed);
+    // Update storage on every keystroke so the SW picks up the latest value
+    // even if the user clicks "Activate Premium" before typing is finished.
+    await setAttribution({
+      attributionAsked: true,
+      attributionSource: 'other',
+      attributionDetail: trimmed || null,
+    });
+  };
+
+  return (
+    <section
+      className="sec sec--tight"
+      style={{ paddingTop: 0, borderTop: 'none' }}
+      aria-label={t('premium.attribution.title')}
+    >
+      <div className="lp__container">
+        <div
+          className="disclose"
+          style={{
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            gap: 12,
+            padding: '20px 24px',
+            borderRadius: 8,
+            background: 'var(--paper-2)',
+            border: '1px solid var(--rule)',
+          }}
+        >
+          <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)' }}>
+            {t('premium.attribution.title')}
+          </div>
+          <div style={{ fontSize: 13.5, color: 'var(--ink)', marginBottom: 4 }}>
+            {t('premium.attribution.question')}
+          </div>
+
+          {/* Dropdown */}
+          <select
+            value={selectedSource}
+            onChange={(e) => handleSourceChange(e.target.value)}
+            style={{
+              width: '100%',
+              maxWidth: 380,
+              padding: '8px 10px',
+              fontSize: 13.5,
+              border: '1px solid var(--rule)',
+              borderRadius: 6,
+              background: 'var(--surface)',
+              color: selectedSource ? 'var(--ink)' : 'var(--muted)',
+              cursor: 'pointer',
+            }}
+            aria-label={t('premium.attribution.question')}
+          >
+            <option value="" disabled>
+              {t('premium.attribution.placeholder')}
+            </option>
+            {ATTRIBUTION_CHOICES.map(({ value, key }) => (
+              <option key={value} value={value}>
+                {t(`premium.attribution.choice.${key}`)}
+              </option>
+            ))}
+          </select>
+
+          {/* Free-text input — only shown when "Other" is selected */}
+          {selectedSource === 'other' && (
+            <input
+              type="text"
+              value={otherDetail}
+              onChange={(e) => handleDetailChange(e.target.value)}
+              maxLength={200}
+              placeholder={t('premium.attribution.detailPlaceholder')}
+              style={{
+                width: '100%',
+                maxWidth: 380,
+                padding: '8px 10px',
+                fontSize: 13,
+                border: '1px solid var(--rule)',
+                borderRadius: 6,
+                background: 'var(--surface)',
+                color: 'var(--ink)',
+              }}
+              aria-label={t('premium.attribution.detailPlaceholder')}
+            />
+          )}
+
+          {/* Helper text */}
+          <div style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.5 }}>
+            {t('premium.attribution.helper')}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
 
 // Mock StatusPayload for the hero popup previews. None of the SW message
 // machinery runs on this page — these are static visual anchors.
@@ -121,7 +297,7 @@ const Hero: React.FC<{ onStart: () => void }> = ({ onStart }) => {
               <span className="p-hero__eyebrow-glyph">★</span>
               {t('premium.intro.hero.eyebrow')}
               <span className="sep" />
-              v1.1.0
+              v1.2.0
             </div>
 
             <h1 className="p-hero__h1">
@@ -539,6 +715,10 @@ export const PremiumLandingPage: React.FC = () => {
       <HowItWorks />
       <Disclose />
       <Faq />
+      {/* Attribution question — shown once per install, before the Activate CTA.
+          Saves answer to storage; activateLicense() picks it up automatically.
+          Renders nothing if already answered (attributionAsked === true). */}
+      <AttributionQuestion />
       <Final onStart={startSetup} />
       <FooterStrip />
     </div>

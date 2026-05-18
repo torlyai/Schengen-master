@@ -139,8 +139,10 @@ export type Msg =
   | { type: 'PREMIUM_CANCEL' }                           // popup Cancel button
   | { type: 'OPEN_PREMIUM_OPTIONS' }                     // header More → P-12
   | { type: 'CLOSE_PREMIUM_OPTIONS' }                    // P-12 ← Back
-  | { type: 'PREMIUM_REQUEST_REFUND'; reason: string }   // P-16
+  | { type: 'OPEN_REFUND_PROMPT' }                       // P-14 → P-16 (PRD 20)
+  | { type: 'PREMIUM_REQUEST_REFUND'; reason: string; evidenceText: string }   // P-16 (PRD 20 / N-8)
   | { type: 'PREMIUM_FORGET_CREDENTIALS' }               // P-12 danger button
+  | { type: 'PREMIUM_STOP_WATCHING' }                    // P-14 "Done" — N-7
   // From license-relay content script (torly.ai/visa-master/activated)
   | { type: 'PREMIUM_INSTALL_LICENSE'; licenseToken: string };
 

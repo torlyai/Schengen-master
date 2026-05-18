@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Visa Master — Schengen Visa Slot Watcher (TLScontact)",
   "short_name": "Visa Master",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Stop refreshing TLScontact. Get a phone + desktop ping the second a Schengen visa slot opens. Local-only, no servers.",
   "homepage_url": "https://github.com/torlyai/Schengen-master",
   "author": "Torly AI",
