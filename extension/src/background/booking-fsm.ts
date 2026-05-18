@@ -410,7 +410,10 @@ export async function handleBookingTimeout(): Promise<void> {
  * captured booking on the install (refund window is 24h — backend
  * enforces).
  */
-export async function refundActiveBooking(reason: string): Promise<
+export async function refundActiveBooking(
+  reason: string,
+  evidenceText: string,
+): Promise<
   { ok: true; refundId: string } | { ok: false; error: string }
 > {
   const active = await getActiveBooking();
@@ -426,6 +429,10 @@ export async function refundActiveBooking(reason: string): Promise<
     bookingDbId: active.bookingDbId ?? undefined,
     stripePaymentIntentId: active.stripePaymentIntentId ?? undefined,
     reason,
+    // PRD 20 (N-8): omit when empty so the backend treats it as the
+    // legacy/admin path. The popup UI guarantees a non-empty string
+    // when this function is invoked from PREMIUM_REQUEST_REFUND.
+    evidenceText: evidenceText.trim() ? evidenceText : undefined,
   });
 
   if (!result.ok) {

@@ -523,6 +523,13 @@
   "premium.refund.request": "申请退款",
   "premium.refund.nevermind": "算了",
   "premium.refund.note": "退款会在 5–10 个工作日内到账。",
+  "premium.refund.note.v2": "退款会在 5–10 个工作日内到账。我们会记录退款证据以确保真实性 — 可疑模式会被审查。",
+  "premium.refund.evidence.label": "TLS 是怎么通知你的?",
+  "premium.refund.evidence.placeholder": "例如:\"TLS 今天给我发邮件说我的预约因运营原因被取消 — 也没提供新时段。\"",
+  "premium.refund.evidence.minCount": "{n} / 至少 {min} 字",
+  "premium.refund.evidence.metReq": "✓ 已填 {n} 字",
+  "premium.refund.evidence.overMax": "字数过多 — 请控制在 {max} 字以内",
+  "premium.refund.evidence.emailFull": "通过邮件发送完整证据(含截图) ↗",
 
   "premium.intro.nav.brandDot": " · Premium",
   "premium.intro.nav.compare": "对比",

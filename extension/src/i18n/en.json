@@ -520,6 +520,13 @@
   "premium.refund.request": "Request refund",
   "premium.refund.nevermind": "Never mind",
   "premium.refund.note": "Refunds take 5–10 business days to appear on your card.",
+  "premium.refund.note.v2": "Refunds take 5–10 business days to appear on your card. We log evidence to keep refunds honest — suspicious patterns are reviewed.",
+  "premium.refund.evidence.label": "What did TLS tell you?",
+  "premium.refund.evidence.placeholder": "e.g. \"TLS emailed me today saying my appointment is cancelled due to operational reasons — they didn't offer a new slot.\"",
+  "premium.refund.evidence.minCount": "{n} / {min} minimum",
+  "premium.refund.evidence.metReq": "✓ {n} characters",
+  "premium.refund.evidence.overMax": "Too long — please keep under {max} characters",
+  "premium.refund.evidence.emailFull": "Send full evidence with screenshots ↗",
 
   "premium.intro.nav.brandDot": " · Premium",
   "premium.intro.nav.compare": "Compare",

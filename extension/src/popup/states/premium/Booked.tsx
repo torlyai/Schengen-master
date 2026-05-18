@@ -100,7 +100,11 @@ export const Booked: React.FC<PremiumStateProps> = ({ status, send }) => {
         style={{ color: 'var(--ink-2)', borderColor: 'var(--rule)' }}
         onClick={(e) => {
           e.preventDefault();
-          send({ type: 'PREMIUM_REQUEST_REFUND', reason: '' });
+          // PRD 20 (N-8): navigate to P-16 RefundPrompt to collect
+          // evidence + reason. Previously fired PREMIUM_REQUEST_REFUND
+          // directly which skipped the prompt and refunded with empty
+          // reason — undocumented shortcut, not the documented flow.
+          send({ type: 'OPEN_REFUND_PROMPT' });
         }}
       >
         {t('premium.booked.refundLink')}
@@ -108,22 +112,25 @@ export const Booked: React.FC<PremiumStateProps> = ({ status, send }) => {
 
       {/* PRD 19 (N-7): explicit "I'm done" opt-out. Visible throughout the
           booking lifecycle so users who got their visa can stop monitoring
-          without waiting 24h for the auto-return. */}
-      <a
-        className="body-lnk"
-        href="#"
-        style={{
-          color: 'var(--ink-2)',
-          borderColor: 'var(--rule)',
-          marginTop: 8,
-        }}
-        onClick={(e) => {
-          e.preventDefault();
-          send({ type: 'PREMIUM_STOP_WATCHING' });
-        }}
-      >
-        {t('premium.booked.done.cta')}
-      </a>
+          without waiting 24h for the auto-return. Wrapped in a block <div>
+          because .body-lnk is `display: inline-flex` — without this wrapper
+          it sits side-by-side with the refund link above. */}
+      <div style={{ marginTop: 8 }}>
+        <a
+          className="body-lnk"
+          href="#"
+          style={{
+            color: 'var(--ink-2)',
+            borderColor: 'var(--rule)',
+          }}
+          onClick={(e) => {
+            e.preventDefault();
+            send({ type: 'PREMIUM_STOP_WATCHING' });
+          }}
+        >
+          {t('premium.booked.done.cta')}
+        </a>
+      </div>
 
       {!reviewDismissed && (
         <div

@@ -277,6 +277,10 @@ export interface RefundBody {
   bookingDbId?: string;
   stripePaymentIntentId?: string;
   reason: string;
+  // PRD 20 (N-8): user-supplied description of what TLS told them.
+  // Required by the popup UI (≥20 chars), optional at the API layer
+  // so admin-initiated refunds can bypass.
+  evidenceText?: string;
 }
 export interface RefundResp {
   refundId: string;
