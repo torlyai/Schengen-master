@@ -113,6 +113,9 @@ export const WelcomePage: React.FC = () => {
               <li>{t('welcome.tiers.premium.bullet.2')}</li>
               <li>{t('welcome.tiers.premium.bullet.3')}</li>
               <li>{t('welcome.tiers.premium.bullet.4')}</li>
+              {/* v1.2.0 — disclosure of new metadata fields collected at activation */}
+              <li>{t('welcome.tiers.premium.bullet.5')}</li>
+              <li>{t('welcome.tiers.premium.bullet.6')}</li>
             </ul>
             <div className="tier-card__price">
               {t('welcome.tiers.premium.price')}

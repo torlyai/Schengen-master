@@ -654,5 +654,23 @@
   "premium.intro.final.t3": "MIT SOURCE",
 
   "premium.intro.footer": "© 2026 Torly AI Ltd · Not affiliated with TLScontact, the French government, or any consulate. Visa Master is open source · MIT licensed. Premium adds Stripe + a small licensing API; everything else is identical to Free.",
-  "premium.intro.footer.linkOss": "open source"
+  "premium.intro.footer.linkOss": "open source",
+
+  "premium.attribution.title": "Quick question (optional)",
+  "premium.attribution.question": "How did you hear about Visa Master?",
+  "premium.attribution.placeholder": "— Select an answer —",
+  "premium.attribution.choice.reddit": "Reddit",
+  "premium.attribution.choice.twitter": "Twitter / X",
+  "premium.attribution.choice.tiktok": "TikTok",
+  "premium.attribution.choice.youtube": "YouTube",
+  "premium.attribution.choice.friend": "A friend told me",
+  "premium.attribution.choice.google": "Google search",
+  "premium.attribution.choice.cws_organic": "Chrome Web Store browse",
+  "premium.attribution.choice.other": "Other (please tell us)",
+  "premium.attribution.choice.skip": "Skip",
+  "premium.attribution.detailPlaceholder": "Tell us where… (max 200 chars)",
+  "premium.attribution.helper": "Just helps us know where to focus our marketing time. You can skip — that's OK.",
+
+  "welcome.tiers.premium.bullet.5": "Browser type and version, extension version, OS (for support diagnostics)",
+  "welcome.tiers.premium.bullet.6": "Your answer to 'how did you hear about us?' (optional)"
 }

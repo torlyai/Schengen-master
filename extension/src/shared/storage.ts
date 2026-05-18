@@ -1,13 +1,23 @@
 // Thin, typed wrappers around chrome.storage.local.
 //
 // Keys (must remain stable — UI agent reads from these too):
-//   settings        : SettingsPayload
-//   state           : { state: ExtState; lastCheckTs; nextCheckTs; evidence; slotDetectedTs }
-//   target          : { url, centre, subjectCode, country }
-//   stats           : { date: 'YYYY-MM-DD', checks: number, slots: number }
-//   consent         : { tsGranted: number, version: string }
-//   bookingWindow   : { travelDate, visaProcessingDays, minDaysNotice, includePrimeTime, groupId }
-//                     — Premium only (PRD docs/09 §8.4)
+//   settings          : SettingsPayload
+//   state             : { state: ExtState; lastCheckTs; nextCheckTs; evidence; slotDetectedTs }
+//   target            : { url, centre, subjectCode, country }
+//   stats             : { date: 'YYYY-MM-DD', checks: number, slots: number }
+//   consent           : { tsGranted: number, version: string }
+//   bookingWindow     : { travelDate, visaProcessingDays, minDaysNotice, includePrimeTime, groupId }
+//                       — Premium only (PRD docs/09 §8.4)
+//   attributionAsked  : boolean — true once the user has seen and answered (or skipped) the
+//                       "How did you hear about us?" question on the Premium intro page.
+//                       Gate: only shown once per install. (PRD 17 §7.4.2)
+//   attributionSource : string | null — self-reported acquisition channel. Accepted values:
+//                       'reddit' | 'twitter' | 'tiktok' | 'youtube' | 'friend' | 'google' |
+//                       'cws_organic' | 'other' | 'skip'. null = question not yet answered.
+//                       PREMIUM ONLY — never sent from the Free path.
+//   attributionDetail : string | null — free-text detail for 'other' source (max 200 chars).
+//                       null when source is not 'other' or not yet answered.
+//                       PREMIUM ONLY — never sent from the Free path.
 
 import type { SettingsPayload } from './messages';
 import type { ExtState } from './states';
@@ -328,6 +338,70 @@ export async function getConsent(): Promise<PersistedConsent | null> {
 
 export async function setConsent(c: PersistedConsent): Promise<void> {
   await setRaw('consent', c);
+}
+
+// ---------- attribution (Premium only) ----------
+//
+// Captures the self-reported acquisition channel from the "How did you hear
+// about us?" question shown once on the Premium intro page. These values are
+// sent to torly.ai only from the Premium activation path — never from Free.
+//
+// Storage keys are permanent (installed users lose data on rename).
+// Accepted values for attributionSource mirror the backend enum in
+// lib/visa-master/attribution.ts (to be added by Stream A).
+
+/** Accepted values for the attribution source field. */
+export type AttributionSource =
+  | 'reddit'
+  | 'twitter'
+  | 'tiktok'
+  | 'youtube'
+  | 'friend'
+  | 'google'
+  | 'cws_organic'
+  | 'other'
+  | 'skip';
+
+export interface PersistedAttribution {
+  /** True once the question has been shown and the user has answered or skipped. */
+  attributionAsked: boolean;
+  /**
+   * The source chosen. null = never asked (or the question appeared but
+   * the user dismissed the page without selecting anything).
+   * 'skip' = they explicitly chose Skip.
+   */
+  attributionSource: AttributionSource | null;
+  /**
+   * Free-text detail when attributionSource === 'other'. null otherwise.
+   * Server-side max is 200 chars; client enforces the same via maxLength.
+   */
+  attributionDetail: string | null;
+}
+
+export async function getAttribution(): Promise<PersistedAttribution> {
+  const asked = await getRaw<boolean>('attributionAsked');
+  const source = await getRaw<AttributionSource | null>('attributionSource');
+  const detail = await getRaw<string | null>('attributionDetail');
+  return {
+    attributionAsked: asked ?? false,
+    attributionSource: source ?? null,
+    attributionDetail: detail ?? null,
+  };
+}
+
+export async function setAttribution(
+  patch: Partial<PersistedAttribution>,
+): Promise<PersistedAttribution> {
+  const current = await getAttribution();
+  const merged: PersistedAttribution = { ...current, ...patch };
+  // Write each key independently to match the storage contract (individual
+  // keys, not a nested object) so reads stay simple.
+  await chrome.storage.local.set({
+    attributionAsked: merged.attributionAsked,
+    attributionSource: merged.attributionSource,
+    attributionDetail: merged.attributionDetail,
+  });
+  return merged;
 }
 
 // ---------- subscribe ----------

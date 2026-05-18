@@ -657,5 +657,23 @@
   "premium.intro.final.t3": "MIT 开源",
 
   "premium.intro.footer": "© 2026 Torly AI Ltd · 与 TLScontact、法国政府或任何领事馆无关联。Visa Master 是开源软件 · MIT 协议。Premium 添加了 Stripe 与一个小型授权 API;其他与免费版完全相同。",
-  "premium.intro.footer.linkOss": "开源"
+  "premium.intro.footer.linkOss": "开源",
+
+  "premium.attribution.title": "快速提问（可选）",
+  "premium.attribution.question": "你是如何得知 Visa Master 的？",
+  "premium.attribution.placeholder": "— 请选择 —",
+  "premium.attribution.choice.reddit": "Reddit",
+  "premium.attribution.choice.twitter": "Twitter / X",
+  "premium.attribution.choice.tiktok": "TikTok",
+  "premium.attribution.choice.youtube": "YouTube",
+  "premium.attribution.choice.friend": "朋友告诉我的",
+  "premium.attribution.choice.google": "Google 搜索",
+  "premium.attribution.choice.cws_organic": "Chrome 应用商店浏览",
+  "premium.attribution.choice.other": "其他（请告诉我们）",
+  "premium.attribution.choice.skip": "跳过",
+  "premium.attribution.detailPlaceholder": "请告诉我们来源…（最多 200 字）",
+  "premium.attribution.helper": "只是帮助我们了解该把精力放在哪个渠道。你可以跳过 — 完全没问题。",
+
+  "welcome.tiers.premium.bullet.5": "浏览器类型与版本、扩展版本、操作系统（用于技术支持诊断）",
+  "welcome.tiers.premium.bullet.6": "你对「你是如何得知我们的？」问题的回答（可选）"
 }
