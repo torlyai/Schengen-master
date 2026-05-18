@@ -70,6 +70,10 @@ import {
   handleBookingConfirmed,
   handleBookingTimeout,
   refundActiveBooking,
+  handleRefundWindowExpired,
+  handleStopWatching,
+  migrateStrandedBookedState,
+  REFUND_WINDOW_EXPIRED_ALARM,
 } from './booking-fsm';
 
 // ---------- Install / startup ----------
@@ -109,6 +113,10 @@ chrome.runtime.onStartup?.addListener(async () => {
     // have dropped the POLL_ALARM (sleep/wake on macOS in particular).
     // If state still expects polling, ensure the alarm is registered.
     await healPollAlarm();
+    // PRD 19 (N-7) §11: rescue any v1.1 install left stranded in
+    // PREMIUM_BOOKED past its refund window. Idempotent; no-op for
+    // installs with no activeBooking.
+    await migrateStrandedBookedState();
   } catch {
     /* ignore */
   }
@@ -193,6 +201,13 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     // a BOOKING_CONFIRMED message. Fail the attempt cleanly with
     // no charge (PRD §12).
     await handleBookingTimeout();
+    return;
+  }
+
+  if (alarm.name === REFUND_WINDOW_EXPIRED_ALARM) {
+    // PRD 19 (N-7): 24h refund window has closed. Auto-return to
+    // PREMIUM_ACTIVE so the user can book a second slot if needed.
+    await handleRefundWindowExpired();
     return;
   }
 });
@@ -499,6 +514,13 @@ async function handle(msg: Msg): Promise<unknown> {
       // backend's 409 response back to the popup.
       const result = await refundActiveBooking(msg.reason);
       return result;
+    }
+
+    case 'PREMIUM_STOP_WATCHING': {
+      // PRD 19 (N-7): user explicitly opts out of further monitoring
+      // from the P-14 Booked screen. Archive the booking and pause.
+      await handleStopWatching();
+      return buildStatusPayload();
     }
 
     case 'PREMIUM_SAVE_BOOKING_WINDOW': {

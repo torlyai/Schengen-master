@@ -497,6 +497,11 @@
   "premium.booked.review.body": "一条简短的评价能帮我们触达下一个被困在 TLS 不停刷新的人 — 不到一分钟即可完成。",
   "premium.booked.review.cta": "前往 Chrome 应用商店评价",
   "premium.booked.review.dismiss": "关闭评价提示",
+  "premium.booked.done.cta": "完成 — 停止监控",
+  "premium.booked.done.toast": "监控已暂停。可随时在弹窗中恢复。",
+  "premium.booked.refundExpired.title": "退款窗口已关闭",
+  "premium.booked.refundExpired.body": "我们已恢复名额监控。您可以继续或在此停止。",
+  "premium.booked.refundExpired.continue": "继续监控",
 
   "premium.bookingFailed.headerActive": "运行中",
   "premium.bookingFailed.tier": "重试",

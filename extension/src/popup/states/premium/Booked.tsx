@@ -106,6 +106,25 @@ export const Booked: React.FC<PremiumStateProps> = ({ status, send }) => {
         {t('premium.booked.refundLink')}
       </a>
 
+      {/* PRD 19 (N-7): explicit "I'm done" opt-out. Visible throughout the
+          booking lifecycle so users who got their visa can stop monitoring
+          without waiting 24h for the auto-return. */}
+      <a
+        className="body-lnk"
+        href="#"
+        style={{
+          color: 'var(--ink-2)',
+          borderColor: 'var(--rule)',
+          marginTop: 8,
+        }}
+        onClick={(e) => {
+          e.preventDefault();
+          send({ type: 'PREMIUM_STOP_WATCHING' });
+        }}
+      >
+        {t('premium.booked.done.cta')}
+      </a>
+
       {!reviewDismissed && (
         <div
           style={{

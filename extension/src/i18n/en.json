@@ -494,6 +494,11 @@
   "premium.booked.review.body": "A quick review is how we reach the next person stuck refreshing TLS — and it takes less than a minute.",
   "premium.booked.review.cta": "Leave a review on the Chrome Web Store",
   "premium.booked.review.dismiss": "Dismiss review prompt",
+  "premium.booked.done.cta": "Done — stop watching",
+  "premium.booked.done.toast": "Watching paused. Resume from the popup any time.",
+  "premium.booked.refundExpired.title": "Refund window closed",
+  "premium.booked.refundExpired.body": "We're back to watching for slots. You can keep going or stop here.",
+  "premium.booked.refundExpired.continue": "Keep watching",
 
   "premium.bookingFailed.headerActive": "Active",
   "premium.bookingFailed.tier": "RETRY",
