@@ -1,0 +1,38 @@
+Tier,Channel,Type,URL,Variant,Submission Date,Listing URL,Status,Dofollow Verified,Moderator Notes,Inbound Clicks (30d),Notes
+0,Chrome Web Store,Marketplace,https://chrome.google.com/webstore,A,,,Pending PRD 13,,,,Primary distribution; not part of this plan but tracked here for visibility
+1,Product Hunt,Launch,https://www.producthunt.com,A,,,Not started,,,,Anchor event - Wed 2026-05-27 placeholder; needs 3-week prep
+1,BetaList,Launch,https://betalist.com,A,,,Not started,,,,Cross-post day after PH
+1,Hacker News (Show HN),Community,https://news.ycombinator.com/show,A,,,Not started,,,,ONLY if technical angle (FSM/MV3) is prepared
+1,Indie Hackers,Community,https://www.indiehackers.com,A,,,Not started,,,,Build-in-public thread on PH launch day
+1,Fazier,Launch,https://fazier.com,A,,,Not started,,,,Optional - lower priority
+2,AlternativeTo,SaaS Directory,https://alternativeto.net,A,,,Not started,,,,Submit as alternative to Visadar / Cita Previa Bot
+2,SaaSHub,SaaS Directory,https://www.saashub.com,A,,,Not started,,,,
+2,Crunchbase,Profile,https://www.crunchbase.com,A,,,Not started,,,,Torly AI as company + Visa Master as product
+6,Best-of listicle outreach #1,Editorial,TBD,A,,,Not started,,,,Find via: site:.com 'Schengen appointment booking tips 2026'
+6,Best-of listicle outreach #2,Editorial,TBD,A,,,Not started,,,,
+6,Best-of listicle outreach #3,Editorial,TBD,A,,,Not started,,,,
+6,Best-of listicle outreach #4,Editorial,TBD,A,,,Not started,,,,
+6,Best-of listicle outreach #5,Editorial,TBD,A,,,Not started,,,,
+8,GitHub (org page),Profile,https://github.com/torlyai,A,,,Live (Schengen-master repo),,,,Already exists
+8,LinkedIn Company Page,Profile,https://www.linkedin.com/company/torly-ai,A,,,Verify exists,,,,
+8,Wikidata stub,Profile,https://www.wikidata.org,A,,,Not started,,,,Feeds AI training corpora
+8,Trustpilot,Reviews,https://www.trustpilot.com,B,,,Not started,,,,DEFER until Premium booking validated against real TLS slot
+10,r/SchengenVisa,Reddit,https://reddit.com/r/SchengenVisa,B,,,Not started,,,,90/10 rule - 10 helpful comments BEFORE posting
+10,r/UKVisa,Reddit,https://reddit.com/r/UKVisa,B,,,Not started,,,,UK applicant angle
+10,r/IWantOut,Reddit,https://reddit.com/r/IWantOut,B,,,Not started,,,,Frame as 'one tool in the appointment-booking step'
+10,r/expats,Reddit,https://reddit.com/r/expats,B,,,Not started,,,,Cross-post with regional flair
+10,r/SideProject,Reddit,https://reddit.com/r/SideProject,A,,,Not started,,,,Cross-post day of PH launch
+10,r/SaaS,Reddit,https://reddit.com/r/SaaS,A,,,Not started,,,,Cross-post launch recap
+10,SchengenVisaInfo forum,Forum,https://www.schengenvisainfo.com,B,,,Not started,,,,DR 60+ - highest backlink value in vertical
+10,VisaJourney forum,Forum,https://www.visajourney.com,B,,,Not started,,,,Niche but trustworthy
+12,Diigo,Bookmark,https://www.diigo.com,A,,,Not started,,,,Low-effort backlink
+12,Scoop.it,Curation,https://www.scoop.it,A,,,Not started,,,,Low-effort backlink
+13-zh,小红书 Xiaohongshu,Social (zh-CN),https://www.xiaohongshu.com,B (zh),,,Not started,,,,HIGHEST priority zh-CN channel - search 申根签证预约
+13-zh,知乎 Zhihu,Q&A (zh-CN),https://www.zhihu.com,B (zh),,,Not started,,,,Answer existing questions under 申根签 / TLScontact tags
+13-zh,微信公众号 outreach #1,Newsletter (zh-CN),TBD,B (zh),,,Not started,,,,Cold-pitch UK-based Chinese student bloggers
+13-zh,微信公众号 outreach #2,Newsletter (zh-CN),TBD,B (zh),,,Not started,,,,
+13-zh,豆瓣 留学英国,Forum (zh-CN),https://www.douban.com,B (zh),,,Not started,,,,
+13-zh,即刻 Jike,Social (zh-CN),https://web.okjike.com,B (zh),,,Not started,,,,Tech-aware Chinese audience - privacy framing fits
+99,Telegram Schengen group #1,Messaging,TBD,B,,,Not started,,,,Search 'TLScontact' / 'Schengen appointment' on tgstat.com
+99,Facebook 'Schengen Visa Help UK',Social,TBD,B,,,Not started,,,,Manual outreach to admin first
+99,Facebook 'France visa appointment',Social,TBD,B,,,Not started,,,,Manual outreach to admin first
