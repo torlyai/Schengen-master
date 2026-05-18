@@ -484,7 +484,7 @@ This is the body-swap reached by the `⋯` button when Premium is active. It is 
 │  ☑  Keep device awake while monitoring                   │
 │                                                          │
 │  TLSCONTACT CREDENTIALS                                  │
-│  Email      [ jasonxu20@icloud.com                     ] │
+│  Email      [ applicant@example.com                     ] │
 │  Password   [ ••••••••••••                          👁  ] │
 │  Stored locally, AES-GCM.                                │  ← .hint
 │  Source: src/shared/crypto.ts                            │
@@ -910,7 +910,7 @@ The existing v1.0.9 Settings page (`src/settings/settings.html`) is **unchanged*
 │                                                                          │     │
 │  ── DEBUG ────────────────────────────────                               │     │
 │  [ Export logs ]   [ Reset state ]                                       │     │
-│  Install ID: 35dee5ee-34cc-46d5-a1fb-17a9fb8370fd  [ copy ]              │     │
+│  Install ID: 00000000-0000-4000-8000-000000000002  [ copy ]              │     │
 │                                                                          │     │
 │  ── DANGER ZONE (Premium only) ───────────                               │     │
 │  [ Delete my account ] — wipes server records + cancels Premium          │     ↓

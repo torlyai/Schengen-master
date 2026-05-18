@@ -139,6 +139,12 @@ Thumbs.db
 /docs/05-master-action-plan.md
 /docs/06-itinerary-locked.md
 /docs/07-bookings-research.md
+/docs/08-t6-countdown.md
+# Defensive: any doc named *-countdown.md or *-personal.md is treated
+# as personal trip data unless we explicitly negate. Avoids future
+# accidental commits when adding new personal trackers.
+/docs/*-countdown.md
+/docs/*-personal.md
 /privacy/audit-log.md
 
 # ---- Secrets / env (defence in depth — should never exist here anyway) ----

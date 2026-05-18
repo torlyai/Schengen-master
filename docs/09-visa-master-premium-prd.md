@@ -1077,7 +1077,7 @@ Lives inside the popup itself, so users can edit booking criteria without leavin
 │  ☑  Keep device awake while monitoring                       │
 │                                                              │
 │  ── TLSCONTACT CREDENTIALS ────────────────────              │
-│  Email      [ jasonxu20@icloud.com                       ]   │
+│  Email      [ applicant@example.com                       ]   │
 │  Password   [ •••••••••••                           👁  ]    │
 │  Stored locally, AES-GCM.                                    │
 │  Encryption source: src/shared/crypto.ts                     │
@@ -1149,7 +1149,7 @@ This is the existing full-tab `options_page` registered in `manifest.json`. **It
 │                                                                          │
 │  ── DEBUG ─────────────────────────────────────────                      │
 │  [ Export logs ]   [ Reset state ]                                       │
-│  Install ID: 35dee5ee-34cc-46d5-a1fb-17a9fb8370fd  [ copy ]              │
+│  Install ID: 00000000-0000-4000-8000-000000000002  [ copy ]              │
 │                                                                          │
 │  ── DANGER ZONE (Premium only) ────────────────────                      │
 │  [ Delete my account ] — wipes server records + cancels Premium          │
@@ -1191,7 +1191,7 @@ This is the existing full-tab `options_page` registered in `manifest.json`. **It
 │                                                              │
 │  [ Send ]                                                    │
 │                                                              │
-│  Install: 35dee5ee-34cc-46d5-a1fb-17a9fb8370fd  [ copy ]     │
+│  Install: 00000000-0000-4000-8000-000000000002  [ copy ]     │
 └──────────────────────────────────────────────────────────────┘
 ```
 

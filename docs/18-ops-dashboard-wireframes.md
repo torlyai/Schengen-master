@@ -212,19 +212,19 @@ Full page, scrollable, single column for sections (some sections have a two-colu
 │  ┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────┐  │
 │  │ WHEN    │ STATUS    │ CUSTOMER          │ INSTALL ID                              │ VER   │ BROWSER    │ SOURCE  │ BK │ £   │  │
 │  ├─────────┼───────────┼───────────────────┼─────────────────────────────────────────┼───────┼────────────┼─────────┼────┼─────┤  │
-│  │ 2h ago  │ [active]  │ jas***@icloud.com │ b7ad8db5-31ba-49c7-85f9-63de2b8b85a0 📋│ 1.2.0 │ Chrome 130 │ Reddit  │ 0  │ £0  │  │
+│  │ 2h ago  │ [active]  │ app***@example.com │ 00000000-0000-4000-8000-000000000001 📋│ 1.2.0 │ Chrome 130 │ Reddit  │ 0  │ £0  │  │
 │  │ 18 May  │           │ 👁                │                                         │       │ 🌐 macOS   │ → r/SVI │    │     │  │
 │  ├─────────┼───────────┼───────────────────┼─────────────────────────────────────────┼───────┼────────────┼─────────┼────┼─────┤  │
-│  │ 3d ago  │ [active]  │ may***@hotmail.com│ 5e7a6d66-4cec-4334-8d01-5348e5ef0e0d 📋│ 1.2.0 │ Edge 130   │ Friend  │ 1  │ £19 │  │
+│  │ 3d ago  │ [active]  │ usr1***@example.com│ 00000000-0000-4000-8000-000000000003 📋│ 1.2.0 │ Edge 130   │ Friend  │ 1  │ £19 │  │
 │  │ 15 May  │           │                   │                                         │       │ 🪟 Windows │         │ 2d │     │  │
 │  ├─────────┼───────────┼───────────────────┼─────────────────────────────────────────┼───────┼────────────┼─────────┼────┼─────┤  │
-│  │ 4d ago  │ [active]  │ joe***@gmail.com  │ 3ff2342d-aabb-ccdd-eeff-001122334455 📋│ 1.1.0 │ Chrome 129 │ TikTok  │ 2  │ £38 │  │
+│  │ 4d ago  │ [active]  │ usr2***@example.com  │ 3ff2342d-aabb-ccdd-eeff-001122334455 📋│ 1.1.0 │ Chrome 129 │ TikTok  │ 2  │ £38 │  │
 │  │ 14 May  │           │                   │                                         │  ⚠   │ 🍎 macOS   │         │ 1d │     │  │
 │  ├─────────┼───────────┼───────────────────┼─────────────────────────────────────────┼───────┼────────────┼─────────┼────┼─────┤  │
-│  │ 5d ago  │ [disputed]│ flu***@gmail.com  │ d6c56572-4cec-4334-8d01-5348e5ef0e0d 📋│ 1.1.0 │ Chrome 130 │ —       │ 1  │ £0  │  │
+│  │ 5d ago  │ [disputed]│ usr3***@example.com  │ 00000000-0000-4000-8000-000000000004 📋│ 1.1.0 │ Chrome 130 │ —       │ 1  │ £0  │  │
 │  │ 13 May  │  ⚠        │                   │                                         │  ⚠   │ 🌐 Linux   │         │ ref│     │  │
 │  ├─────────┼───────────┼───────────────────┼─────────────────────────────────────────┼───────┼────────────┼─────────┼────┼─────┤  │
-│  │ 10d ago │ [orphan]  │ jas***@icloud.com │ b7ad8db5-31ba-49c7-85f9-63de2b8b85a0 📋│ —     │ —          │ —       │ 0  │ £0  │  │
+│  │ 10d ago │ [orphan]  │ app***@example.com │ 00000000-0000-4000-8000-000000000001 📋│ —     │ —          │ —       │ 0  │ £0  │  │
 │  │ 8 May   │  ⚠ RED    │ 👁                │                                         │       │            │         │ Rec│     │  │
 │  └──────────────────────────────────────────────────────────────────────────────────────────────────────────────┘  │
 │                                                                          [ Load 20 more ]                          │
@@ -235,13 +235,13 @@ Full page, scrollable, single column for sections (some sections have a two-colu
 │  ┌─────────────────────────────────────────────────────────────────────────┐  │
 │  │ WHEN    │ STATUS    │ CUSTOMER          │ CENTRE     │ SLOT  │ £   │ ⟳   │  │
 │  ├─────────┼───────────┼───────────────────┼────────────┼───────┼─────┼─────┤  │
-│  │ 2d ago  │ [captured]│ may***@hotmail.com│ London MH  │ 22 May│ £19 │ 16h │  │
+│  │ 2d ago  │ [captured]│ usr1***@example.com│ London MH  │ 22 May│ £19 │ 16h │  │
 │  │ 15 May  │           │                   │            │ 09:40 │     │ left│  │
 │  ├─────────┼───────────┼───────────────────┼────────────┼───────┼─────┼─────┤  │
-│  │ 3d ago  │ [captured]│ joe***@gmail.com  │ Manchester │ 25 May│ £19 │Closed│  │
+│  │ 3d ago  │ [captured]│ usr2***@example.com  │ Manchester │ 25 May│ £19 │Closed│  │
 │  │ 14 May  │           │                   │            │ 14:00 │     │     │  │
 │  ├─────────┼───────────┼───────────────────┼────────────┼───────┼─────┼─────┤  │
-│  │ 5d ago  │ [refunded]│ flu***@gmail.com  │ Edinburgh  │ 28 May│ £19 │Refunded│  │
+│  │ 5d ago  │ [refunded]│ usr3***@example.com  │ Edinburgh  │ 28 May│ £19 │Refunded│  │
 │  │ 12 May  │           │                   │            │ 11:30 │     │ ✓   │  │
 │  └─────────────────────────────────────────────────────────────────────────┘  │
 │                                                  [ Load 20 more ]             │
@@ -512,19 +512,19 @@ PREMIUM CUSTOMERS — last 30d                                                  
 ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ WHEN    │ STATUS    │ CUSTOMER          │ INSTALL ID                              │ VER   │ BROWSER     │ SOURCE     │ BK │ £   │
 ├─────────┼───────────┼───────────────────┼─────────────────────────────────────────┼───────┼─────────────┼────────────┼────┼─────┤
-│ 2h ago  │ [active]  │ jas***@icloud.com │ b7ad8db5-31ba-49c7-85f9-63de2b8b85a0 📋│ 1.2.0 │ 🌐 Chrome 130│ Reddit     │ 0  │ £0  │
+│ 2h ago  │ [active]  │ app***@example.com │ 00000000-0000-4000-8000-000000000001 📋│ 1.2.0 │ 🌐 Chrome 130│ Reddit     │ 0  │ £0  │
 │ 18 May  │           │ 👁                │  (monospace, 11px, click to copy)       │       │   macOS     │ → r/SVI    │    │     │
 ├─────────┼───────────┼───────────────────┼─────────────────────────────────────────┼───────┼─────────────┼────────────┼────┼─────┤
-│ 3d ago  │ [active]  │ may***@hotmail.com│ 5e7a6d66-4cec-4334-8d01-5348e5ef0e0d 📋│ 1.2.0 │ 🪟 Edge 130 │ Friend     │ 1  │ £19 │
+│ 3d ago  │ [active]  │ usr1***@example.com│ 00000000-0000-4000-8000-000000000003 📋│ 1.2.0 │ 🪟 Edge 130 │ Friend     │ 1  │ £19 │
 │ 15 May  │           │ 👁                │                                         │       │   Windows   │            │ 2d │     │
 ├─────────┼───────────┼───────────────────┼─────────────────────────────────────────┼───────┼─────────────┼────────────┼────┼─────┤
-│ 4d ago  │ [active]  │ joe***@gmail.com  │ 3ff2342d-aabb-ccdd-eeff-001122334455 📋│ 1.1.0 │ 🍎 Chrome 129│ TikTok     │ 2  │ £38 │
+│ 4d ago  │ [active]  │ usr2***@example.com  │ 3ff2342d-aabb-ccdd-eeff-001122334455 📋│ 1.1.0 │ 🍎 Chrome 129│ TikTok     │ 2  │ £38 │
 │ 14 May  │           │ 👁                │                                         │ ⚠ old │   macOS     │            │ 1d │     │
 ├─────────┼───────────┼───────────────────┼─────────────────────────────────────────┼───────┼─────────────┼────────────┼────┼─────┤
-│ 5d ago  │ [disputed]│ flu***@gmail.com  │ d6c56572-4cec-4334-8d01-5348e5ef0e0d 📋│ 1.1.0 │ 🐧 Chrome 130│ —          │ 1  │ £0  │
+│ 5d ago  │ [disputed]│ usr3***@example.com  │ 00000000-0000-4000-8000-000000000004 📋│ 1.1.0 │ 🐧 Chrome 130│ —          │ 1  │ £0  │
 │ 13 May  │  ⚠        │ 👁                │                                         │ ⚠ old │   Linux     │  (skipped) │ ref│     │
 ├─────────┼───────────┼───────────────────┼─────────────────────────────────────────┼───────┼─────────────┼────────────┼────┼─────┤
-│ 10d ago │ [orphan]  │ jas***@icloud.com │ b7ad8db5-31ba-49c7-85f9-63de2b8b85a0 📋│ —     │ —           │ —          │ 0  │ £0  │
+│ 10d ago │ [orphan]  │ app***@example.com │ 00000000-0000-4000-8000-000000000001 📋│ —     │ —           │ —          │ 0  │ £0  │
 │ 8 May   │  ⚠ RED    │ 👁                │                                         │       │             │            │ Rec│     │
 └─────────┴───────────┴───────────────────┴─────────────────────────────────────────┴───────┴─────────────┴────────────┴────┴─────┘
                                                                                                                   [ Load 20 more ]
@@ -548,7 +548,7 @@ PREMIUM CUSTOMERS — last 30d                                                  
 
 ### Install ID column — full UUID display
 
-- **Full UUID shown** (`b7ad8db5-31ba-49c7-85f9-63de2b8b85a0`), monospace 11px (`font-mono text-xs`). 36 chars wide.
+- **Full UUID shown** (`00000000-0000-4000-8000-000000000001`), monospace 11px (`font-mono text-xs`). 36 chars wide.
 - The `📋` icon at the end is a click-to-copy button. Tooltip: `Copy install_id to clipboard`. After click: toast "Copied b7ad8db5…" for 2s.
 - Cell is also click-to-copy on the whole text (clicking the UUID itself copies it).
 - Not PII — random UUID with no embedded personal info — so no audit log for copy/reveal.
@@ -596,16 +596,16 @@ BOOKINGS — last 30d                                       [ ↧ Sort: Newest ]
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │ WHEN    │ STATUS    │ CUSTOMER          │ CENTRE     │ SLOT     │ £   │ WINDOW  │
 ├─────────┼───────────┼───────────────────┼────────────┼──────────┼─────┼─────────┤
-│ 2d ago  │ [captured]│ may***@hotmail.com│ London MH  │ 22 May   │ £19 │ 16h left│
+│ 2d ago  │ [captured]│ usr1***@example.com│ London MH  │ 22 May   │ £19 │ 16h left│
 │ 15 May  │           │                   │            │ 09:40    │     │ ⏳       │
 ├─────────┼───────────┼───────────────────┼────────────┼──────────┼─────┼─────────┤
-│ 3d ago  │ [captured]│ joe***@gmail.com  │ Manchester │ 25 May   │ £19 │ Closed  │
+│ 3d ago  │ [captured]│ usr2***@example.com  │ Manchester │ 25 May   │ £19 │ Closed  │
 │ 14 May  │           │                   │            │ 14:00    │     │ (24h+) │
 ├─────────┼───────────┼───────────────────┼────────────┼──────────┼─────┼─────────┤
-│ 5d ago  │ [refunded]│ flu***@gmail.com  │ Edinburgh  │ 28 May   │ £19 │ ✓ Ref'd │
+│ 5d ago  │ [refunded]│ usr3***@example.com  │ Edinburgh  │ 28 May   │ £19 │ ✓ Ref'd │
 │ 12 May  │           │                   │            │ 11:30    │     │         │
 ├─────────┼───────────┼───────────────────┼────────────┼──────────┼─────┼─────────┤
-│ 9d ago  │ [failed]  │ ali***@gmail.com  │ Birmingham │ —        │ £0  │ —       │
+│ 9d ago  │ [failed]  │ usr4***@example.com  │ Birmingham │ —        │ £0  │ —       │
 │ 9 May   │  ⚠        │                   │ (no slot)  │          │     │         │
 └─────────┴───────────┴───────────────────┴────────────┴──────────┴─────┴─────────┘
                                                                   [ Load 20 more ]

@@ -360,8 +360,8 @@ Columns:
 |---|---|---|
 | When | `installs.created_at` | Relative time ("2d ago") + absolute ("16 May") — same pattern as Transactions table |
 | Status | `installs.status` | Badge: `active` (green) / `disputed` (red) / `cancelled` (gray) / `deleted` (gray); plus a special `orphan` (red) for installs that have a Stripe Setup Intent succeeded but no matching active install row |
-| Customer | `installs.stripe_email` | Masked by default (`jas***@icloud.com`); click to reveal (logs an audit event) |
-| **Install ID** | `installs.install_id` | **Full UUID** shown (`b7ad8db5-31ba-49c7-85f9-63de2b8b85a0`), monospace 11px text-xs. Click-to-copy on the row. Per operator request 2026-05-18. |
+| Customer | `installs.stripe_email` | Masked by default (`app***@example.com`); click to reveal (logs an audit event) |
+| **Install ID** | `installs.install_id` | **Full UUID** shown (`00000000-0000-4000-8000-000000000001`), monospace 11px text-xs. Click-to-copy on the row. Per operator request 2026-05-18. |
 | **Version** | `installs.extension_version` | E.g. `1.1.0`. Cell colored amber-50 if version is more than 2 minor revs behind latest; gray for current. NULL shows "—" (pre-migration backfill). |
 | **Browser** | `installs.browser_name` + `browser_version` (compact) | E.g. `Chrome 130`, `Edge 130`, `Brave 1.71`. Lucide icon for the browser if recognized. NULL shows "—". |
 | **Source** | `installs.attribution_source` | E.g. `Reddit`, `Friend`, `CWS organic`. NULL shows "—" (user skipped or pre-migration). Hover for `attribution_detail` if present. |
@@ -476,7 +476,7 @@ Single endpoint, returns the full dashboard payload. Modeled on `/api/admin/ops/
 ### 13.1 Hard rules
 
 1. **No Free-tier user is identifiable in this dashboard.** Even if we later add Mixpanel/PostHog to Free, we will not surface per-user metrics here.
-2. **Stripe email is masked by default.** The mask format is `<first 3 chars>***@<domain>` (e.g. `jas***@icloud.com`). Clicking to reveal logs an audit event with the operator's session ID and the install_id revealed.
+2. **Stripe email is masked by default.** The mask format is `<first 3 chars>***@<domain>` (e.g. `app***@example.com`). Clicking to reveal logs an audit event with the operator's session ID and the install_id revealed.
 3. **TLS credentials, polling cadence, DOM contents, Telegram tokens** — never appear in API responses, never appear in dashboard UI, never appear in logs. This is enforced by the data model: these fields don't exist in any table or any API response from `/api/visa-master/*`.
 4. **Install ID is shown** because it's a random UUID with no embedded personal information. Showing it lets the operator correlate with Stripe.
 
@@ -559,7 +559,7 @@ These are the three calls I made on the operator's behalf. Each can be reversed 
 
 ### Decision D5 — Show full install_id UUID vs truncated
 
-**Choice made:** Full UUID (`b7ad8db5-31ba-49c7-85f9-63de2b8b85a0`) in monospace 11px text-xs, click-to-copy. Per operator request 2026-05-18.
+**Choice made:** Full UUID (`00000000-0000-4000-8000-000000000001`) in monospace 11px text-xs, click-to-copy. Per operator request 2026-05-18.
 
 **Why:** the operator's support workflow involves correlating the popup-side `installId` with the Stripe-side metadata (which carries the full UUID). Truncation forces a copy-from-Stripe-paste-to-search round trip. Showing the full UUID at small font costs ~280px of column width but saves multiple seconds per incident.
 
