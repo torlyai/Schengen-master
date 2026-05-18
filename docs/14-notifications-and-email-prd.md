@@ -545,10 +545,14 @@ service=torly.ai, account=SUPABASE_SERVICE_ROLE_KEY
 Add commands the user runs once:
 
 ```bash
+# Placeholder values only — never commit a real key string.
+# Paste the actual Resend key from the dashboard at runtime.
 security add-generic-password -s "torly.ai" -a "RESEND_API_KEY" \
-  -w "re_EuR8a4tS_CkhfmFdYv3whwkgt1jQDf34W" -U
-# repeat for each
+  -w "re_REDACTED_EXAMPLE_NEVER_REAL" -U
+# repeat for each (RESEND_FROM_EMAIL, RESEND_WEBHOOK_SECRET, JWT_PRIVATE_KEY, etc.)
 ```
+
+> ⚠️ **Why placeholder:** an earlier draft of this doc contained a real Resend key string that GitGuardian flagged in the public release repo on 2026-05-14. The key was rotated at Resend; this redaction prevents future re-flagging. Strings containing `REDACTED`/`EXAMPLE` are on every major secret-scanner's allowlist.
 
 ### 9.4 Loader script (new — `scripts/load-secrets.ts`)
 

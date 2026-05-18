@@ -170,6 +170,10 @@ export async function activateLicense(
   installId: string,
   setupIntentId: string,
   attribution?: ActivateMetadataPayload,
+  // PRD 14 §15 / N-3a — extension's current uiLang so the backend can
+  // store it as vm_installs.preferred_email_locale for transactional
+  // emails. Backend defaults to 'en' if absent.
+  uiLang?: 'en' | 'zh-CN',
 ): Promise<ApiResult<LicenseResp>> {
   const metadata = collectInstallMetadata();
   const body: Record<string, unknown> = {
@@ -181,6 +185,7 @@ export async function activateLicense(
     browserVersion: metadata.browserVersion,
     os: metadata.os,
   };
+  if (uiLang) body.uiLang = uiLang;
   // Attribution fields are only included if the caller supplies them (i.e.
   // attributionAsked === true in storage). This keeps the body identical to
   // the pre-1.2.0 shape for users who activate before the Premium intro page

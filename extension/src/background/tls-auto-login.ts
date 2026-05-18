@@ -29,6 +29,8 @@ import { getTlsCredentials } from '../shared/storage';
 import { getLicense } from '../shared/license';
 import { transitionTo } from './state-machine';
 import { getState } from '../shared/storage';
+import { notifyAutoLoginDisabled } from './telegram';
+import { triggerEmail } from './email';
 
 const FAIL_COUNTER_KEY = 'vmAutoLoginFails';
 const COOLDOWN_KEY = 'vmAutoLoginCooldownUntil';
@@ -244,7 +246,19 @@ export async function maybeAutoLoginToTls(): Promise<boolean> {
     (t) => t > Date.now() - FAIL_WINDOW_MS,
   ).length;
   if (recentFails >= MAX_FAILS_PER_HOUR) {
+    // First entry to this branch trips the lockout — inCooldown() guards
+    // re-entry above, so notifications fire exactly once per lockout event.
     await setCooldown();
+    const reason = `${recentFails} failed attempts in the last hour. Auto-login paused for 1 hour.`;
+    notifyAutoLoginDisabled({ reason }).catch(() => { /* fire-and-forget */ });
+    // Email — PRD 14 §7.8, auth-issues category (default OFF). Backend
+    // dedupe key is installId:auto-login-disabled:${date}, so retries
+    // within 24h won't re-send even if this branch hypothetically re-fires.
+    triggerEmail('vm_auto_login_disabled', {
+      reason,
+      failCount: recentFails,
+      cooldownUntilIso: new Date(Date.now() + FAIL_WINDOW_MS).toISOString(),
+    }).catch(() => { /* silent */ });
     return false;
   }
 
