@@ -23,11 +23,19 @@ application. Ships two things in one repository:
 > live here — concrete data is filled in by each user on their own machine
 > and stays local via the deny-by-default `.gitignore`.
 >
-> **Status:** Extension v1.0.0 ships as a pre-built ZIP on the
+> **Status (2026-05-18):** Extension **v1.2.0** is submitted to the
+> Chrome Web Store and awaiting review. While the review is in flight
+> (typical: 1–3 days), install via the pre-built ZIP on the
 > [Releases page](https://github.com/torlyai/Schengen-master/releases/latest)
-> — **no Node / no terminal / no build step needed** for end-user install.
-> Chrome Web Store listing is not live yet, so installation is still
-> "Load unpacked" (with Developer mode on).
+> — **no Node / no terminal / no build step needed**. Once approved on
+> CWS, installation moves to one click from the store listing.
+>
+> **What's new in v1.2.0** — Multi-booking after the 24h refund window (book
+> follow-up appointments for family members), required refund-evidence text
+> on the refund flow, Premium email notifications alongside Telegram/desktop,
+> and improved install metadata + attribution. See the
+> [v1.2.0 Release notes](https://github.com/torlyai/Schengen-master/releases/tag/v1.2.0)
+> for the full changelog.
 
 ---
 
