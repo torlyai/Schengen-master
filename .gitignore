@@ -147,6 +147,40 @@ Thumbs.db
 /docs/*-personal.md
 /privacy/audit-log.md
 
+# ─── Extension source code (private from public repo, 2026-05-22 onwards) ──
+# Policy: the public repo serves the distribution ZIP (attached to each
+# GitHub Release) + the README + screenshots + brand assets. The actual
+# TypeScript / React source, build config, tests, and dev scripts live
+# privately. End users get the compiled extension via Chrome Web Store
+# auto-update or by sideloading the ZIP from the Releases page.
+#
+# What stays public on disk + in this repo:
+#   extension/public/   — icons, brand, QR codes (used by README + CWS)
+#   extension/screenshots/ — CWS listing screenshots
+#
+# What's gitignored below: source, tests, build config, dev README.
+/extension/src/
+/extension/tests/
+/extension/test-fixtures/
+/extension/scripts/
+/extension/docs/
+/extension/manifest.json
+/extension/package.json
+/extension/package-lock.json
+/extension/vite.config.ts
+/extension/tsconfig.json
+/extension/tsconfig.tsbuildinfo
+/extension/playwright.config.ts
+/extension/eslint.config.js
+/extension/.gitignore
+/extension/README.md
+# Build artefacts (already covered by extension/.gitignore which we're
+# now ignoring — re-list here to be safe).
+/extension/dist/
+/extension/node_modules/
+/extension/test-results/
+/extension/playwright-report/
+
 # ---- Secrets / env (defence in depth — should never exist here anyway) ----
 .env
 .env.*
