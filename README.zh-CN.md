@@ -14,10 +14,10 @@
 > 日期、证件号码或行程细节 — 个人数据由你自己在本地填写，并通过
 > `.gitignore` 的"默认拒绝"策略阻止误提交。
 >
-> **状态（2026-05-18）：** 扩展 **v1.2.0** 已提交至 Chrome 应用商店，
-> 正在审核中（通常 1–3 天）。审核期间可从[最新发布页](https://github.com/torlyai/Schengen-master/releases/latest)
-> 下载**预构建 ZIP 包**直接安装 — **不需要 Node、不需要终端、
-> 不需要任何编译步骤**。审核通过后，可在应用商店一键安装。
+> **状态（2026-05-22）：** 扩展 **v1.2.0 已在 Chrome 应用商店上架** —
+> 可从[官方商店页面](https://chromewebstore.google.com/detail/cpogdllkcpenafboclnidfmmlcnjpbfm)
+> 一键安装。如需手动安装或在安装前审计源码，仍可从[最新发布页](https://github.com/torlyai/Schengen-master/releases/latest)
+> 下载**预构建 ZIP 包** — **不需要 Node、不需要终端、不需要任何编译步骤**。
 >
 > **v1.2.0 新增功能** — 24 小时退款窗口结束后自动继续监控
 > （方便为家庭成员预订后续时段）、退款时需说明 TLS 取消原因（增加退款
