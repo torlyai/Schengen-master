@@ -1,0 +1,82 @@
+---
+name: <slug-of-skill>
+description: |
+  One-paragraph description of what this skill does, when to invoke it, and
+  the trigger phrases. Multi-line description is what powers the LLM's
+  trigger detection — be specific. End with "(Schengen-master skills)" so
+  it's clear which toolkit this comes from.
+allowed-tools:
+  - Read
+  - AskUserQuestion
+  # - Bash      # only if the skill truly needs to run shell commands
+  # - Write     # only if the skill writes files (e.g. cover letter draft)
+triggers:
+  - sample trigger phrase 1
+  - sample trigger phrase 2
+country: france               # absent if skill applies to all Schengen countries
+proactive: false              # if true, LLM auto-invokes on trigger; if false, user must call explicitly
+version: 0.1.0
+last-reviewed: YYYY-MM-DD
+---
+
+# /<slug-of-skill>
+
+## What this skill does
+
+(One short paragraph stating the skill's job. Specific. Bounded.)
+
+## When to use it
+
+(Bullet list of concrete situations.)
+
+## Required information
+
+(Bullet list of what the skill needs to do its job — from the user or from a prior skill's output.)
+
+## Procedure
+
+(Numbered list of steps the skill executes. Be precise. Use Schengen-master
+ETHOS principles as the bias — see `../ETHOS.md`.)
+
+1. Step 1: ...
+2. Step 2: ...
+3. Step 3: ...
+
+## Output template
+
+(The shape of what the user receives. Use markdown so the LLM produces
+consistent output across runs.)
+
+```
+SKILL RESULT — <skill-name>
+For: {{APPLICANT_NAME}}
+
+✅ <item that passed>
+❌ <item that failed> — <specific reason> — <action to fix>
+⚠️ <item that's borderline> — <ask user to confirm>
+
+ACTION: <one or two sentences of next steps>
+```
+
+## Routing rules (hand-offs to other skills)
+
+(When does this skill hand off to another? Be explicit. The LLM uses this
+to decide what to suggest after the skill completes.)
+
+- If <condition>: suggest `/<other-skill>` next
+- If <other condition>: route to `/<emergency-skill>` immediately
+- If user explicitly says "we're done": just confirm completion and exit
+
+## Authoritative sources
+
+(External URLs the skill is built against. Stamp the URL with the date you
+last verified the content. If the URL goes stale, file a GitHub issue.)
+
+- https://france-visas.gouv.fr/... — verified YYYY-MM-DD
+- https://visas-fr.tlscontact.com/... — verified YYYY-MM-DD
+
+## Notes for maintainers
+
+(Anything a future contributor should know — known edge cases, why a
+counter-intuitive choice was made, areas of ambiguity that need
+real-applicant testing.)
