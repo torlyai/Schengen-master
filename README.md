@@ -48,7 +48,6 @@ application. Ships two things in one repository:
   - [Path A — Use the templates for your own application](#path-a--use-the-templates-for-your-own-application)
   - [Path B — Install the pre-built extension (recommended)](#path-b--install-the-pre-built-extension-recommended)
   - [Path C — Open the workspace in Obsidian (optional)](#path-c--open-the-workspace-in-obsidian-optional)
-  - [Path D — Develop the extension](#path-d--develop-the-extension)
 - [Configuration](#configuration)
 - [Privacy & data handling](#privacy--data-handling)
 - [Troubleshooting](#troubleshooting)
@@ -61,7 +60,7 @@ application. Ships two things in one repository:
 
 | Area | Purpose |
 | --- | --- |
-| `extension/` | Chrome MV3 extension source (TypeScript + React + Vite). Watches TLScontact, raises notifications when a slot is detected. |
+| `extension/` | Distribution assets for the Chrome MV3 extension — icons, brand SVGs, screenshots. The compiled extension ships via [Chrome Web Store](https://chromewebstore.google.com/detail/cpogdllkcpenafboclnidfmmlcnjpbfm) (or the ZIP attached to each GitHub Release). Source code is maintained privately. |
 | `docs/templates/` | Skeleton templates with `{{PLACEHOLDER}}` tokens — copy locally, fill in, **don't** commit. See [`docs/templates/README.md`](docs/templates/README.md). |
 | `docs/06-visa-master-chrome-extension-prd.md` | Product spec for the Chrome extension. |
 | `docs/07-chrome-extension-wireframes.md` | Screen-by-screen wireframes for the extension. |
@@ -328,36 +327,6 @@ Useful pre-configured plugins:
 
 ---
 
-### Path D — Develop the extension
-
-```sh
-cd extension
-npm install
-npm run typecheck    # tsc --noEmit, must pass clean
-npm run dev          # vite dev with HMR
-npm run build        # one-shot production build into dist/
-npm run icons        # regenerate placeholder icons
-```
-
-After `npm run dev`, reload the extension on `chrome://extensions` to pick
-up changes. The service worker reload is automatic; content script and UI
-changes need an explicit reload of the host page.
-
-Source-level architecture is documented in `extension/README.md`. The short
-version:
-
-```
-content-script  →  service-worker  →  badge / notifications
-   (detector)       (state machine,
-                     scheduler, SW
-                     message router)
-```
-
-The tunable detector classification rule is in
-`extension/src/content/detector.ts` — search for `TUNABLE:`.
-
----
-
 ## Configuration
 
 The extension is configured entirely in-browser via the **Settings** page
@@ -388,8 +357,8 @@ This project takes privacy seriously — see
 **What stays in git:**
 
 - Templates with `{{PLACEHOLDER}}` tokens (`docs/templates/`).
-- Extension source code.
-- Product specs and platform design notes (no application-level personal data).
+- Public-facing product positioning (`docs/06`, `docs/07`, `docs/08`, `docs/11`).
+- Distribution assets (extension icons, brand SVGs, CWS-listing screenshots).
 - Public reference data (UK school term PDFs, allow-listed in `.gitignore`).
 
 **What is always git-ignored:**

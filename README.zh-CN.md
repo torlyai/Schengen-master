@@ -32,7 +32,6 @@
 - [扩展能做什么](#扩展能做什么)
 - [系统要求](#系统要求)
 - [安装步骤（推荐路径 — 下载 ZIP）](#安装步骤推荐路径--下载-zip)
-- [安装步骤（开发者路径 — 从源码编译）](#安装步骤开发者路径--从源码编译)
 - [Telegram 手机通知设置（可选但推荐）](#telegram-手机通知设置可选但推荐)
 - [配置选项](#配置选项)
 - [隐私说明](#隐私说明)
@@ -70,22 +69,6 @@
 | Chrome / Chromium | **≥ 110**（支持 Manifest V3） | 浏览器地址栏输入 `chrome://version` |
 
 仅此一项 — 不需要 Git、不需要 Node.js、不需要命令行。
-
-### 开发者 / 高级用户（从源码自己编译）
-
-| 组件 | 要求 | 检查方式 |
-| --- | --- | --- |
-| Git | 近期任意版本 | `git --version` |
-| Node.js | **≥ 20.0**（扩展使用 Vite 5 和 `@crxjs/vite-plugin` v2） | `node --version` |
-| npm | 随 Node 20+ 一起安装 | `npm --version` |
-| Chrome / Chromium | **≥ 110**（支持 Manifest V3） | 浏览器地址栏输入 `chrome://version` |
-
-如果没有 Node 20，建议用 [nvm](https://github.com/nvm-sh/nvm) 安装：
-
-```sh
-nvm install 20
-nvm use 20
-```
 
 ---
 
@@ -169,37 +152,6 @@ Chrome 会一直从这个文件夹加载扩展。**安装后不要删除或移�
 点 **重新载入** 图标即可，Chrome 会重新读取那个文件夹。
 
 ---
-
-## 安装步骤（开发者路径 — 从源码编译）
-
-只有当你想自己审计代码、改源码、或者不放心 GitHub Actions 构建的
-ZIP，才需要走这条路。需要先安装 Node 20 和 Git（见上面的系统要求）。
-
-```sh
-# 1. 克隆仓库
-git clone https://github.com/torlyai/Schengen-master.git
-cd Schengen-master/extension
-
-# 2. 安装依赖（约 250 MB，30–60 秒）
-npm install
-
-# 3. 类型检查（可选，确认源码没问题）
-npm run typecheck
-
-# 4. 构建扩展，产物会写到 extension/dist/
-npm run build
-
-# 5. （可选）打包成 ZIP，模拟 GitHub Actions 的输出
-npm run package
-```
-
-构建完成后：
-
-- 走"普通用户"路径加载 `extension/dist/` 文件夹即可，
-- 或者解压 `extension/visa-master-v<版本号>.zip` 加载它，效果一样。
-
-> `dist/` 和 `*.zip` 都**不会**提交到仓库；每次构建出来都是新的。
-> 第一次加载时记得开启**开发者模式**（同上面的第 4 步）。
 
 ---
 

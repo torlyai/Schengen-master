@@ -181,6 +181,45 @@ Thumbs.db
 /extension/test-results/
 /extension/playwright-report/
 
+# ─── Internal docs (private from public repo, 2026-05-23 onwards) ───
+# Same policy as source code: the public repo is for distribution +
+# user-facing content. Internal PRDs that describe business strategy,
+# pricing decisions, anti-fraud measures, marketing playbooks, and
+# operational procedures move out of public view.
+#
+# What stays public on docs/:
+#   06 — Free-tier extension PRD (positioning)
+#   07 — Free-tier wireframes (positioning)
+#   08 — vs-alternatives (marketing copy)
+#   11 — architecture (trust transparency)
+#   release-notes/  (user-facing changelogs)
+#   templates/      (the doc-template toolkit — user-facing)
+/docs/09-visa-master-premium-prd.md
+/docs/10-visa-master-premium-wireframes.md
+/docs/12-premium-backlog.md
+/docs/13-chrome-web-store-submission-prd.md
+/docs/14-notifications-and-email-prd.md
+/docs/15-directory-submissions-launch-plan.md
+/docs/15-directory-submissions-tracker.csv
+/docs/16-vm-launcher-usage-plan.md
+/docs/17-ops-dashboard-prd.md
+/docs/18-ops-dashboard-wireframes.md
+/docs/19-vm-n7-multi-booking-prd.md
+/docs/20-vm-n8-refund-evidence-prd.md
+/docs/21-vm-v1.2.0-post-deploy-monitoring-plan.md
+/docs/launch/
+
+# ─── Internal platform / strategy docs ───
+# Architecture + privacy compliance stay public (transparency); features
+# spec and competitive research go private (roadmap / strategy).
+/platform/features/
+/platform/integrations/
+/platform/research/
+
+# ─── Internal AI / IDE config ───
+/.claude/
+/.obsidian/
+
 # ---- Secrets / env (defence in depth — should never exist here anyway) ----
 .env
 .env.*
