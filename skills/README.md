@@ -8,7 +8,7 @@
 
 This is a Claude Code skills toolkit for **Schengen short-stay visa applications**, starting with France from the UK. It turns Claude Code into nine virtual experts who walk you through the entire journey — a trip planner who interrogates your scenario, a document engineer who builds your file pack, an accountant who audits your finances, a forms specialist who walks you through France-Visas and TLScontact line by line, a minor specialist for kids, a sponsor specialist for spouse/parent/employer support, an appointment coordinator who hunts slots, an application auditor who runs a final pre-submission check, and a recovery advisor for when things go wrong.
 
-**36 skills at v1.0.0 — the catalogue is complete.** All Markdown, all free, MIT-licensed. Designed for France at v1.0; other Schengen countries land in v1.x. Each skill is bilingual (English + Simplified Chinese) so a family applying together can each work in their preferred language.
+**37 skills at v1.0.0 — the catalogue is complete.** All Markdown, all free, MIT-licensed. Designed for France at v1.0; other Schengen countries land in v1.x. Each skill is bilingual (English + Simplified Chinese) so a family applying together can each work in their preferred language.
 
 **Who this is for:**
 
@@ -182,7 +182,7 @@ Each stage feeds into the next. `/start-here` figures out your scenario and rout
 | **Wait** | Decode the tracker, set realistic expectations, escalate when needed | `/track-application` |
 | **Recover** | Refusal? Appeal or re-apply — let's decide | `/refusal-appeal` |
 
-## The 36 skills — your complete virtual visa team
+## The 37 skills — your complete virtual visa team
 
 Each skill is a persona. You don't think "what skill do I need?" — you think "which expert do I want to talk to?"
 
@@ -354,7 +354,7 @@ Key principles:
 
 ## What's coming next (v1.x — beyond the catalogue)
 
-The 36-skill catalogue is complete at v1.0. The next phase shifts focus from "building skills" to "scaling impact":
+The 37-skill catalogue is complete at v1.0. The next phase shifts focus from "building skills" to "scaling impact":
 
 - **Country expansion** — `countries/italy/`, `countries/spain/`, `countries/germany/`, `countries/netherlands/`. Same skill architecture, country-specific KNOWLEDGE.md + consulate-specific detail.
 - **Real-applicant validation** — dogfooding + community feedback to refine skill outputs against actual application outcomes.
