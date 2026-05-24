@@ -35,7 +35,7 @@ application. Ships three things in one repository:
 > remains available for users who prefer sideloading or want to audit before
 > install — **no Node / no terminal / no build step needed**.
 >
-> The **vstack skills toolkit** is at **v1.0.0** — the full 36-skill catalogue
+> The **vstack skills toolkit** is at **v1.0.0** — the full 37-skill catalogue
 > for France Schengen short-stay applications is complete. Install with one
 > command (see [Path D](#path-d--use-the-ai-skills-toolkit-for-your-application) below).
 >

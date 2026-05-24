@@ -4,7 +4,7 @@ All notable changes to the Schengen-master skills toolkit. Format follows [Keep 
 
 ## [1.0.0] — 2026-05-24
 
-**Major release. The full 36-skill catalogue is complete.** All 9 personas have their full skill complement plus the France country knowledge base. EN + zh-CN parallel for every skill.
+**Major release. The full 37-skill catalogue is complete.** All 10 personas have their full skill complement plus the France country knowledge base. EN + zh-CN parallel for every skill.
 
 ### Added — 12 new skills (each EN + zh-CN parallel)
 
@@ -47,7 +47,7 @@ All notable changes to the Schengen-master skills toolkit. Format follows [Keep 
 | Application Auditor | 2 | Complete |
 | Recovery Advisor | 3 | Complete |
 | Meta Utility | 3 | Complete |
-| **Total** | **36 skills** | **v1.0** |
+| **Total** | **37 skills** | **v1.0** |
 
 ### Changed
 - README + README.zh-CN updated to reflect full catalogue
