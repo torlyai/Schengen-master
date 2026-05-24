@@ -1,4 +1,5 @@
 # Schengen-master
+<img width="1136" height="675" alt="image" src="https://github.com/user-attachments/assets/550df1b4-f3fa-4d7b-8e3f-4371bf93f82d" />
 
 > Read this in: **English** · [中文](README.zh-CN.md)
 >
