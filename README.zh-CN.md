@@ -6,18 +6,30 @@
 > AI 助手。Schengen Visa Master 代理完全开源；我们的英国创新创始人
 > （UK Innovator Founder）签证 AI 助手是另一个独立项目。
 
-本仓库提供一款**隐私优先的 Chrome 扩展** — *Visa Master 预约监控* —
-它会监控你的 TLScontact 预约页面，一旦有时段开放立刻提醒你。
-完全在你自己的浏览器里运行，不会把任何账号信息上传到服务器。
+本仓库提供三样东西：
+
+1. **隐私优先的 Chrome 扩展** — *Visa Master 预约监控* — 监控你的
+   TLScontact 预约页面，时段开放时立刻提醒。完全在你自己的浏览器里运行，
+   不把任何账号信息上传服务器。
+2. **文档模板** — 各家庭在本地维护的申请文档骨架（家庭档案、行动计划、
+   行程、状态仪表盘、审计日志），以及扩展背后的产品规范和平台设计说明。
+3. **AI 技能工具集** — *vstack* — 36 个 Claude Code 斜杠命令，全程带你
+   走完法国申根申请：行程规划师、文件工程师、会计、未成年人专家、
+   表格专家、预约协调员、申请审计师、补救顾问。全 Markdown，全免费，
+   EN+中文双语。见 [`skills/`](skills/) 与
+   [`skills/README.zh-CN.md`](skills/README.zh-CN.md)。
 
 > **隐私设计原则。** 本仓库**只放模板**，不包含任何真实姓名、地址、
 > 日期、证件号码或行程细节 — 个人数据由你自己在本地填写，并通过
 > `.gitignore` 的"默认拒绝"策略阻止误提交。
 >
-> **状态（2026-05-22）：** 扩展 **v1.2.0 已在 Chrome 应用商店上架** —
+> **状态（2026-05-24）：** 扩展 **v1.2.0 已在 Chrome 应用商店上架** —
 > 可从[官方商店页面](https://chromewebstore.google.com/detail/cpogdllkcpenafboclnidfmmlcnjpbfm)
 > 一键安装。如需手动安装或在安装前审计源码，仍可从[最新发布页](https://github.com/torlyai/Schengen-master/releases/latest)
 > 下载**预构建 ZIP 包** — **不需要 Node、不需要终端、不需要任何编译步骤**。
+>
+> **vstack 技能工具集**已发布至 **v1.0.0** — 法国申根短期签证完整的 36
+> 技能目录全部完成。安装方法见下方[技能工具集](#vstack-技能工具集)章节。
 >
 > **v1.2.0 新增功能** — 24 小时退款窗口结束后自动继续监控
 > （方便为家庭成员预订后续时段）、退款时需说明 TLS 取消原因（增加退款
@@ -34,6 +46,7 @@
 - [安装步骤（推荐路径 — 下载 ZIP）](#安装步骤推荐路径--下载-zip)
 - [Telegram 手机通知设置（可选但推荐）](#telegram-手机通知设置可选但推荐)
 - [配置选项](#配置选项)
+- [vstack 技能工具集](#vstack-技能工具集)
 - [隐私说明](#隐私说明)
 - [常见问题](#常见问题)
 - [关于 Torly AI](#关于-torly-ai)
@@ -201,6 +214,42 @@ Telegram 的下载链接；第 2 步有"打开 @BotFather"的一键深链接，
 | Telegram 手机通知 | 关 | 需手动启用。配置向导见上文。 |
 | 阻塞事件也通知 | 关 | 监控被 Cloudflare / 登录过期阻塞时，手机也响。 |
 | 开始监控时通知 | 关 | 扩展开始监控后会发一条简短的确认消息。 |
+
+---
+
+## vstack 技能工具集
+
+`skills/` 目录下是 **vstack** — 36 个
+[Claude Code](https://docs.anthropic.com/en/docs/claude-code) 斜杠命令，
+全程带你走完法国申根申请：行程规划、文件清单、照片+保险+求情信审计、
+财务证据审核、France-Visas+TLScontact 表格陪同、抢时段、赴约准备、
+申请审计、拒签申诉、批准后入境指引。EN+中文双语。
+
+**前置条件：** [Claude Code](https://docs.anthropic.com/en/docs/claude-code)、
+[Git](https://git-scm.com/)。
+
+**一行安装** — 粘贴到 Claude Code：
+
+```bash
+curl -sSL https://raw.githubusercontent.com/torlyai/Schengen-master/main/skills/install.sh | sh
+```
+
+通过 sparse-checkout 安装到 `~/.claude/skills/schengen-master/`（仅技能，
+不含扩展或模板）。任何时候重跑此命令即可更新。
+
+**然后在任何 Claude Code 会话中：**
+
+```
+/start-here
+```
+
+— 通过 6 个关键问题摸清你的行程，并路由到合适的技能。完整目录+角色分解+
+架构图见 [`skills/README.zh-CN.md`](skills/README.zh-CN.md)
+（[English](skills/README.md)）。
+
+**隐私：** 技能在 Claude Code 中本地运行。技能本身不会把你的申请信息
+上传到任何地方。选择性 `/learn` 技能会写一份本地 JSON 文件由你控制 —
+不会上传服务器。
 
 ---
 
