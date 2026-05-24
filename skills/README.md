@@ -5,6 +5,7 @@
   <a href="https://github.com/torlyai/Schengen-master/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License"></a>
   <a href="https://github.com/torlyai/Schengen-master/blob/main/skills/VERSION"><img src="https://img.shields.io/badge/skills-v1.0.0-blue?style=flat-square" alt="Skills v1.0.0"></a>
   <a href="https://chromewebstore.google.com/detail/cpogdllkcpenafboclnidfmmlcnjpbfm"><img src="https://img.shields.io/badge/Chrome%20Web%20Store-Visa%20Master-orange?style=flat-square&logo=googlechrome&logoColor=white" alt="Chrome Web Store"></a>
+  <a href="https://deepwiki.com/torlyai/Schengen-master"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
   <a href="https://github.com/torlyai/Schengen-master/stargazers"><img src="https://img.shields.io/github/stars/torlyai/Schengen-master?style=flat-square" alt="GitHub Stars"></a>
 </p>
 
@@ -17,7 +18,7 @@
 
 <p align="center">
   <strong>AI skills for France Schengen visa applications — 37 skills, 10 personas, EN + 中文</strong><br>
-  <a href="#install--30-seconds">Quick Install</a> · <a href="#the-37-skills--your-complete-virtual-visa-team">Browse Skills</a> · <a href="#see-it-work">See It Work</a> · <a href="#documentation--resources">Docs &amp; Resources</a>
+  <a href="#install--30-seconds">Quick Install</a> · <a href="#the-37-skills--your-complete-virtual-visa-team">Browse Skills</a> · <a href="#see-it-work">See It Work</a> · <a href="#documentation--resources">Docs &amp; Resources</a> · <a href="https://deepwiki.com/torlyai/Schengen-master">Ask AI Wiki</a>
 </p>
 
 > Read this in: **English** · [中文](README.zh-CN.md)
@@ -368,8 +369,22 @@ Once you have the skills installed, the most powerful place to explore them is *
 | [`countries/france/consulate-*.md`](countries/france/) | Per-TLS-centre detail for London, Manchester, Edinburgh, Belfast. |
 | Architecture diagram | The ASCII tree near the top of this README — `/start-here` → 8 personas → `/audit-application`. |
 | Per-skill `SKILL.md` | Each skill's own file under `skills/<name>/` documents triggers, procedure, output template, routing rules, common pitfalls, and authoritative sources. |
+| [DeepWiki for this repo](https://deepwiki.com/torlyai/Schengen-master) | AI-generated interactive documentation — browse the catalogue, ask questions, get answers cited back to source files. Auto-syncs with the repo on every push. |
 | [Visa Master Chrome extension](https://chromewebstore.google.com/detail/cpogdllkcpenafboclnidfmmlcnjpbfm) | The runtime companion — watches TLScontact for slots, complements `/find-slot` and `/book-appointment`. |
 | [Agent Skills standard](https://agentskills.io/) | The Anthropic spec for `SKILL.md` files — useful if you want to contribute a new skill. |
+
+### Browse the AI wiki (without installing)
+
+If you want to evaluate the toolkit before installing, **[DeepWiki for `torlyai/Schengen-master`](https://deepwiki.com/torlyai/Schengen-master)** gives you an AI Q&A interface over the full catalogue without touching your machine. The wiki indexes every skill, the architecture, the country knowledge base, and the routing rules. Auto-syncs with `main` on every push.
+
+Example questions DeepWiki answers well:
+
+- *"What does the document-engineer persona actually do, and how is it different from the auditor?"*
+- *"Show me the architecture of how skills route between each other."*
+- *"What's in the France country knowledge base?"*
+- *"How does the install one-liner work — what does sparse-checkout do here?"*
+
+DeepWiki is for **evaluation-before-install**. For Q&A *during* a real visa application, the section below ("Using Claude Code to explore the toolkit") is the stronger path because Claude has your actual application context.
 
 ### Using Claude Code to explore the toolkit
 
