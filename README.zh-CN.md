@@ -6,6 +6,7 @@
   <a href="https://github.com/torlyai/Schengen-master/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License"></a>
   <a href="https://github.com/torlyai/Schengen-master/blob/main/skills/VERSION"><img src="https://img.shields.io/badge/skills-v1.0.0-blue?style=flat-square" alt="Skills v1.0.0"></a>
   <a href="https://chromewebstore.google.com/detail/cpogdllkcpenafboclnidfmmlcnjpbfm"><img src="https://img.shields.io/badge/Chrome%20Web%20Store-Visa%20Master%20v1.2.0-orange?style=flat-square&logo=googlechrome&logoColor=white" alt="Chrome Web Store"></a>
+  <a href="https://deepwiki.com/torlyai/Schengen-master"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
   <a href="https://github.com/torlyai/Schengen-master/stargazers"><img src="https://img.shields.io/github/stars/torlyai/Schengen-master?style=flat-square" alt="GitHub Stars"></a>
 </p>
 
@@ -18,7 +19,7 @@
 
 <p align="center">
   <strong>申根签证工具集 — Chrome 扩展 + 文档模板 + 37 个 AI 技能</strong><br>
-  <a href="#安装步骤推荐路径--下载-zip">安装扩展</a> · <a href="#vstack-技能工具集">安装技能</a> · <a href="skills/README.zh-CN.md">浏览技能</a>
+  <a href="#安装步骤推荐路径--下载-zip">安装扩展</a> · <a href="#vstack-技能工具集">安装技能</a> · <a href="skills/README.zh-CN.md">浏览技能</a> · <a href="https://deepwiki.com/torlyai/Schengen-master">AI 维基问答</a>
 </p>
 
 > Read this in: [English](README.md) · **中文**

@@ -6,6 +6,7 @@
   <a href="https://github.com/torlyai/Schengen-master/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License"></a>
   <a href="https://github.com/torlyai/Schengen-master/blob/main/skills/VERSION"><img src="https://img.shields.io/badge/skills-v1.0.0-blue?style=flat-square" alt="Skills v1.0.0"></a>
   <a href="https://chromewebstore.google.com/detail/cpogdllkcpenafboclnidfmmlcnjpbfm"><img src="https://img.shields.io/badge/Chrome%20Web%20Store-Visa%20Master%20v1.2.0-orange?style=flat-square&logo=googlechrome&logoColor=white" alt="Chrome Web Store"></a>
+  <a href="https://deepwiki.com/torlyai/Schengen-master"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
   <a href="https://github.com/torlyai/Schengen-master/stargazers"><img src="https://img.shields.io/github/stars/torlyai/Schengen-master?style=flat-square" alt="GitHub Stars"></a>
 </p>
 
@@ -18,7 +19,7 @@
 
 <p align="center">
   <strong>Schengen visa toolkit — Chrome extension + document templates + 37 AI skills</strong><br>
-  <a href="#path-b--install-the-pre-built-extension-recommended">Install Extension</a> · <a href="#path-d--use-the-ai-skills-toolkit-for-your-application">Install Skills</a> · <a href="#path-a--use-the-templates-for-your-own-application">Use Templates</a> · <a href="skills/README.md">Browse Skills</a>
+  <a href="#path-b--install-the-pre-built-extension-recommended">Install Extension</a> · <a href="#path-d--use-the-ai-skills-toolkit-for-your-application">Install Skills</a> · <a href="#path-a--use-the-templates-for-your-own-application">Use Templates</a> · <a href="skills/README.md">Browse Skills</a> · <a href="https://deepwiki.com/torlyai/Schengen-master">Ask AI Wiki</a>
 </p>
 
 > Read this in: **English** · [中文](README.zh-CN.md)

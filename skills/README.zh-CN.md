@@ -5,6 +5,7 @@
   <a href="https://github.com/torlyai/Schengen-master/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License"></a>
   <a href="https://github.com/torlyai/Schengen-master/blob/main/skills/VERSION"><img src="https://img.shields.io/badge/skills-v1.0.0-blue?style=flat-square" alt="Skills v1.0.0"></a>
   <a href="https://chromewebstore.google.com/detail/cpogdllkcpenafboclnidfmmlcnjpbfm"><img src="https://img.shields.io/badge/Chrome%20Web%20Store-Visa%20Master-orange?style=flat-square&logo=googlechrome&logoColor=white" alt="Chrome Web Store"></a>
+  <a href="https://deepwiki.com/torlyai/Schengen-master"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
   <a href="https://github.com/torlyai/Schengen-master/stargazers"><img src="https://img.shields.io/github/stars/torlyai/Schengen-master?style=flat-square" alt="GitHub Stars"></a>
 </p>
 
@@ -17,7 +18,7 @@
 
 <p align="center">
   <strong>法国申根签证申请的 AI 技能集 — 37 个技能、10 位角色、中英双语</strong><br>
-  <a href="#安装--30-秒">快速安装</a> · <a href="#37-个技能--你完整的虚拟签证团队">浏览技能</a> · <a href="#看它怎么跑">看它怎么跑</a> · <a href="#文档与资源">文档与资源</a>
+  <a href="#安装--30-秒">快速安装</a> · <a href="#37-个技能--你完整的虚拟签证团队">浏览技能</a> · <a href="#看它怎么跑">看它怎么跑</a> · <a href="#文档与资源">文档与资源</a> · <a href="https://deepwiki.com/torlyai/Schengen-master">AI 维基问答</a>
 </p>
 
 > Read this in: [English](README.md) · **中文**
@@ -363,8 +364,22 @@ TLS 追踪器两周不动、或拒签信到了，跟这位聊。读情况、设�
 | [`countries/france/consulate-*.md`](countries/france/) | 伦敦、曼彻斯特、爱丁堡、贝尔法斯特各 TLS 中心的细节。 |
 | 架构图 | 本 README 顶部附近的 ASCII 树 — `/start-here` → 8 位角色 → `/audit-application`。 |
 | 各技能的 `SKILL.md` | `skills/<name>/` 下每个技能自己的文件，记录触发短语、流程、输出模板、路由规则、常见陷阱、权威来源。 |
+| [本仓库的 DeepWiki](https://deepwiki.com/torlyai/Schengen-master) | AI 生成的交互式文档 — 浏览目录、提问、答案附源文件引用。每次推送自动同步。 |
 | [Visa Master Chrome 扩展](https://chromewebstore.google.com/detail/cpogdllkcpenafboclnidfmmlcnjpbfm) | 运行时配套 — 监视 TLScontact 时段，与 `/find-slot` + `/book-appointment` 互补。 |
 | [Agent Skills 标准](https://agentskills.io/) | Anthropic 的 `SKILL.md` 规范 — 如想贡献新技能可读。 |
+
+### 不装也能浏览 AI 维基
+
+如想在装之前评估工具集，**[`torlyai/Schengen-master` 的 DeepWiki](https://deepwiki.com/torlyai/Schengen-master)** 提供完整目录的 AI 问答界面，不动你的机器。维基索引每个技能、架构、国家知识库和路由规则。每次推送到 `main` 自动同步。
+
+DeepWiki 善于回答的例子：
+
+- *"document-engineer 角色到底做什么？跟 auditor 有什么不同？"*
+- *"展示技能之间如何路由的架构。"*
+- *"法国国家知识库里有什么？"*
+- *"一行安装命令怎么工作 — sparse-checkout 在这里做什么？"*
+
+DeepWiki 用于**装之前评估**。在**真实签证申请期间**的问答，下方"用 Claude Code 探索工具集"是更强路径，因为 Claude 有你实际的申请上下文。
 
 ### 用 Claude Code 探索工具集
 
