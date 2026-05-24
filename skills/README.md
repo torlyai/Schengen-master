@@ -8,7 +8,7 @@
 
 This is a Claude Code skills toolkit for **Schengen short-stay visa applications**, starting with France from the UK. It turns Claude Code into nine virtual experts who walk you through the entire journey — a trip planner who interrogates your scenario, a document engineer who builds your file pack, an accountant who audits your finances, a forms specialist who walks you through France-Visas and TLScontact line by line, a minor specialist for kids, a sponsor specialist for spouse/parent/employer support, an appointment coordinator who hunts slots, an application auditor who runs a final pre-submission check, and a recovery advisor for when things go wrong.
 
-**24 skills at v0.3.0**, all Markdown, all free, MIT-licensed. Designed for France at v0.x; other Schengen countries land in v1.x. Each skill is bilingual (English + Simplified Chinese) so a family applying together can each work in their preferred language.
+**36 skills at v1.0.0 — the catalogue is complete.** All Markdown, all free, MIT-licensed. Designed for France at v1.0; other Schengen countries land in v1.x. Each skill is bilingual (English + Simplified Chinese) so a family applying together can each work in their preferred language.
 
 **Who this is for:**
 
@@ -182,7 +182,7 @@ Each stage feeds into the next. `/start-here` figures out your scenario and rout
 | **Wait** | Decode the tracker, set realistic expectations, escalate when needed | `/track-application` |
 | **Recover** | Refusal? Appeal or re-apply — let's decide | `/refusal-appeal` |
 
-## The 24 skills — your virtual visa team
+## The 36 skills — your complete virtual visa team
 
 Each skill is a persona. You don't think "what skill do I need?" — you think "which expert do I want to talk to?"
 
@@ -208,6 +208,9 @@ Knows every Schengen rule by heart: photo dimensions, insurance minimums, cover 
 | `/photo-check` | Vision-enabled passport-photo compliance check. Attach your photo, get a verdict against the Schengen standard (35×45mm, white background, no glasses, neutral expression, ≤6 months old). |
 | `/insurance-check` | Travel-insurance certificate audit. Verifies €30k+ coverage in EUR, repatriation, full trip duration, full Schengen area coverage. Tells you exactly what's missing. |
 | `/cover-letter` | Drafts a personalised cover letter under 300 words. Variants for tourism, business, family visit. Explains purpose + return commitment + ties to your country of residence. |
+| `/accommodation-verify` | **New in v1.0.** Night-by-night accommodation audit. Flags gap nights, name mismatches on shared bookings, and Attestation-d'Accueil cases the user might have missed. |
+| `/translate-doc` | **New in v1.0.** Certified-translation guidance for non-English/French documents. Recommends ATC / ITI / NRPSI members; sets cost + time expectations. |
+| `/apostille` | **New in v1.0.** UK FCDO + foreign apostille processes. Identifies which documents need it, in what order (apostille first, then translate). |
 
 ### Accountant (visa-only) — *the meticulous money person* — **new in v0.2**
 
@@ -228,6 +231,9 @@ Travel with children is its own visa subspecialty. Birth certificates, parental 
 |---|---|
 | `/minor-application` | Entry-point for child applicants. Walks through birth cert + parent consent + school letter + parent docs requirements. Branches based on which parents are travelling. |
 | `/minor-parent-consent` | Drafts the notarised parental consent letter when one or both parents are NOT travelling. Includes the legal phrasing consulates expect. |
+| `/minor-birth-certificate` | **New in v1.0.** Verifies the child's birth certificate (long-form preferred), handles foreign-issued certificates, adopted-child cases, single-parent edge cases. |
+| `/minor-school-letter` | **New in v1.0.** UK school absence-letter template + verification checklist. Covers what the school must include and how to request it. |
+| `/minor-parent-docs` | **New in v1.0.** Audits accompanying parent's passport, UK status (BRP / share code), and financial evidence; cross-document consistency check between child + parent. |
 
 ### Sponsor Specialist — *for when someone else is paying*
 
@@ -255,6 +261,8 @@ TLScontact slots are scarce, especially London May-August. This persona knows wh
 |---|---|
 | `/find-slot` | Strategy for when no slots are available. Recommends the [Visa Master extension](https://chromewebstore.google.com/detail/cpogdllkcpenafboclnidfmmlcnjpbfm) for slot-watching, centre-shopping advice (Edinburgh + Belfast often have slots when London doesn't), and last-resort options. |
 | `/book-appointment` | **New in v0.2.** Full booking-mechanics walkthrough once slots exist. Centre comparison, slot-time strategy, add-on advice (decline almost all upsells), and the on-the-day checklist. |
+| `/appointment-prep` | **New in v1.0.** 24-hour-before checklist. Documents printed (not screen), photos physical, payment cards, transport planned, folder packed. |
+| `/appointment-day` | **New in v1.0.** Morning-of brief — five-item sanity sweep + during-appointment guidance + what to do as soon as you're back home. |
 
 ### Application Auditor — *the second pair of eyes before you commit*
 
@@ -263,6 +271,7 @@ The most important persona. Reads everything before you submit and flags the inc
 | Skill | What it does |
 |---|---|
 | `/audit-application` | Five-layer pre-submission audit: completeness (do you have all docs?), consistency (do dates/names/addresses match across docs?), credibility (does your financial story add up?), compliance (insurance + photo + cover letter against Schengen spec), and admissibility (do you meet visa eligibility?). PASS / HOLD / FAIL verdict + recommended fixes. |
+| `/mock-interview` | **New in v1.0.** Practice consular interview (rare for France tourist visas, but possible for refusal-reapplications + complex cases). Question bank + framing principles + confidence scoring. |
 
 ### Recovery Advisor — *for when things go wrong* — **new in v0.2**
 
@@ -272,6 +281,17 @@ When the TLS tracker stays silent for two weeks, or the refusal letter arrives, 
 |---|---|
 | `/track-application` | TLS tracker status decoder. Translates "Documents in transit" → "this is normal, just transit." Sets realistic timelines (7-15 working days for France from UK). Flags when to actually be concerned vs when to just wait. |
 | `/refusal-appeal` | Interprets refusal codes 1-9, identifies which are fixable and which aren't. Drafts the appeal letter when appeal is viable. Recommends re-application (cheaper, faster) when appeal isn't. |
+| `/first-trip` | **New in v1.0.** Post-approval first-Schengen-entry guidance. Visa sticker verification, border-control prep, 90/180 rule, building a clean record for future multi-entry visas. |
+
+### Meta Utility — *toolkit ergonomics* — **new in v1.0**
+
+These three skills aren't visa-domain content — they manage your experience with the toolkit itself. Use them when you want the toolkit to remember your context across sessions, see what you've done, or pull in the latest skills.
+
+| Skill | What it does |
+|---|---|
+| `/learn` | Opt-in cross-session memory. Saves your application context (trip dates, group composition, sponsor, stage of work) into a local JSON file so future sessions pick up where you left off. Privacy-first: nothing leaves your machine, you control what's saved. |
+| `/audit-log` | "Where are we?" digest. Shows what skills you've run in this session, what decisions were made, and what's still outstanding. Session-local only (use `/learn` for cross-session). |
+| `/vstack-upgrade` | Self-update. Checks current installed version vs latest on GitHub, shows what's changed, runs `git pull` to update. Idempotent; safe to run repeatedly. |
 
 ## Which skill should I use?
 
@@ -332,17 +352,15 @@ Key principles:
 - **Don't lie. Ever.** The VIS database cross-references everything.
 - **We are templates, not lawyers.** Always confirm against official sources.
 
-## What's coming next (v0.4 → v1.0)
+## What's coming next (v1.x — beyond the catalogue)
 
-12 more skills to reach the full 36-skill catalogue:
+The 36-skill catalogue is complete at v1.0. The next phase shifts focus from "building skills" to "scaling impact":
 
-- **More documents:** `/accommodation-verify`, `/translate-doc`, `/apostille`
-- **More minor skills:** `/minor-birth-certificate`, `/minor-school-letter`, `/minor-parent-docs`
-- **Appointment-day prep:** `/appointment-prep`, `/appointment-day`, `/mock-interview`
-- **Post-decision:** `/first-trip`
-- **Meta-utility:** `/learn` (memory), `/audit-log`, `/vstack-upgrade`
-
-Plus more `countries/*` knowledge bases — Germany, Italy, Spain, Netherlands.
+- **Country expansion** — `countries/italy/`, `countries/spain/`, `countries/germany/`, `countries/netherlands/`. Same skill architecture, country-specific KNOWLEDGE.md + consulate-specific detail.
+- **Real-applicant validation** — dogfooding + community feedback to refine skill outputs against actual application outcomes.
+- **`/vstack-doctor`** — sanity-check tooling that validates every skill's frontmatter, route references, and external links. Quality gate for community contributions.
+- **Quarterly review cadence** — re-verify each skill against authoritative sources (france-visas.gouv.fr, TLScontact, EU Visa Code) every 3 months.
+- **Native zh-CN reviewer pass** — validate Chinese translations for natural phrasing and cultural adaptation.
 
 See [CHANGELOG.md](CHANGELOG.md) for what shipped when.
 
