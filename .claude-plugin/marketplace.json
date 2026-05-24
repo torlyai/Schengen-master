@@ -1,0 +1,151 @@
+{
+  "$schema": "https://docs.claude.com/schemas/claude-plugin-marketplace-v1.json",
+  "name": "visa-schengen",
+  "owner": {
+    "name": "torly.ai",
+    "email": "support@torly.ai"
+  },
+  "metadata": {
+    "description": "37 Claude Code skills across 10 personas for France Schengen visa applications (EN + zh-CN bilingual)",
+    "version": "1.3.0"
+  },
+  "plugins": [
+    {
+      "name": "trip-planner",
+      "description": "Plans a France Schengen trip end-to-end — destinations, dates, visa type, and a backwards timeline from your travel date so nothing slips.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/start-here",
+        "./skills/plan-trip",
+        "./skills/itinerary-builder",
+        "./skills/decide-visa-type",
+        "./skills/timeline-planner"
+      ],
+      "keywords": ["schengen", "france", "visa", "trip-planning", "itinerary", "timeline"],
+      "license": "MIT"
+    },
+    {
+      "name": "document-engineer",
+      "description": "Builds the visa document pack — photo, insurance, cover letter, accommodation proof, translations, apostille — and catches small-rule slips that cause refusals.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/document-checklist",
+        "./skills/photo-check",
+        "./skills/insurance-check",
+        "./skills/cover-letter",
+        "./skills/accommodation-verify",
+        "./skills/translate-doc",
+        "./skills/apostille"
+      ],
+      "keywords": ["schengen", "france", "documents", "compliance", "checklist", "translation"],
+      "license": "MIT"
+    },
+    {
+      "name": "accountant",
+      "description": "Prepares the visa financial pack — employment letter, bank statements, cost estimate, and a financial-evidence checklist that meets consulate thresholds.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/employment-letter",
+        "./skills/bank-statement-check",
+        "./skills/cost-estimate",
+        "./skills/financial-checklist"
+      ],
+      "keywords": ["schengen", "france", "visa", "financial-evidence", "bank-statement", "employment"],
+      "license": "MIT"
+    },
+    {
+      "name": "minor-specialist",
+      "description": "Handles Schengen visa applications for children under 18 — parent consent, birth certificate, school letter, and the extra parent documents consulates require.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/minor-application",
+        "./skills/minor-parent-consent",
+        "./skills/minor-birth-certificate",
+        "./skills/minor-school-letter",
+        "./skills/minor-parent-docs"
+      ],
+      "keywords": ["schengen", "france", "minor", "child-visa", "parental-consent", "family"],
+      "license": "MIT"
+    },
+    {
+      "name": "sponsor-specialist",
+      "description": "Guides Schengen visa applications where someone else (family, employer, host) sponsors the trip — invitation letter, proof of relationship, and sponsor financials.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/sponsored-application"
+      ],
+      "keywords": ["schengen", "france", "visa", "sponsor", "invitation-letter", "host"],
+      "license": "MIT"
+    },
+    {
+      "name": "forms-specialist",
+      "description": "Fills the France-Visas online form and the TLScontact follow-up form correctly the first time, including the group-application flow for families travelling together.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/france-visas-form",
+        "./skills/tlscontact-form",
+        "./skills/group-application"
+      ],
+      "keywords": ["schengen", "france-visas", "tlscontact", "application-form", "group-application"],
+      "license": "MIT"
+    },
+    {
+      "name": "appointment-coordinator",
+      "description": "Finds and books a TLScontact appointment slot, then prepares you for the visit — what to bring, what to expect, and how to behave on appointment day.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/find-slot",
+        "./skills/book-appointment",
+        "./skills/appointment-prep",
+        "./skills/appointment-day"
+      ],
+      "keywords": ["schengen", "tlscontact", "appointment", "booking", "visa-centre"],
+      "license": "MIT"
+    },
+    {
+      "name": "application-auditor",
+      "description": "Reviews a completed visa application before submission — finds gaps, inconsistencies, and refusal risks, and runs a mock consular interview so you're ready.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/audit-application",
+        "./skills/mock-interview"
+      ],
+      "keywords": ["schengen", "france", "visa", "audit", "review", "mock-interview"],
+      "license": "MIT"
+    },
+    {
+      "name": "recovery-advisor",
+      "description": "Helps after the application is submitted — track status, appeal a refusal, and handle the first-trip extras (entry stamps, 90/180 rule, what to carry).",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/track-application",
+        "./skills/refusal-appeal",
+        "./skills/first-trip"
+      ],
+      "keywords": ["schengen", "france", "visa", "refusal", "appeal", "first-trip"],
+      "license": "MIT"
+    },
+    {
+      "name": "meta-utility",
+      "description": "Maintenance helpers for the Schengen skills themselves — record learnings, view the audit log, and upgrade the vstack skill collection.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/learn",
+        "./skills/audit-log",
+        "./skills/vstack-upgrade"
+      ],
+      "keywords": ["schengen", "vstack", "meta", "audit-log", "upgrade", "learnings"],
+      "license": "MIT"
+    }
+  ]
+}

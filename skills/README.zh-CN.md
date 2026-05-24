@@ -104,6 +104,43 @@
 4. 觉得准备好了就运行 `/audit-application`
 5. 到这一步你就知道这套是否适合你
 
+## 通过 Claude Code 插件市场安装（推荐）
+
+Claude Code 用户最干净的安装方式。一次添加市场，然后按需安装角色：
+
+```
+/plugin marketplace add torlyai/Schengen-master
+/plugin install trip-planner@visa-schengen
+/plugin install document-engineer@visa-schengen
+/plugin install application-auditor@visa-schengen
+```
+
+或一次装完整目录：
+
+```
+/plugin install visa-schengen/*
+```
+
+**装完之后**，技能按所属插件（角色）命名空间。示例：
+
+```
+/trip-planner:start-here
+/document-engineer:audit-application
+/recovery-advisor:refusal-appeal
+```
+
+10 个插件（每角色一个）列于 [`.claude-plugin/marketplace.json`](../.claude-plugin/marketplace.json)。更新：`/plugin update visa-schengen`。
+
+### 何时用市场 vs 下方 `install.sh`
+
+| 用市场如果... | 用 `install.sh` 如果... |
+|---|---|
+| 你在 Claude Code 且想要原生插件 UX | 你想要不带前缀的命令（`/audit-application` 而非 `/application-auditor:audit-application`） |
+| 你只想装特定角色 | 你想一行装全 37 个技能 |
+| 你想通过 `/plugin update` 管理更新 | 你用非 Claude Code 代理（Cursor、Codex、Gemini） |
+
+两个渠道并行 — 任选其一或都用。
+
 ## 安装 — 30 秒
 
 **前置：** [Claude Code](https://docs.anthropic.com/en/docs/claude-code)、[Git](https://git-scm.com/)
