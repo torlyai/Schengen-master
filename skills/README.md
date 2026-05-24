@@ -1,5 +1,25 @@
 # Schengen-master skills
 
+<p align="center">
+  <a href="https://torly.ai"><img src="https://img.shields.io/badge/Website-torly.ai-black?style=flat-square" alt="Website"></a>
+  <a href="https://github.com/torlyai/Schengen-master/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License"></a>
+  <a href="https://github.com/torlyai/Schengen-master/blob/main/skills/VERSION"><img src="https://img.shields.io/badge/skills-v1.0.0-blue?style=flat-square" alt="Skills v1.0.0"></a>
+  <a href="https://chromewebstore.google.com/detail/cpogdllkcpenafboclnidfmmlcnjpbfm"><img src="https://img.shields.io/badge/Chrome%20Web%20Store-Visa%20Master-orange?style=flat-square&logo=googlechrome&logoColor=white" alt="Chrome Web Store"></a>
+  <a href="https://github.com/torlyai/Schengen-master/stargazers"><img src="https://img.shields.io/github/stars/torlyai/Schengen-master?style=flat-square" alt="GitHub Stars"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/torlyai/Schengen-master/issues"><img src="https://img.shields.io/github/issues/torlyai/Schengen-master?style=flat-square" alt="Issues"></a>
+  <a href="https://github.com/torlyai/Schengen-master/pulls"><img src="https://img.shields.io/github/issues-pr/torlyai/Schengen-master?style=flat-square" alt="Pull Requests"></a>
+  <img src="https://img.shields.io/github/last-commit/torlyai/Schengen-master?style=flat-square" alt="Last Commit">
+  <a href="https://github.com/torlyai/Schengen-master/graphs/contributors"><img src="https://img.shields.io/github/contributors/torlyai/Schengen-master?style=flat-square" alt="Contributors"></a>
+</p>
+
+<p align="center">
+  <strong>AI skills for France Schengen visa applications — 37 skills, 10 personas, EN + 中文</strong><br>
+  <a href="#install--30-seconds">Quick Install</a> · <a href="#the-37-skills--your-complete-virtual-visa-team">Browse Skills</a> · <a href="#see-it-work">See It Work</a> · <a href="#documentation--resources">Docs &amp; Resources</a>
+</p>
+
 > Read this in: **English** · [中文](README.zh-CN.md)
 >
 > A Schengen visa application is a lot of paperwork, a lot of small rules, and very little forgiveness. Get the photo wrong, get refused. Insurance €20k short of €30k, refused. Bank statement with one suspicious deposit, refused. Cover letter contradicts the France-Visas form, refused. Show up at TLScontact without a printed barcode, sent home.
@@ -336,6 +356,32 @@ Install: [Chrome Web Store](https://chromewebstore.google.com/detail/cpogdllkcpe
 
 Skills know about it: `/find-slot` recommends the Free tier for slot-watching, `/book-appointment` explains how it complements manual booking, and the wider ETHOS treats Premium as opt-in with a clear trust boundary (the Free tier never sends anything to torly.ai).
 
+## Documentation & Resources
+
+Once you have the skills installed, the most powerful place to explore them is **inside Claude Code itself** — Claude has access to all 37 `SKILL.md` files locally, each with structured frontmatter, routing rules, and worked examples. That's a better Q&A surface than any external wiki.
+
+| Resource | What's there |
+|---|---|
+| [`ETHOS.md`](ETHOS.md) | The 12 principles every skill embodies. Read before contributing or to understand why a skill made a specific recommendation. |
+| [`CHANGELOG.md`](CHANGELOG.md) | Per-version release history (v0.1 → v1.0). |
+| [`countries/france/KNOWLEDGE.md`](countries/france/KNOWLEDGE.md) | Single source of truth for France-specific facts — fees, processing times, refusal codes, document requirements. |
+| [`countries/france/consulate-*.md`](countries/france/) | Per-TLS-centre detail for London, Manchester, Edinburgh, Belfast. |
+| Architecture diagram | The ASCII tree near the top of this README — `/start-here` → 8 personas → `/audit-application`. |
+| Per-skill `SKILL.md` | Each skill's own file under `skills/<name>/` documents triggers, procedure, output template, routing rules, common pitfalls, and authoritative sources. |
+| [Visa Master Chrome extension](https://chromewebstore.google.com/detail/cpogdllkcpenafboclnidfmmlcnjpbfm) | The runtime companion — watches TLScontact for slots, complements `/find-slot` and `/book-appointment`. |
+| [Agent Skills standard](https://agentskills.io/) | The Anthropic spec for `SKILL.md` files — useful if you want to contribute a new skill. |
+
+### Using Claude Code to explore the toolkit
+
+Once installed, ask Claude Code anything about the catalogue. Examples that work because Claude can read all 37 `SKILL.md` files locally:
+
+- *"Which skills do I need if I'm applying with my spouse and 8-year-old son?"* — Claude routes through `/start-here` → `/minor-application` → `/group-application` → `/document-checklist` and explains why.
+- *"What's the difference between `/accommodation-verify` and `/audit-application`?"* — Claude compares the two skills' procedures and tells you when each fires.
+- *"Show me the dependency chain from `/start-here` to booking the TLS appointment."* — Claude walks the routing rules: `/start-here` → `/plan-trip` → `/decide-visa-type` → `/timeline-planner` → `/document-checklist` → `/france-visas-form` → `/tlscontact-form` → `/find-slot` → `/book-appointment`.
+- *"My friend was refused for code 3. What should I look at?"* — Claude routes to `/refusal-appeal` and explains code 3 (insufficient funds) + the documents that address it (`/bank-statement-check`, `/sponsored-application`).
+
+The skills auto-suggest each other via inline `Routing rules` tables, so the discovery path stays self-documenting as the catalogue grows.
+
 ## Templates — print-ready files
 
 `docs/templates/visa-application/` in the public repo holds the printable templates the skills reference: cover letter templates, document checklist PDFs, photo spec card, employer letter samples, sponsor letter samples. The skills generate personalised content; the templates give you the layout.
@@ -379,6 +425,10 @@ If you spot a skill that's wrong, outdated, or could be better — file an issue
 If you want to add a new skill: copy `SKILL.md.tmpl`, follow the format, and open a PR. Read `ETHOS.md` first — your skill should embody these principles.
 
 If you want to translate a skill to another language: copy `<skill>/SKILL.md` to `i18n/<locale>/<skill>/SKILL.md` and translate. We currently ship English + Simplified Chinese; happy to add more.
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=torlyai/Schengen-master&type=Date)](https://star-history.com/#torlyai/Schengen-master&Date)
 
 ## License
 
