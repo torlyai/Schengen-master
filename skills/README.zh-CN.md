@@ -4,7 +4,7 @@
 >
 > 由九位虚拟专家协助你申请申根签证 — 行程规划师、文件工程师、会计、表格专家、未成年人专家、担保专家、预约协调员、申请审计师、补救顾问。全部 Claude Code 斜杠命令。全部 markdown。免费、开源、MIT 协议。
 
-v0.1.0 提供 10 个技能（目标 v1.0 提供 36 个完整技能）。v0.1 专注**法国申根短期签证申请**；其他申根国家在 v1.x 上线。
+**v0.2.0 提供 20 个技能**（目标 v1.0 提供 36 个完整技能）。v0.x 专注**法国申根短期签证申请**；其他申根国家在 v1.x 上线。
 
 ---
 
@@ -34,29 +34,85 @@ SCHENGEN_SKILLS_DEST=~/some/other/path curl -sSL ...install.sh | sh
 | "帮我检查照片是否符合要求" | `/photo-check` *（附上图片时启用视觉识别）* |
 | "我的旅行保险符合申根要求吗？" | `/insurance-check` |
 | "帮我写求情信" | `/cover-letter` |
+| "帮我起草雇主信" | `/employment-letter` |
+| "审核我的银行流水" | `/bank-statement-check` |
+| "估算我的出行成本" | `/cost-estimate` |
 | "我和孩子一起申请" | `/minor-application` |
 | "我的配偶担保我" | `/sponsored-application` |
+| "帮我填 France-Visas 表" | `/france-visas-form` |
+| "带我过 TLScontact" | `/tlscontact-form` |
+| "我们一家 4 口" | `/group-application` |
 | "我准备好提交申请了吗？" | `/audit-application` |
 | "我找不到 TLS 预约时段" | `/find-slot` |
+| "帮我预订预约" | `/book-appointment` |
+| "我的 TLS 状态什么意思？" | `/track-application` |
+| "我被拒了 — 怎么办？" | `/refusal-appeal` |
 
-## v0.1 的 10 个技能
+## v0.2 的 20 个技能
 
-| 技能 | 角色 | 功能 |
-|---|---|---|
-| `/start-here` | 行程规划师 | 入口；6 个关键问题；引导你进入下一步 |
-| `/document-checklist` | 文件工程师 | 根据你的目的 + 家庭 + 担保情况，定制文件清单 |
-| `/photo-check` | 文件工程师 | 启用视觉识别的护照照片合规性检查 |
-| `/insurance-check` | 文件工程师 | 旅行保险证明对申根要求的合规性检查（€30000+、全程覆盖、医疗遣返） |
-| `/cover-letter` | 文件工程师 | 起草个性化求情信，说明出行目的 + 回国承诺 |
-| `/minor-application` | 未成年人专家 | 儿童申请入口 — 出生证明、父母同意书、学校证明、父母证件 |
-| `/minor-parent-consent` | 未成年人专家 | 父母一方或双方不随行时的同意书 |
-| `/sponsored-application` | 担保专家 | 配偶/父母/朋友/雇主担保 — 根据担保人类型自动调整 |
-| `/audit-application` | 申请审计师 | 提交前审计；阅读全部材料，标出不一致、遗漏和薄弱环节 |
-| `/find-slot` | 预约协调员 | TLScontact 预约策略 + 与 [Visa Master 扩展](https://chromewebstore.google.com/detail/cpogdllkcpenafboclnidfmmlcnjpbfm) 集成 |
+### 行程规划师
+| 技能 | 功能 |
+|---|---|
+| `/start-here` | 入口；6 个关键问题；引导你进入下一步 |
 
-## v1.0 路线图
+### 文件工程师
+| 技能 | 功能 |
+|---|---|
+| `/document-checklist` | 根据你的目的 + 家庭 + 担保情况，定制文件清单 |
+| `/photo-check` | 启用视觉识别的护照照片合规性检查 |
+| `/insurance-check` | 旅行保险证明对申根要求的合规性检查（€30000+、全程覆盖、医疗遣返） |
+| `/cover-letter` | 起草个性化求情信，说明出行目的 + 回国承诺 |
 
-后续将补充另外 26 个技能，形成完整的 36 技能目录：行程规划技能（`/plan-trip`、`/itinerary-builder`、`/decide-visa-type`、`/timeline-planner`）、更多文件技能（`/accommodation-verify`、`/translate-doc`、`/apostille`）、财务证明技能（`/employment-letter`、`/bank-statement-check`、`/cost-estimate`）、更多未成年人技能（`/minor-birth-certificate`、`/minor-school-letter`、`/minor-parent-docs`）、表格指南（`/france-visas-form`、`/tlscontact-form`、`/group-application`）、预约日准备（`/book-appointment`、`/appointment-prep`、`/appointment-day`）、面试准备（`/mock-interview`）、申请后补救（`/track-application`、`/refusal-appeal`、`/first-trip`）、以及元工具（`/learn`、`/audit-log`）。
+### 会计（签证专用）— *v0.2 新增*
+| 技能 | 功能 |
+|---|---|
+| `/employment-letter` | 起草合规雇主信；标记缺失字段（薪资、职位、休假批准） |
+| `/bank-statement-check` | 按 €65/天规则审核 3 个月流水；标记可疑存款 |
+| `/cost-estimate` | 分项出行成本核算（机票、住宿、日支、保险、费用） |
+| `/financial-checklist` | 整合财务证据包；路由到上述一项或多项 |
+
+### 未成年人专家
+| 技能 | 功能 |
+|---|---|
+| `/minor-application` | 儿童申请入口 — 出生证明、父母同意书、学校证明、父母证件 |
+| `/minor-parent-consent` | 父母一方或双方不随行时的同意书 |
+
+### 担保专家
+| 技能 | 功能 |
+|---|---|
+| `/sponsored-application` | 配偶/父母/朋友/雇主担保 — 根据担保人类型自动调整 |
+
+### 表格专家 — *v0.2 新增*
+| 技能 | 功能 |
+|---|---|
+| `/france-visas-form` | France-Visas 门户逐页指引 |
+| `/tlscontact-form` | TLScontact 账户创建 + 参考号关联 + 预约流程配置 |
+| `/group-application` | 家庭/团体结构性规则（每人 1 个 France-Visas、1 个 TLS 团队 ID、1 个时段） |
+
+### 预约协调员
+| 技能 | 功能 |
+|---|---|
+| `/find-slot` | TLScontact 预约策略 + 与 [Visa Master 扩展](https://chromewebstore.google.com/detail/cpogdllkcpenafboclnidfmmlcnjpbfm) 集成 |
+| `/book-appointment` | 完整预订机制指引；中心选择、时段建议、附加项建议、当天清单 — *v0.2 新增* |
+
+### 申请审计师
+| 技能 | 功能 |
+|---|---|
+| `/audit-application` | 提交前审计；阅读全部材料，标出不一致、遗漏和薄弱环节 |
+
+### 补救顾问 — *v0.2 新增*
+| 技能 | 功能 |
+|---|---|
+| `/track-application` | TLS 追踪器状态解读 + 现实时间线 + 升级触发 |
+| `/refusal-appeal` | 解读拒签代码 1-9；起草申诉信或建议重新申请 |
+
+## 法国知识库 — *v0.2 新增*
+
+`countries/france/` 包含法国特定事实的唯一真实来源（费用、处理时间、拒签代码、常见怪癖）加上伦敦、曼彻斯特、爱丁堡和贝尔法斯特各领事中心的详细信息。
+
+## v0.3 → v1.0 路线图
+
+再 16 个技能即达完整 36 技能目录：行程规划（`/plan-trip`、`/itinerary-builder`、`/decide-visa-type`、`/timeline-planner`）、更多文件技能（`/accommodation-verify`、`/translate-doc`、`/apostille`）、更多未成年人技能（`/minor-birth-certificate`、`/minor-school-letter`、`/minor-parent-docs`）、预约日准备（`/appointment-prep`、`/appointment-day`、`/mock-interview`）、决定后（`/first-trip`）、以及元工具（`/learn`、`/audit-log`、`/vstack-upgrade`）。加上 Germany、Italy、Spain、Netherlands 等其他 `countries/*` 知识库。
 
 详见 [CHANGELOG.md](CHANGELOG.md)。
 
