@@ -1,4 +1,5 @@
 # Schengen-master · 中文安装与配置指南
+<img width="1136" height="675" alt="image" src="https://github.com/user-attachments/assets/f1dba5a4-a882-4357-bf09-3cbe24be746a" />
 
 > Read this in: [English](README.md) · **中文**
 >
