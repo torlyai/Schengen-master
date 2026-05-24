@@ -2,6 +2,29 @@
 
 All notable changes to the Schengen-master skills toolkit. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [SemVer](https://semver.org/).
 
+## [0.3.0] — 2026-05-24
+
+Third public release. Completes the Trip Planner persona with the remaining 4 skills. Total: **24 skills** (EN + zh-CN parallel). README restructured with marketingskills-style architecture diagram showing how skills relate.
+
+### Added — 4 new skills (each EN + zh-CN parallel)
+
+**Trip Planner — completes the persona (4 new skills + existing /start-here)**
+- `/plan-trip` — iterative trip-planning wizard (destinations, dates, group composition, budget) with consular-credibility checks built in
+- `/itinerary-builder` — day-by-day itinerary generator with accommodation cross-check, season + group + pace validation; output attachable to France-Visas
+- `/decide-visa-type` — Type A/C/D + single/multi-entry + purpose + responsible-consulate decision tree
+- `/timeline-planner` — backwards-planner from trip date; computes critical path (apostille / Attestation / passport renewal lead times); GO / TIGHT / NO-GO verdict
+
+### Changed
+- README.md + README.zh-CN.md restructured with **"What are skills?"** + **"How skills work together"** sections including an ASCII architecture diagram (inspired by [coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills)) showing `/start-here` as foundation and 8 persona branches converging on `/audit-application`
+- 24-skill catalogue index now grouped by persona with cross-reference legend
+
+### Migration from 0.2.0
+Re-run the install one-liner — sparse-checkout picks up the new skills automatically:
+```bash
+curl -sSL https://raw.githubusercontent.com/torlyai/Schengen-master/main/skills/install.sh | sh
+```
+No breaking changes to v0.1 or v0.2 skills.
+
 ## [0.2.0] — 2026-05-24
 
 Second public release. Adds 10 more skills covering Accountant, Forms Specialist, Recovery Advisor personas and extends the Appointment Coordinator. Total: **20 skills** (EN + zh-CN parallel). Adds the `countries/france/` knowledge base.

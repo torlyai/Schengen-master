@@ -8,7 +8,7 @@
 
 This is a Claude Code skills toolkit for **Schengen short-stay visa applications**, starting with France from the UK. It turns Claude Code into nine virtual experts who walk you through the entire journey — a trip planner who interrogates your scenario, a document engineer who builds your file pack, an accountant who audits your finances, a forms specialist who walks you through France-Visas and TLScontact line by line, a minor specialist for kids, a sponsor specialist for spouse/parent/employer support, an appointment coordinator who hunts slots, an application auditor who runs a final pre-submission check, and a recovery advisor for when things go wrong.
 
-**20 skills at v0.2.0**, all Markdown, all free, MIT-licensed. Designed for France at v0.x; other Schengen countries land in v1.x. Each skill is bilingual (English + Simplified Chinese) so a family applying together can each work in their preferred language.
+**24 skills at v0.3.0**, all Markdown, all free, MIT-licensed. Designed for France at v0.x; other Schengen countries land in v1.x. Each skill is bilingual (English + Simplified Chinese) so a family applying together can each work in their preferred language.
 
 **Who this is for:**
 
@@ -18,6 +18,63 @@ This is a Claude Code skills toolkit for **Schengen short-stay visa applications
 - **Refused applicants** — you got a refusal letter and need to decide between appeal and re-application
 - **Business travellers** — invitation letters, employer letters, reimbursement evidence
 - **Anyone who hates filling forms twice** — the skills enforce one source of truth across every document
+
+## What are skills?
+
+Skills are Markdown files that give Claude Code specialised knowledge and workflows for a specific task. When you install them, Claude recognises when you're working on a Schengen visa application and applies the right framework, the right document templates, and the right rules automatically — no need to memorise prompts.
+
+Each skill is a `SKILL.md` file with YAML frontmatter (name, description, trigger phrases) and a body that tells Claude exactly how to behave when that skill is active. You can invoke a skill directly (`/start-here`) or just describe what you're doing in natural language and the right skill activates.
+
+## How skills work together
+
+Skills aren't independent — they reference each other and build on shared context. `/start-here` is the foundation: every other skill expects you've already run it (or knows how to recover when you haven't). The trip planner skills shape your itinerary; the document engineer + accountant build the file pack; the forms specialist + appointment coordinator put it all into the portals; the application auditor verifies before submission; the recovery advisor handles whatever comes back.
+
+```
+                              ┌─────────────────────────────────────────┐
+                              │              /start-here                │
+                              │   (entry-point — read by everything)    │
+                              └────────────────────┬────────────────────┘
+                                                   │
+   ┌────────────┬────────────┬────────────┬────────┴───────┬────────────┬────────────┬────────────┐
+   ▼            ▼            ▼            ▼                ▼            ▼            ▼            ▼
+┌────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐
+│  Trip  │ │ Document │ │Account-  │ │  Minor   │ │ Sponsor  │ │  Forms   │ │ Appoint- │ │Recovery  │
+│Planner │ │ Engineer │ │ ant      │ │   Spec   │ │   Spec   │ │   Spec   │ │  ment    │ │ Advisor  │
+│        │ │          │ │(visa-    │ │          │ │          │ │          │ │  Coord   │ │          │
+│        │ │          │ │  only)   │ │          │ │          │ │          │ │          │ │          │
+├────────┤ ├──────────┤ ├──────────┤ ├──────────┤ ├──────────┤ ├──────────┤ ├──────────┤ ├──────────┤
+│plan-   │ │document- │ │employ-   │ │minor-    │ │sponsored-│ │france-   │ │find-     │ │track-    │
+│ trip   │ │ checklist│ │ ment-    │ │  applica-│ │  applica-│ │ visas-   │ │ slot     │ │  applica-│
+│itiner- │ │photo-    │ │  letter  │ │   tion   │ │   tion   │ │  form    │ │book-     │ │    tion  │
+│ ary-   │ │ check    │ │bank-     │ │minor-    │ │          │ │tls-      │ │ appoint- │ │refusal-  │
+│ builder│ │insurance-│ │ statement│ │  parent- │ │          │ │ contact- │ │  ment    │ │  appeal  │
+│decide- │ │ check    │ │ -check   │ │  consent │ │          │ │  form    │ │          │ │          │
+│ visa-  │ │cover-    │ │cost-     │ │          │ │          │ │group-    │ │          │ │          │
+│  type  │ │ letter   │ │ estimate │ │          │ │          │ │  applica-│ │          │ │          │
+│timeline│ │          │ │financial-│ │          │ │          │ │   tion   │ │          │ │          │
+│ -planner│ │         │ │ checklist│ │          │ │          │ │          │ │          │ │          │
+└────┬───┘ └────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘
+     │          │            │            │            │            │            │            │
+     └──────────┴────────┬───┴────────────┴────────────┴────────────┴────────────┴────────────┘
+                         │
+                         ▼
+              ┌──────────────────────┐
+              │  Application Auditor │
+              │  /audit-application  │
+              │   (reads everything) │
+              └──────────────────────┘
+
+Skills cross-reference each other:
+  cover-letter ↔ employment-letter ↔ cost-estimate
+  bank-statement-check → cover-letter, audit-application
+  minor-application → minor-parent-consent → document-checklist
+  group-application → minor-application + sponsored-application
+  france-visas-form → tlscontact-form → find-slot → book-appointment
+  track-application → refusal-appeal
+  audit-application reads everything before submission
+```
+
+See each skill's **Routing rules** section (inside `<skill>/SKILL.md`) for the full per-skill dependency map.
 
 ## Quick start
 
@@ -125,17 +182,21 @@ Each stage feeds into the next. `/start-here` figures out your scenario and rout
 | **Wait** | Decode the tracker, set realistic expectations, escalate when needed | `/track-application` |
 | **Recover** | Refusal? Appeal or re-apply — let's decide | `/refusal-appeal` |
 
-## The 20 skills — your virtual visa team
+## The 24 skills — your virtual visa team
 
 Each skill is a persona. You don't think "what skill do I need?" — you think "which expert do I want to talk to?"
 
 ### Trip Planner — *the first person you talk to*
 
-Like a smart travel agent who interrogates your scenario before recommending anything. Sets the agenda for everything that follows.
+Like a smart travel agent who interrogates your scenario, shapes the trip, decides which visa is right, and works the timeline backwards before you spend a penny.
 
 | Skill | What it does |
 |---|---|
 | `/start-here` | Six forcing questions (country, purpose, group, sponsorship, dates, residence) that decide which other skills you actually need. Routes you to the right next 2-3 skills based on your answers. Always run this first. |
+| `/plan-trip` | **New in v0.3.** Iterative trip-planning wizard. Goes from "we want to go to France" to a concrete trip skeleton (cities + nights + accommodation type + transport + budget) with consular-credibility checks built in. |
+| `/itinerary-builder` | **New in v0.3.** Expands the skeleton into a day-by-day itinerary attachable to France-Visas. Cross-checks every night has accommodation, transitions are realistic, activities match season + group composition. |
+| `/decide-visa-type` | **New in v0.3.** Wizard that lands on the right visa type (A / C / D), entry pattern (single / double / multiple), purpose category, and confirms France is the responsible consulate. |
+| `/timeline-planner` | **New in v0.3.** Backwards-plans from your travel date. Computes the critical-path deadlines (apostille has 3-week lead; Attestation 4 weeks; etc.) and gives a GO / TIGHT / NO-GO verdict for today. |
 
 ### Document Engineer — *the perfectionist who builds your file pack*
 
@@ -271,11 +332,10 @@ Key principles:
 - **Don't lie. Ever.** The VIS database cross-references everything.
 - **We are templates, not lawyers.** Always confirm against official sources.
 
-## What's coming next (v0.3 → v1.0)
+## What's coming next (v0.4 → v1.0)
 
-16 more skills to reach the full 36-skill catalogue:
+12 more skills to reach the full 36-skill catalogue:
 
-- **Trip planning:** `/plan-trip`, `/itinerary-builder`, `/decide-visa-type`, `/timeline-planner`
 - **More documents:** `/accommodation-verify`, `/translate-doc`, `/apostille`
 - **More minor skills:** `/minor-birth-certificate`, `/minor-school-letter`, `/minor-parent-docs`
 - **Appointment-day prep:** `/appointment-prep`, `/appointment-day`, `/mock-interview`
