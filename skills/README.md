@@ -105,6 +105,43 @@ See each skill's **Routing rules** section (inside `<skill>/SKILL.md`) for the f
 4. Run `/audit-application` when you think you're ready
 5. Stop there. You'll know if this is for you.
 
+## Install via Claude Code Plugin Marketplace (recommended)
+
+The cleanest way to install for Claude Code users. Add the marketplace once, then install whichever personas you need:
+
+```
+/plugin marketplace add torlyai/Schengen-master
+/plugin install trip-planner@visa-schengen
+/plugin install document-engineer@visa-schengen
+/plugin install application-auditor@visa-schengen
+```
+
+Or grab the whole catalogue:
+
+```
+/plugin install visa-schengen/*
+```
+
+**After install**, skills are namespaced by their plugin (persona) name. Examples:
+
+```
+/trip-planner:start-here
+/document-engineer:audit-application
+/recovery-advisor:refusal-appeal
+```
+
+The 10 plugins (one per persona) are listed at [`.claude-plugin/marketplace.json`](../.claude-plugin/marketplace.json). Updates: `/plugin update visa-schengen`.
+
+### When to use this vs `install.sh` below
+
+| Use the marketplace if... | Use `install.sh` if... |
+|---|---|
+| You're on Claude Code and want native plugin UX | You want bare un-namespaced commands (`/audit-application` not `/application-auditor:audit-application`) |
+| You want to install only specific personas | You want all 37 skills with one command |
+| You want managed updates via `/plugin update` | You use a non-Claude-Code agent (Cursor, Codex, Gemini) |
+
+Both channels work in parallel — pick either or use both.
+
 ## Install — 30 seconds
 
 **Requirements:** [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [Git](https://git-scm.com/)

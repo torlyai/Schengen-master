@@ -2,6 +2,54 @@
 
 All notable changes to the Schengen-master skills toolkit. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [SemVer](https://semver.org/).
 
+## [1.3.0] — 2026-05-24
+
+**Plugin Marketplace integration — Phase 1 (self-hosted).** The Schengen-master skills are now installable via the Claude Code Plugin Marketplace as 10 themed plugins (one per persona). Existing `install.sh` users are unaffected — both distribution channels coexist.
+
+Per PRD `docs/27-plugin-marketplace-prd.md`, v1.1 and v1.2 are reserved for v1.x country-expansion releases (Italy, Spain, etc.); Plugin Marketplace is v1.3.0.
+
+### Added
+
+- `.claude-plugin/marketplace.json` — marketplace manifest at the repo root per Anthropic's spec. Exposes the 37 skills as 10 themed plugins (`trip-planner`, `document-engineer`, `accountant`, `minor-specialist`, `sponsor-specialist`, `forms-specialist`, `appointment-coordinator`, `application-auditor`, `recovery-advisor`, `meta-utility`). Marketplace name = `visa-schengen` (NOT `schengen-master` — see PRD D7 for the family-namespace rationale).
+- `docs/marketplaces/README.md` — public multi-marketplace convention doc explaining where each ecosystem's manifest lives (Claude Code now, others when/if shipped) and why paths are ecosystem-specific rather than unified.
+- "Install via Plugin Marketplace" section in `skills/README.md` + `skills/README.zh-CN.md` — three-line install + namespacing explanation + when to use marketplace vs `install.sh`.
+
+### Install UX
+
+```bash
+# Add the marketplace once (uses repo URL)
+/plugin marketplace add torlyai/Schengen-master
+
+# Install whichever plugins you want (uses marketplace name)
+/plugin install trip-planner@visa-schengen
+/plugin install document-engineer@visa-schengen
+
+# After install, skills are namespaced by their plugin (persona) name
+/trip-planner:start-here
+/document-engineer:audit-application
+```
+
+### What's NOT in this release (deferred)
+
+- **Phase 2 — Anthropic community marketplace submission.** Per PRD `docs/27` D5, deferred until ≥ 2 weeks of real-applicant testing and ≥ 1 external dogfood report. Self-hosted install works immediately via `/plugin marketplace add torlyai/Schengen-master`.
+- **PRD F2 — frontmatter description polish.** Audit found 32 of 37 skill descriptions ship-ready for plugin-mode routing; 5 (`audit-log`, `find-slot`, `learn`, `mock-interview`, `vstack-upgrade`) would benefit from a polish pass to remove maintainer jargon. Deferred to v1.3.1 as a separate focused PR. Not blocking; the 5 still work, just not optimally.
+
+### Changed
+
+- `skills/VERSION` — `1.0.0` → `1.3.0`
+
+### Migration from 1.0.0
+
+No breaking changes to `install.sh` users. To pick up the Plugin Marketplace install option:
+
+```bash
+# If you already use install.sh, nothing to do — keep using it
+# If you want to try the marketplace path instead:
+/plugin marketplace add torlyai/Schengen-master
+```
+
+The two channels install to different locations with different command shapes (`install.sh` = un-namespaced commands at `~/.claude/skills/schengen-master/`; marketplace = namespaced commands managed by Claude Code's plugin store). You can use either or both.
+
 ## [1.0.0] — 2026-05-24
 
 **Major release. The full 37-skill catalogue is complete.** All 10 personas have their full skill complement plus the France country knowledge base. EN + zh-CN parallel for every skill.
