@@ -1,5 +1,25 @@
 # Schengen-master 技能集
 
+<p align="center">
+  <a href="https://torly.ai"><img src="https://img.shields.io/badge/Website-torly.ai-black?style=flat-square" alt="Website"></a>
+  <a href="https://github.com/torlyai/Schengen-master/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License"></a>
+  <a href="https://github.com/torlyai/Schengen-master/blob/main/skills/VERSION"><img src="https://img.shields.io/badge/skills-v1.0.0-blue?style=flat-square" alt="Skills v1.0.0"></a>
+  <a href="https://chromewebstore.google.com/detail/cpogdllkcpenafboclnidfmmlcnjpbfm"><img src="https://img.shields.io/badge/Chrome%20Web%20Store-Visa%20Master-orange?style=flat-square&logo=googlechrome&logoColor=white" alt="Chrome Web Store"></a>
+  <a href="https://github.com/torlyai/Schengen-master/stargazers"><img src="https://img.shields.io/github/stars/torlyai/Schengen-master?style=flat-square" alt="GitHub Stars"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/torlyai/Schengen-master/issues"><img src="https://img.shields.io/github/issues/torlyai/Schengen-master?style=flat-square" alt="Issues"></a>
+  <a href="https://github.com/torlyai/Schengen-master/pulls"><img src="https://img.shields.io/github/issues-pr/torlyai/Schengen-master?style=flat-square" alt="Pull Requests"></a>
+  <img src="https://img.shields.io/github/last-commit/torlyai/Schengen-master?style=flat-square" alt="Last Commit">
+  <a href="https://github.com/torlyai/Schengen-master/graphs/contributors"><img src="https://img.shields.io/github/contributors/torlyai/Schengen-master?style=flat-square" alt="Contributors"></a>
+</p>
+
+<p align="center">
+  <strong>法国申根签证申请的 AI 技能集 — 37 个技能、10 位角色、中英双语</strong><br>
+  <a href="#安装--30-秒">快速安装</a> · <a href="#37-个技能--你完整的虚拟签证团队">浏览技能</a> · <a href="#看它怎么跑">看它怎么跑</a> · <a href="#文档与资源">文档与资源</a>
+</p>
+
 > Read this in: [English](README.md) · **中文**
 >
 > 一份申根签证申请，是一堆文件、一大堆细枝末节的规则，外加几乎不给你犯错的空间。照片不合规——拒签。保险只买了 €20000、差 €30000 一万——拒签。银行流水里有一笔可疑入账——拒签。求情信跟 France-Visas 表里写的不一致——拒签。TLScontact 当天没带打印的条码——直接被请回家。
@@ -331,6 +351,32 @@ TLS 追踪器两周不动、或拒签信到了，跟这位聊。读情况、设�
 
 技能知道它的存在：`/find-slot` 推荐免费版做时段监视、`/book-appointment` 解释如何与手动预约互补、整套 ETHOS 把 Premium 视为带明确信任边界的选择项（Free 版从不向 torly.ai 发送任何东西）。
 
+## 文档与资源
+
+技能装好之后，**Claude Code 本身就是最强的探索接口** — Claude 本地能读所有 37 份 `SKILL.md`，每份都带结构化前置、路由规则、和示例输出。比任何第三方 wiki 都好用。
+
+| 资源 | 里面有什么 |
+|---|---|
+| [`ETHOS.md`](ETHOS.md) | 每个技能贯彻的 12 条原则。贡献代码前或想理解某个建议背后的判断时读。 |
+| [`CHANGELOG.md`](CHANGELOG.md) | 各版本发布历史（v0.1 → v1.0）。 |
+| [`countries/france/KNOWLEDGE.md`](countries/france/KNOWLEDGE.md) | 法国特定事实的唯一真实来源 — 费用、处理时间、拒签代码、文件要求。 |
+| [`countries/france/consulate-*.md`](countries/france/) | 伦敦、曼彻斯特、爱丁堡、贝尔法斯特各 TLS 中心的细节。 |
+| 架构图 | 本 README 顶部附近的 ASCII 树 — `/start-here` → 8 位角色 → `/audit-application`。 |
+| 各技能的 `SKILL.md` | `skills/<name>/` 下每个技能自己的文件，记录触发短语、流程、输出模板、路由规则、常见陷阱、权威来源。 |
+| [Visa Master Chrome 扩展](https://chromewebstore.google.com/detail/cpogdllkcpenafboclnidfmmlcnjpbfm) | 运行时配套 — 监视 TLScontact 时段，与 `/find-slot` + `/book-appointment` 互补。 |
+| [Agent Skills 标准](https://agentskills.io/) | Anthropic 的 `SKILL.md` 规范 — 如想贡献新技能可读。 |
+
+### 用 Claude Code 探索工具集
+
+装好之后，Claude Code 中任意提问。这些例子能工作是因为 Claude 本地能读全部 37 份 `SKILL.md`：
+
+- *"如果我和配偶+8 岁儿子一起申请，我需要哪些技能？"* — Claude 走 `/start-here` → `/minor-application` → `/group-application` → `/document-checklist` 并解释原因。
+- *"`/accommodation-verify` 和 `/audit-application` 有什么区别？"* — Claude 比较两个技能的流程，告诉你各自何时触发。
+- *"从 `/start-here` 到订 TLS 预约的依赖链是什么？"* — Claude 走路由规则：`/start-here` → `/plan-trip` → `/decide-visa-type` → `/timeline-planner` → `/document-checklist` → `/france-visas-form` → `/tlscontact-form` → `/find-slot` → `/book-appointment`。
+- *"我朋友因代码 3 被拒。应该看什么？"* — Claude 路由到 `/refusal-appeal` 并解释代码 3（资金不足）+ 应对文件（`/bank-statement-check`、`/sponsored-application`）。
+
+技能通过内嵌的"路由规则"表互相推荐，所以目录扩展时发现路径保持自记录。
+
 ## 模板 — 可打印文件
 
 公共仓库的 `docs/templates/visa-application/` 存放技能引用的可打印模板：求情信模板、文件清单 PDF、照片规范卡、雇主信样本、担保信样本。技能生成个性化内容；模板提供版式。
@@ -374,6 +420,10 @@ TLS 追踪器两周不动、或拒签信到了，跟这位聊。读情况、设�
 如要添加新技能：复制 `SKILL.md.tmpl`，按格式编写，然后提交 PR。提交前请先阅读 `ETHOS.md` — 你的技能应该体现这些原则。
 
 如要翻译技能到其他语言：复制 `<skill>/SKILL.md` 到 `i18n/<locale>/<skill>/SKILL.md` 后翻译。目前提供英文 + 简体中文；乐意接入其他语言。
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=torlyai/Schengen-master&type=Date)](https://star-history.com/#torlyai/Schengen-master&Date)
 
 ## 许可证
 
