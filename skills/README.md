@@ -8,7 +8,7 @@
 > auditor, recovery advisor. All Claude Code slash-commands. All markdown.
 > Free, open source, MIT.
 
-10 skills at v0.1.0 (working towards a 36-skill catalog at v1.0). Designed for **France Schengen short-stay applicants** at v0.1; other Schengen countries land in v1.x.
+**20 skills at v0.2.0** (working towards a 36-skill catalog at v1.0). Designed for **France Schengen short-stay applicants** at v0.x; other Schengen countries land in v1.x.
 
 ---
 
@@ -38,29 +38,85 @@ SCHENGEN_SKILLS_DEST=~/some/other/path curl -sSL ...install.sh | sh
 | "Check if my photo is OK" | `/photo-check` *(uses vision when you attach an image)* |
 | "Is my travel insurance Schengen-compliant?" | `/insurance-check` |
 | "Help me write the cover letter" | `/cover-letter` |
+| "Draft my employer letter" | `/employment-letter` |
+| "Audit my bank statement" | `/bank-statement-check` |
+| "Estimate my trip cost" | `/cost-estimate` |
 | "I'm applying with my kids" | `/minor-application` |
 | "My spouse will sponsor me" | `/sponsored-application` |
+| "Help me fill the France-Visas form" | `/france-visas-form` |
+| "Walk me through TLScontact" | `/tlscontact-form` |
+| "We're a family of 4" | `/group-application` |
 | "Am I ready to submit?" | `/audit-application` |
 | "I can't find a TLS appointment slot" | `/find-slot` |
+| "Help me book the appointment" | `/book-appointment` |
+| "What does my TLS status mean?" | `/track-application` |
+| "I got refused — what now?" | `/refusal-appeal` |
 
-## The 10 skills (v0.1)
+## The 20 skills (v0.2)
 
-| Skill | Persona | What it does |
-|---|---|---|
-| `/start-here` | Trip Planner | Entry-point with 6 forcing questions; routes you to the next skill |
-| `/document-checklist` | Document Engineer | Personalised document list based on your purpose + family + sponsor situation |
-| `/photo-check` | Document Engineer | Vision-enabled passport-photo compliance check |
-| `/insurance-check` | Document Engineer | Travel-insurance certificate compliance against Schengen requirements (€30k+, full cover, repatriation) |
-| `/cover-letter` | Document Engineer | Drafts a personalised cover letter explaining purpose + return commitment |
-| `/minor-application` | Minor Specialist | Entry-point for child applicants — birth certs, parent consent, school letters, parent docs |
-| `/minor-parent-consent` | Minor Specialist | Consent letter when one or both parents are NOT travelling |
-| `/sponsored-application` | Sponsor Specialist | Spouse / parent / friend / employer sponsorship — adapts to sponsor type |
-| `/audit-application` | Application Auditor | Pre-submission audit; reads everything, flags inconsistencies + gaps + weak points |
-| `/find-slot` | Appointment Coordinator | TLScontact slot-finding strategy + integration with the [Visa Master extension](https://chromewebstore.google.com/detail/cpogdllkcpenafboclnidfmmlcnjpbfm) |
+### Trip Planner
+| Skill | What it does |
+|---|---|
+| `/start-here` | Entry-point with 6 forcing questions; routes you to the next skill |
 
-## What's coming next (v1.0)
+### Document Engineer
+| Skill | What it does |
+|---|---|
+| `/document-checklist` | Personalised document list based on your purpose + family + sponsor situation |
+| `/photo-check` | Vision-enabled passport-photo compliance check |
+| `/insurance-check` | Travel-insurance certificate compliance against Schengen requirements (€30k+, full cover, repatriation) |
+| `/cover-letter` | Drafts a personalised cover letter explaining purpose + return commitment |
 
-26 more skills filling out the full 36-skill catalog: trip-planning skills (`/plan-trip`, `/itinerary-builder`, `/decide-visa-type`, `/timeline-planner`), more document skills (`/accommodation-verify`, `/translate-doc`, `/apostille`), financial-evidence skills (`/employment-letter`, `/bank-statement-check`, `/cost-estimate`), more minor skills (`/minor-birth-certificate`, `/minor-school-letter`, `/minor-parent-docs`), forms walkthroughs (`/france-visas-form`, `/tlscontact-form`, `/group-application`), appointment-day prep (`/book-appointment`, `/appointment-prep`, `/appointment-day`), audit + mock interview (`/mock-interview`), recovery (`/track-application`, `/refusal-appeal`, `/first-trip`), and meta-utility (`/learn`, `/audit-log`).
+### Accountant (visa-only) — *new in v0.2*
+| Skill | What it does |
+|---|---|
+| `/employment-letter` | Drafts compliant employer letter; flags missing fields (salary, role, leave approval) |
+| `/bank-statement-check` | Audits 3-month statement against €65/day rule; flags suspicious deposits |
+| `/cost-estimate` | Itemised trip-cost breakdown (flights, accommodation, daily spend, insurance, fees) |
+| `/financial-checklist` | Consolidated financial-evidence kit; routes to one or more of the above |
+
+### Minor Specialist
+| Skill | What it does |
+|---|---|
+| `/minor-application` | Entry-point for child applicants — birth certs, parent consent, school letters, parent docs |
+| `/minor-parent-consent` | Consent letter when one or both parents are NOT travelling |
+
+### Sponsor Specialist
+| Skill | What it does |
+|---|---|
+| `/sponsored-application` | Spouse / parent / friend / employer sponsorship — adapts to sponsor type |
+
+### Forms Specialist — *new in v0.2*
+| Skill | What it does |
+|---|---|
+| `/france-visas-form` | Page-by-page walkthrough of the France-Visas portal |
+| `/tlscontact-form` | TLScontact account creation + reference number linkage + appointment flow setup |
+| `/group-application` | Family/group structural rules (1 France-Visas per person, 1 TLS team ID, 1 slot) |
+
+### Appointment Coordinator
+| Skill | What it does |
+|---|---|
+| `/find-slot` | TLScontact slot-finding strategy + integration with the [Visa Master extension](https://chromewebstore.google.com/detail/cpogdllkcpenafboclnidfmmlcnjpbfm) |
+| `/book-appointment` | Full booking-mechanics walkthrough; centre selection, slot tips, add-on advice, on-the-day checklist — *new in v0.2* |
+
+### Application Auditor
+| Skill | What it does |
+|---|---|
+| `/audit-application` | Pre-submission audit; reads everything, flags inconsistencies + gaps + weak points |
+
+### Recovery Advisor — *new in v0.2*
+| Skill | What it does |
+|---|---|
+| `/track-application` | TLS tracker status decoder + realistic timeline + escalation triggers |
+| `/refusal-appeal` | Interprets refusal codes 1-9; drafts appeal letter or recommends re-application |
+
+## France knowledge base — *new in v0.2*
+
+`countries/france/` contains the single source of truth for France-specific facts (fees, processing time, refusal codes, common quirks) plus per-consulate detail for London, Manchester, Edinburgh and Belfast.
+
+## What's coming next (v0.3 → v1.0)
+
+16 more skills to reach the full 36-skill catalog: trip-planning (`/plan-trip`, `/itinerary-builder`, `/decide-visa-type`, `/timeline-planner`), more document skills (`/accommodation-verify`, `/translate-doc`, `/apostille`), more minor skills (`/minor-birth-certificate`, `/minor-school-letter`, `/minor-parent-docs`), appointment-day prep (`/appointment-prep`, `/appointment-day`, `/mock-interview`), post-decision (`/first-trip`), and meta-utility (`/learn`, `/audit-log`, `/vstack-upgrade`). Plus additional `countries/*` knowledge bases for Germany, Italy, Spain, Netherlands.
 
 See [CHANGELOG.md](CHANGELOG.md).
 
