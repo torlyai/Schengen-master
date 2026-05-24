@@ -2,6 +2,72 @@
 
 All notable changes to the Schengen-master skills toolkit. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [SemVer](https://semver.org/).
 
+## [1.0.0] — 2026-05-24
+
+**Major release. The full 36-skill catalogue is complete.** All 9 personas have their full skill complement plus the France country knowledge base. EN + zh-CN parallel for every skill.
+
+### Added — 12 new skills (each EN + zh-CN parallel)
+
+**Document Engineer — 3 new skills**
+- `/accommodation-verify` — night-by-night accommodation audit; flags gap nights, name mismatches, Attestation-needed cases
+- `/translate-doc` — certified-translation requirements + recommended translators (ATC, ITI, NRPSI) + cost/time expectations
+- `/apostille` — UK FCDO + foreign apostille processes; Hague vs non-Hague handling; ordering with translation
+
+**Minor Specialist — 3 new skills**
+- `/minor-birth-certificate` — long-form vs short-form; foreign-issued cert handling; adopted-child special cases
+- `/minor-school-letter` — UK school absence-letter template + verification checklist
+- `/minor-parent-docs` — accompanying parent's passport + UK status + financial evidence audit; cross-document consistency check
+
+**Appointment Coordinator — 2 new skills**
+- `/appointment-prep` — 24-hour-before checklist (documents printed + photos physical + payment cards + transport planned)
+- `/appointment-day` — brief morning-of sanity sweep + during-appointment guidance + post-appointment steps
+
+**Application Auditor — 1 new skill**
+- `/mock-interview` — practice consular interview with question bank (purpose, ties, financial, sponsor, refusal-reapp) + framing principles
+
+**Recovery Advisor — 1 new skill**
+- `/first-trip` — post-approval first-Schengen-entry guidance; visa sticker verification, border-control prep, 90/180 rule, clean-record building
+
+**Meta Utility — 3 new skills (new persona)**
+- `/learn` — opt-in cross-session memory; privacy-first local JSON; user controls what's saved + can delete
+- `/audit-log` — session-local action history; "where are we?" digest
+- `/vstack-upgrade` — self-update toolkit; idempotent git-pull-based
+
+### Catalogue summary
+
+| Persona | Skill count | Status |
+|---|---|---|
+| Trip Planner | 5 | Complete |
+| Document Engineer | 7 | Complete |
+| Accountant (visa-only) | 4 | Complete |
+| Minor Specialist | 5 | Complete |
+| Sponsor Specialist | 1 | Complete |
+| Forms Specialist | 3 | Complete |
+| Appointment Coordinator | 4 | Complete |
+| Application Auditor | 2 | Complete |
+| Recovery Advisor | 3 | Complete |
+| Meta Utility | 3 | Complete |
+| **Total** | **36 skills** | **v1.0** |
+
+### Changed
+- README + README.zh-CN updated to reflect full catalogue
+- Skill count badge updated 24 → 36
+- v1.x roadmap shifts focus from "skill catalogue completion" to "country expansion" and "real-applicant validation"
+
+### Migration from 0.3.0
+Re-run the install one-liner — sparse-checkout picks up the new skills automatically:
+```bash
+curl -sSL https://raw.githubusercontent.com/torlyai/Schengen-master/main/skills/install.sh | sh
+```
+No breaking changes to existing skills.
+
+### What's next (v1.x — beyond catalogue)
+- **Country expansion** — Italy, Spain, Germany, Netherlands (each a copy of France with country-specific KNOWLEDGE.md + per-consulate detail)
+- **Real-applicant validation** — dogfood + community feedback to refine skill outputs
+- **`/vstack-doctor`** — sanity-check script that validates every skill's frontmatter, routes, external links
+- **Quarterly review cadence** — re-verify each skill against authoritative sources every 3 months
+- **Native zh-CN reviewer** — validate Chinese translations for natural phrasing
+
 ## [0.3.0] — 2026-05-24
 
 Third public release. Completes the Trip Planner persona with the remaining 4 skills. Total: **24 skills** (EN + zh-CN parallel). README restructured with marketingskills-style architecture diagram showing how skills relate.
