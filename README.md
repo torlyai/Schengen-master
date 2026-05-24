@@ -7,7 +7,7 @@
 > Founder visa AI-assistant is a related, separate project.
 
 An open-source **toolkit + templates** for preparing a family Schengen visa
-application. Ships two things in one repository:
+application. Ships three things in one repository:
 
 1. **A privacy-first Chrome extension** — *Visa Master Appointment Watcher* —
    that watches your TLScontact appointment page and notifies you the instant
@@ -17,24 +17,33 @@ application. Ships two things in one repository:
    docs every family maintains *locally* (family profile, master action plan,
    itinerary, status dashboard, audit log), plus the product specs and
    platform design notes behind the extension.
+3. **An AI skills toolkit** — *vstack* — 36 Claude Code slash-commands that
+   walk you through the entire France Schengen application: a trip planner,
+   document engineer, accountant, minor specialist, forms specialist,
+   appointment coordinator, application auditor, and recovery advisor. All
+   markdown, all free, EN + 中文 parallel. See [`skills/`](skills/).
 
 > **Privacy by design.** The repository is intentionally **template-only**.
 > No real names, addresses, dates, document numbers, or itinerary specifics
 > live here — concrete data is filled in by each user on their own machine
 > and stays local via the deny-by-default `.gitignore`.
 >
-> **Status (2026-05-22):** Extension **v1.2.0 is live on the Chrome Web
+> **Status (2026-05-24):** Extension **v1.2.0 is live on the Chrome Web
 > Store** — install in one click from the
 > [official listing](https://chromewebstore.google.com/detail/cpogdllkcpenafboclnidfmmlcnjpbfm).
 > The pre-built ZIP on the [Releases page](https://github.com/torlyai/Schengen-master/releases/latest)
 > remains available for users who prefer sideloading or want to audit before
 > install — **no Node / no terminal / no build step needed**.
 >
-> **What's new in v1.2.0** — Multi-booking after the 24h refund window (book
-> follow-up appointments for family members), required refund-evidence text
-> on the refund flow, Premium email notifications alongside Telegram/desktop,
-> and improved install metadata + attribution. See the
-> [v1.2.0 Release notes](https://github.com/torlyai/Schengen-master/releases/tag/v1.2.0)
+> The **vstack skills toolkit** is at **v1.0.0** — the full 36-skill catalogue
+> for France Schengen short-stay applications is complete. Install with one
+> command (see [Path D](#path-d--use-the-ai-skills-toolkit-for-your-application) below).
+>
+> **What's new in extension v1.2.0** — Multi-booking after the 24h refund
+> window (book follow-up appointments for family members), required
+> refund-evidence text on the refund flow, Premium email notifications
+> alongside Telegram/desktop, and improved install metadata + attribution.
+> See the [v1.2.0 Release notes](https://github.com/torlyai/Schengen-master/releases/tag/v1.2.0)
 > for the full changelog.
 
 ---
@@ -48,6 +57,7 @@ application. Ships two things in one repository:
   - [Path A — Use the templates for your own application](#path-a--use-the-templates-for-your-own-application)
   - [Path B — Install the pre-built extension (recommended)](#path-b--install-the-pre-built-extension-recommended)
   - [Path C — Open the workspace in Obsidian (optional)](#path-c--open-the-workspace-in-obsidian-optional)
+  - [Path D — Use the AI skills toolkit for your application](#path-d--use-the-ai-skills-toolkit-for-your-application)
 - [Configuration](#configuration)
 - [Privacy & data handling](#privacy--data-handling)
 - [Troubleshooting](#troubleshooting)
@@ -61,6 +71,7 @@ application. Ships two things in one repository:
 | Area | Purpose |
 | --- | --- |
 | `extension/` | Distribution assets for the Chrome MV3 extension — icons, brand SVGs, screenshots. The compiled extension ships via [Chrome Web Store](https://chromewebstore.google.com/detail/cpogdllkcpenafboclnidfmmlcnjpbfm) (or the ZIP attached to each GitHub Release). Source code is maintained privately. |
+| `skills/` | **The vstack AI skills toolkit** — 36 Claude Code slash-commands organised into 10 personas (Trip Planner, Document Engineer, Accountant, Minor Specialist, Sponsor Specialist, Forms Specialist, Appointment Coordinator, Application Auditor, Recovery Advisor, Meta Utility). EN + zh-CN parallel. See [`skills/README.md`](skills/README.md) for the full catalogue and a one-line install. |
 | `docs/templates/` | Skeleton templates with `{{PLACEHOLDER}}` tokens — copy locally, fill in, **don't** commit. See [`docs/templates/README.md`](docs/templates/README.md). |
 | `docs/06-visa-master-chrome-extension-prd.md` | Product spec for the Chrome extension. |
 | `docs/07-chrome-extension-wireframes.md` | Screen-by-screen wireframes for the extension. |
@@ -324,6 +335,43 @@ Useful pre-configured plugins:
 | Tasks | Tracks the checklists in `05-master-action-plan.md`. |
 | Calendar | Visualises milestone dates. |
 | Kanban | Boards for the application stages. |
+
+### Path D — Use the AI skills toolkit for your application
+
+The `skills/` folder ships **vstack** — 36 [Claude Code](https://docs.anthropic.com/en/docs/claude-code)
+slash-commands that walk you through the entire France Schengen application:
+trip planning, document checklist, photo + insurance + cover-letter audits,
+financial-evidence review, France-Visas + TLScontact form companions, slot
+finding, appointment prep, application audit, refusal-appeal drafting,
+post-approval entry guidance. EN + 中文 parallel.
+
+**Requirements:** [Claude Code](https://docs.anthropic.com/en/docs/claude-code),
+[Git](https://git-scm.com/).
+
+**One-command install** — paste into Claude Code:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/torlyai/Schengen-master/main/skills/install.sh | sh
+```
+
+This installs to `~/.claude/skills/schengen-master/` via sparse-checkout
+(skills only, not the extension or templates). Re-run the same command any
+time to update.
+
+**Then in any Claude Code session:**
+
+```
+/start-here
+```
+
+— answers 6 forcing questions about your trip and routes you to the right
+skills. Full catalogue + persona breakdown + architecture diagram in
+[`skills/README.md`](skills/README.md) (or [中文版](skills/README.zh-CN.md)).
+
+**Privacy:** the skills run locally inside Claude Code. Nothing about your
+application is uploaded anywhere by the skills themselves. The opt-in
+`/learn` skill writes context to a local JSON file you control — never to a
+server.
 
 ---
 
