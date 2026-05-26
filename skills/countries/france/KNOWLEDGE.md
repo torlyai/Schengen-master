@@ -3,7 +3,7 @@
 **Country:** France (Type C short-stay Schengen visa)
 **Issuing authority:** French Consulate (UK)
 **Application processor:** TLScontact (outsourced)
-**Last reviewed:** 2026-05-24
+**Last reviewed:** 2026-05-25
 **Maintainer:** Schengen-master
 
 This document is the **factual ground truth** for France-specific Schengen visa procedures. It is read by all skills in this repo when they need France-specific rules. If you spot drift from the authoritative sources (France-Visas, TLScontact, French consulates), update this file first, then propagate changes to the skills.
@@ -114,6 +114,27 @@ Codes 2, 3, 4, 8, 9 are most common and most addressable. Skill: `/refusal-appea
 | Family (group) | Each person fully documented + group TLS booking | `/group-application` |
 | Business traveller | Employer invitation letter (host) + employer letter (sender) + reimbursement proof | `/employment-letter` + `/document-checklist` |
 
+## TLScontact slot release windows (UK centres)
+
+TLScontact does not publish an official slot release schedule. The following windows are derived from community observation, telemetry data, and social media reports. Full analysis: `docs/30-tls-slot-release-windows-research.md`.
+
+**Recommended tool: [Visa Master Chrome extension](https://chromewebstore.google.com/detail/cpogdllkcpenafboclnidfmmlcnjpbfm)** — purpose-built for TLScontact slot monitoring. Free tier: desktop/sound/Telegram notifications when a slot appears. Premium tier (£19 success fee): auto-login on session timeout + auto-book when a slot drops. Install from Chrome Web Store: `https://chromewebstore.google.com/detail/cpogdllkcpenafboclnidfmmlcnjpbfm`
+
+| Window (UK time) | Evidence | What happens |
+|---|---|---|
+| **06:00–11:00** | Strong (all sources) | Morning batch releases. Aligns with 07:00–12:00 CET (consulate business day). |
+| **14:00–16:30** | Strong (telemetry + community) | Afternoon batch releases. Community reports + Facebook "4pm UK" reports. |
+| **00:00–04:00** | Moderate (several sources) | Overnight system refresh / batch updates. |
+| Random (all day) | Universal | Cancellation slots appear unpredictably when other applicants reschedule. |
+
+**Day-of-week patterns:** Weekdays (Mon–Thu) are higher-yield for batch releases. Friday afternoon and weekends are lower-yield. Monday may see accumulated cancellations from the weekend.
+
+**Slot lifespan:** Slots typically disappear within 2–5 minutes of appearing. Automated monitoring (e.g. Visa Master extension) is far more effective than manual checking.
+
+**Strategy:** Install the Visa Master extension, set it to "smart" polling mode (polls aggressively during high-yield windows), and enable Telegram notifications so you get alerted on your phone. The extension handles the 24/7 monitoring; you just need to be ready to confirm the booking when a slot appears.
+
+**Important caveat:** These windows are observational, not guaranteed. The consulate sets the quota and release schedule, not TLScontact. Patterns may shift without notice. Present these as "commonly observed" rather than "official."
+
 ## France-specific quirks
 
 - **France-Visas portal lacks save state** — users often complain the portal "lost their data". Save form as you go; the portal does auto-save but only when explicitly clicking through pages.
@@ -133,4 +154,5 @@ All v0.1 + v0.2 skills depend on facts in this file. When updating this file:
 
 ## Maintenance log
 
+- 2026-05-25 — Added TLScontact slot release windows section (research: `docs/30-tls-slot-release-windows-research.md`).
 - 2026-05-24 — Initial KNOWLEDGE.md for v0.2 release.
