@@ -1645,3 +1645,551 @@ echo "Synced $(find "$DST" -name "*.md" | wc -l | tr -d ' ') files to $DST"
 | 8 | Multi-tool conversation works | Complete all 5 tools in sequence in one Claude.ai conversation |
 | 9 | Open questions Q1, Q3, Q4 answered | Findings documented in PRD §19 |
 | 10 | Phase 1 setup instructions written | New developer can add a tool by following the template |
+
+---
+
+## Appendix B — Phase 1 Implementation Breakdown: OAuth + Billing + Full Tool Set
+
+### B.1 Overview
+
+**Goal:** Gate MCP access behind OAuth 2.0 + Stripe subscription. Add remaining 19 tools. Users subscribe at torly.ai, get OAuth credentials, enter them in Claude.ai connector settings.
+
+**Duration:** 10 working days (2 weeks)
+**Repos:** torlyAI (primary), Schengen-visa (content only)
+**Dependencies:** Phase 0 complete (MCP endpoint live, 5 tools, logging)
+
+### B.2 Architecture: OAuth 2.0 for MCP
+
+Claude.ai's connector dialog has "OAuth Client ID" and "OAuth Client Secret" fields. When a user enters these, Claude.ai performs an OAuth 2.0 client_credentials flow against our authorization server to get an access token, then sends it as a Bearer token on every MCP request.
+
+```
+Claude.ai Connector Setup
+─────────────────────────
+  1. User enters Client ID + Secret (from torly.ai subscription)
+  2. Claude.ai discovers our auth server via RFC 9728
+  3. Claude.ai exchanges credentials for access token
+  4. Every MCP request includes: Authorization: Bearer <token>
+
+Flow:
+┌────────────┐    ┌──────────────────────────────────┐    ┌───────────────────┐
+│ Claude.ai  │───>│ /.well-known/                     │───>│ Discover auth     │
+│            │    │ oauth-protected-resource            │    │ server URL        │
+│            │    └──────────────────────────────────┘    └───────────────────┘
+│            │                                                     │
+│            │    ┌──────────────────────────────────┐            │
+│            │───>│ POST /api/marco-polo/auth/token   │<───────────┘
+│            │    │ grant_type=client_credentials      │
+│            │    │ client_id=mp_xxxxx                 │
+│            │    │ client_secret=sk_xxxxx             │
+│            │    └───────────────┬──────────────────┘
+│            │                    │
+│            │                    ▼
+│            │    ┌──────────────────────────────────┐
+│            │    │ { access_token: "at_xxxxx",       │
+│            │    │   token_type: "Bearer",           │
+│            │    │   expires_in: 3600 }              │
+│            │    └──────────────────────────────────┘
+│            │
+│            │    ┌──────────────────────────────────┐
+│            │───>│ POST /api/mcp/visa-master/        │
+│            │    │ Authorization: Bearer at_xxxxx     │
+│            │    │ { JSON-RPC tool invocation }       │
+│            │    └──────────────────────────────────┘
+└────────────┘
+```
+
+### B.3 Tech Stack (Phase 1 additions)
+
+| Component | Package/Service | Purpose |
+|---|---|---|
+| OAuth token generation | `jose` (npm) | JWT signing/verification for access tokens |
+| OAuth discovery | `mcp-handler` exports | `protectedResourceHandler`, `metadataCorsOptionsRequestHandler` |
+| MCP auth middleware | `mcp-handler` `withMcpAuth` | Wraps route handler with Bearer token validation |
+| Stripe billing | `stripe` (existing in project) | Subscription management |
+| Supabase | Existing | `marco_polo_subscriptions` + `marco_polo_oauth_clients` tables |
+
+### B.4 Supabase Tables
+
+```sql
+-- Migration: 039_marco_polo_subscriptions.sql
+
+CREATE TABLE IF NOT EXISTS marco_polo_subscriptions (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  email TEXT NOT NULL,
+  stripe_customer_id TEXT,
+  stripe_subscription_id TEXT,
+  plan TEXT NOT NULL CHECK (plan IN ('trial', 'standard', 'per_app')),
+  status TEXT NOT NULL CHECK (status IN ('active', 'trialing', 'past_due', 'cancelled', 'expired')),
+  trial_ends_at TIMESTAMPTZ,
+  current_period_end TIMESTAMPTZ,
+  tool_calls_used INTEGER DEFAULT 0,
+  tool_calls_limit INTEGER,  -- NULL = unlimited (standard), 500 = per_app
+  created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT now() NOT NULL
+);
+
+CREATE UNIQUE INDEX idx_mp_subs_email ON marco_polo_subscriptions (email);
+CREATE INDEX idx_mp_subs_stripe_customer ON marco_polo_subscriptions (stripe_customer_id);
+
+-- OAuth client credentials (one pair per subscription)
+CREATE TABLE IF NOT EXISTS marco_polo_oauth_clients (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  subscription_id UUID NOT NULL REFERENCES marco_polo_subscriptions(id),
+  client_id TEXT NOT NULL UNIQUE,      -- "mp_" + nanoid(24)
+  client_secret_hash TEXT NOT NULL,    -- bcrypt hash of the secret
+  scopes TEXT[] DEFAULT '{"read"}',
+  revoked BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now() NOT NULL
+);
+
+CREATE UNIQUE INDEX idx_mp_oauth_client_id ON marco_polo_oauth_clients (client_id);
+```
+
+### B.5 Files to Create / Modify
+
+```
+torlyAI/
+  supabase/migrations/
+    039_marco_polo_subscriptions.sql          # Tables: subscriptions + oauth_clients
+
+  lib/marco-polo/
+    oauth.ts                                  # Generate client_id/secret, validate tokens
+    subscription.ts                           # Check subscription status, enforce limits
+
+  app/.well-known/
+    oauth-protected-resource/route.ts         # RFC 9728 discovery (points to auth server)
+
+  app/api/marco-polo/
+    auth/
+      token/route.ts                          # OAuth token endpoint (client_credentials grant)
+      authorize/route.ts                      # OAuth authorization endpoint (for future flows)
+    subscribe/route.ts                        # Create Stripe checkout session
+    subscription/route.ts                     # GET: check status, show credentials
+    webhook/stripe/route.ts                   # Stripe webhook for subscription lifecycle
+
+  app/api/mcp/visa-master/route.ts            # MODIFY: add auth middleware
+
+  app/schengen/marco-polo/
+    pricing/page.tsx                          # Pricing page with 3 tiers
+    dashboard/page.tsx                        # Subscriber dashboard (shows credentials)
+
+  lib/marco-polo/mcp-tools/
+    visa-plan-trip.ts                         # NEW: 19 remaining tools
+    visa-check-finances.ts
+    visa-minor-application.ts
+    visa-sponsored-application.ts
+    visa-france-visas-form.ts
+    visa-tlscontact-form.ts
+    visa-group-application.ts
+    visa-appointment-prep.ts
+    visa-mock-interview.ts
+    visa-refusal-appeal.ts
+    visa-track-application.ts
+    visa-first-trip.ts
+    visa-translate-doc.ts
+    visa-apostille.ts
+    visa-accommodation.ts
+    visa-check-photo.ts
+    visa-check-insurance.ts
+    visa-employment-letter.ts
+    visa-find-slot.ts
+```
+
+### B.6 Day-by-Day Plan
+
+#### Days 1-2: OAuth 2.0 Infrastructure
+
+**Day 1 — Supabase + OAuth token generation:**
+- [ ] Create migration `039_marco_polo_subscriptions.sql` (both tables)
+- [ ] Apply migration: `npx supabase db push`
+- [ ] Create `lib/marco-polo/oauth.ts`:
+  - `generateClientCredentials()` → returns `{ clientId: "mp_xxx", clientSecret: "sk_xxx" }`
+  - `hashSecret(secret)` → bcrypt hash for storage
+  - `generateAccessToken(clientId, scopes)` → JWT signed with `MARCO_POLO_JWT_SECRET`
+  - `validateAccessToken(token)` → returns `{ clientId, scopes, subscriptionId }` or throws
+- [ ] Test: generate a client, hash the secret, generate a token, validate it
+
+**Day 2 — OAuth endpoints + MCP auth middleware:**
+- [ ] Create `app/.well-known/oauth-protected-resource/route.ts`:
+  ```typescript
+  import { protectedResourceHandler, metadataCorsOptionsRequestHandler } from 'mcp-handler'
+  const handler = protectedResourceHandler({
+    authServerUrls: ['https://torly.ai/api/marco-polo/auth'],
+  })
+  const corsHandler = metadataCorsOptionsRequestHandler()
+  export { handler as GET, corsHandler as OPTIONS }
+  ```
+- [ ] Create `app/api/marco-polo/auth/token/route.ts`:
+  - Accept `grant_type=client_credentials` + `client_id` + `client_secret`
+  - Validate credentials against `marco_polo_oauth_clients` table
+  - Check subscription is active
+  - Return `{ access_token, token_type: "Bearer", expires_in: 3600 }`
+- [ ] Update `app/api/mcp/visa-master/route.ts`:
+  - Add Bearer token validation before handling MCP requests
+  - On valid token → proceed to tool execution
+  - On missing/invalid token → return MCP error: "Subscribe at torly.ai/schengen/marco-polo/pricing"
+  - **Keep unauthenticated access to `visa_knowledge` only** (freemium — let users try one tool without subscribing)
+- [ ] Test: Claude.ai connector with Client ID + Secret → should authenticate and invoke tools
+
+#### Days 3-4: Stripe Billing
+
+**Day 3 — Stripe products + checkout:**
+- [ ] Create 3 Stripe products in Stripe Dashboard:
+  - "Marco Polo Trial" — Free, 7 days, then auto-cancel
+  - "Marco Polo Standard" — £9/month, recurring
+  - "Marco Polo Per-Application" — £19, one-time payment
+- [ ] Create `app/api/marco-polo/subscribe/route.ts`:
+  - Accepts `{ email, plan }` → creates Stripe Checkout Session
+  - On success redirect → `/schengen/marco-polo/dashboard?session_id={CHECKOUT_SESSION_ID}`
+  - **Use `{CHECKOUT_SESSION_ID}` not `{SETUP_INTENT_ID}`** (learned from Visa Master PRD — Stripe only substitutes the former)
+- [ ] Create `app/api/marco-polo/webhook/stripe/route.ts`:
+  - Handle: `checkout.session.completed` → create subscription + generate OAuth credentials
+  - Handle: `customer.subscription.updated` → update status
+  - Handle: `customer.subscription.deleted` → mark cancelled, revoke OAuth client
+  - Handle: `invoice.payment_failed` → mark past_due
+
+**Day 4 — Pricing page + subscriber dashboard:**
+- [ ] Create `app/schengen/marco-polo/pricing/page.tsx`:
+  - 3 pricing cards (Trial / Standard / Per-App) matching the PRD wireframes
+  - Each card links to the subscribe endpoint
+  - Match existing torly.ai design system (paper-cream, forest-green, IBM Plex)
+- [ ] Create `app/schengen/marco-polo/dashboard/page.tsx`:
+  - Shows subscription status (plan, expiry, usage)
+  - Shows OAuth Client ID (visible) + Client Secret (show once, then masked)
+  - "Copy to clipboard" buttons for both
+  - Setup instructions: "Paste these into Claude.ai > Customize > Connectors > Advanced settings"
+  - "Regenerate secret" button (revokes old, creates new)
+- [ ] Fix landing page pricing CTAs (`MarcoPoloComingSoon.tsx` lines 804/821/837):
+  - Replace `href="#"` → link to `/schengen/marco-polo/pricing`
+
+#### Days 5-8: Remaining 19 MCP Tools
+
+**Day 5 — Trip planning + financial tools (6 tools):**
+- [ ] `visa-plan-trip.ts` — bundles plan-trip, decide-visa-type, timeline-planner, itinerary-builder
+- [ ] `visa-check-finances.ts` — bundles bank-statement-check, financial-checklist, cost-estimate
+- [ ] `visa-employment-letter.ts` — employment letter generation
+- [ ] `visa-check-photo.ts` — passport photo compliance check
+- [ ] `visa-check-insurance.ts` — travel insurance verification
+- [ ] `visa-find-slot.ts` — slot-finding guidance + Visa Master extension recommendation
+
+**Day 6 — Special-case tools (5 tools):**
+- [ ] `visa-minor-application.ts` — bundles 5 minor skills
+- [ ] `visa-sponsored-application.ts` — sponsorship workflow
+- [ ] `visa-france-visas-form.ts` — 10-section form walkthrough
+- [ ] `visa-tlscontact-form.ts` — TLScontact portal guidance
+- [ ] `visa-group-application.ts` — multi-applicant coordination
+
+**Day 7 — Workflow completion tools (5 tools):**
+- [ ] `visa-appointment-prep.ts` — bundles appointment-prep + appointment-day
+- [ ] `visa-mock-interview.ts` — interview rehearsal
+- [ ] `visa-refusal-appeal.ts` — refusal code interpretation + appeal guidance
+- [ ] `visa-track-application.ts` — post-submission tracking
+- [ ] `visa-first-trip.ts` — post-approval travel guidance
+
+**Day 8 — Utility tools + registration (3 tools + wiring):**
+- [ ] `visa-translate-doc.ts` — translation requirements
+- [ ] `visa-apostille.ts` — apostille/legalisation guidance
+- [ ] `visa-accommodation.ts` — accommodation document verification
+- [ ] Update `mcp-tools/index.ts` — export all 24 tools
+- [ ] Update `mcp-server.ts` — register all 24 tools with descriptions
+- [ ] Update `mcp-logger.ts` — ensure all new tool names are logged
+- [ ] Typecheck + test all 24 tools via Claude.ai
+
+#### Days 9-10: Integration Testing + Hardening
+
+**Day 9 — End-to-end testing:**
+- [ ] Full subscription flow: pricing page → Stripe checkout → dashboard → copy credentials → Claude.ai connector → tool invocation
+- [ ] Test all 3 plans: trial (auto-expires after 7 days), standard (recurring), per-app (500 call limit)
+- [ ] Test rate limiting: per-app user hits 500 calls → gets "limit reached" error
+- [ ] Test expired subscription: cancelled user → gets "subscription expired" error
+- [ ] Test freemium: unauthenticated user → can invoke `visa_knowledge` only
+- [ ] Test credential regeneration: old secret stops working, new secret works
+- [ ] Verify MCP logging captures auth state (authenticated vs freemium)
+- [ ] Verify ops dashboard shows new data (client type, subscription tier)
+
+**Day 10 — Deploy + documentation:**
+- [ ] Deploy all changes with `[deploy]` token
+- [ ] Update PRD §Phase 1 status to COMPLETED
+- [ ] Update Marco Polo landing page: "Now available" instead of "Coming soon"
+- [ ] Send waitlist email announcing launch (via existing Resend infrastructure)
+- [ ] Update `docs/marketplaces/README.md` with MCP connector instructions
+- [ ] Write setup guide: "How to connect Marco Polo to Claude.ai"
+
+### B.7 OAuth Implementation Reference
+
+```typescript
+// lib/marco-polo/oauth.ts
+
+import { nanoid } from 'nanoid'
+import { hash, compare } from 'bcryptjs'
+import { SignJWT, jwtVerify } from 'jose'
+
+const JWT_SECRET = new TextEncoder().encode(process.env.MARCO_POLO_JWT_SECRET!)
+const TOKEN_EXPIRY = '1h'
+
+export function generateClientId(): string {
+  return `mp_${nanoid(24)}`
+}
+
+export function generateClientSecret(): string {
+  return `sk_mp_${nanoid(32)}`
+}
+
+export async function hashClientSecret(secret: string): Promise<string> {
+  return hash(secret, 12)
+}
+
+export async function verifyClientSecret(secret: string, hash: string): Promise<boolean> {
+  return compare(secret, hash)
+}
+
+export async function generateAccessToken(
+  clientId: string,
+  subscriptionId: string,
+  scopes: string[] = ['read']
+): Promise<string> {
+  return new SignJWT({ sub: clientId, sid: subscriptionId, scopes })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime(TOKEN_EXPIRY)
+    .setIssuer('torly.ai')
+    .setAudience('mcp-visa-master')
+    .sign(JWT_SECRET)
+}
+
+export async function validateAccessToken(token: string): Promise<{
+  clientId: string
+  subscriptionId: string
+  scopes: string[]
+}> {
+  const { payload } = await jwtVerify(token, JWT_SECRET, {
+    issuer: 'torly.ai',
+    audience: 'mcp-visa-master',
+  })
+  return {
+    clientId: payload.sub as string,
+    subscriptionId: payload.sid as string,
+    scopes: payload.scopes as string[],
+  }
+}
+```
+
+```typescript
+// app/api/marco-polo/auth/token/route.ts
+
+import { NextRequest, NextResponse } from 'next/server'
+import { createAdminClient } from '@/lib/supabase/server'
+import { verifyClientSecret, generateAccessToken } from '@/lib/marco-polo/oauth'
+
+export async function POST(request: NextRequest) {
+  const body = await request.formData().catch(() => null)
+    || await request.json().catch(() => null)
+
+  const grantType = body?.get?.('grant_type') || body?.grant_type
+  const clientId = body?.get?.('client_id') || body?.client_id
+  const clientSecret = body?.get?.('client_secret') || body?.client_secret
+
+  if (grantType !== 'client_credentials') {
+    return NextResponse.json(
+      { error: 'unsupported_grant_type' },
+      { status: 400 }
+    )
+  }
+
+  if (!clientId || !clientSecret) {
+    return NextResponse.json(
+      { error: 'invalid_request', error_description: 'client_id and client_secret required' },
+      { status: 400 }
+    )
+  }
+
+  const supabase = createAdminClient()
+
+  const { data: client } = await supabase
+    .from('marco_polo_oauth_clients')
+    .select('id, subscription_id, client_secret_hash, scopes, revoked')
+    .eq('client_id', clientId)
+    .single()
+
+  if (!client || client.revoked) {
+    return NextResponse.json({ error: 'invalid_client' }, { status: 401 })
+  }
+
+  const valid = await verifyClientSecret(clientSecret, client.client_secret_hash)
+  if (!valid) {
+    return NextResponse.json({ error: 'invalid_client' }, { status: 401 })
+  }
+
+  // Check subscription is active
+  const { data: sub } = await supabase
+    .from('marco_polo_subscriptions')
+    .select('status, plan, tool_calls_used, tool_calls_limit')
+    .eq('id', client.subscription_id)
+    .single()
+
+  if (!sub || !['active', 'trialing'].includes(sub.status)) {
+    return NextResponse.json(
+      { error: 'invalid_grant', error_description: 'Subscription inactive. Renew at torly.ai/schengen/marco-polo/pricing' },
+      { status: 403 }
+    )
+  }
+
+  if (sub.tool_calls_limit && sub.tool_calls_used >= sub.tool_calls_limit) {
+    return NextResponse.json(
+      { error: 'invalid_grant', error_description: 'Tool call limit reached. Upgrade at torly.ai/schengen/marco-polo/pricing' },
+      { status: 403 }
+    )
+  }
+
+  const accessToken = await generateAccessToken(
+    clientId,
+    client.subscription_id,
+    client.scopes
+  )
+
+  return NextResponse.json({
+    access_token: accessToken,
+    token_type: 'Bearer',
+    expires_in: 3600,
+  })
+}
+```
+
+### B.8 Pricing Tiers
+
+| Tier | Price | Tool Calls | Duration | Stripe Product |
+|---|---|---|---|---|
+| **Free Trial** | £0 | 50 calls | 7 days | Trial subscription, auto-cancel |
+| **Standard** | £9/month | Unlimited | Recurring | Monthly subscription |
+| **Per-Application** | £19 one-time | 500 calls | Until exhausted | One-time payment |
+
+**Freemium (no subscription):** `visa_knowledge` tool only — lets anyone look up visa facts without subscribing. This is the hook: users see the value, then subscribe for the full 24-tool experience.
+
+### B.9 MCP Auth Middleware Pattern
+
+```typescript
+// Updated app/api/mcp/visa-master/route.ts (POST handler)
+
+export async function POST(request: NextRequest) {
+  const authHeader = request.headers.get('authorization')
+  const body = await request.clone().json().catch(() => null)
+  const toolName = body?.params?.name || body?.method || 'unknown'
+
+  // Freemium gate: visa_knowledge allowed without auth
+  if (!authHeader && toolName !== 'visa_knowledge' && body?.method !== 'initialize') {
+    return NextResponse.json({
+      jsonrpc: '2.0',
+      error: {
+        code: -32001,
+        message: 'Authentication required. Subscribe at https://torly.ai/schengen/marco-polo/pricing',
+      },
+      id: body?.id || null,
+    }, { status: 401 })
+  }
+
+  // Validate token if present
+  if (authHeader) {
+    const token = authHeader.replace('Bearer ', '')
+    try {
+      const claims = await validateAccessToken(token)
+      // Increment tool call counter for per-app plans
+      await incrementToolCallCount(claims.subscriptionId)
+    } catch {
+      return NextResponse.json({
+        jsonrpc: '2.0',
+        error: { code: -32001, message: 'Invalid or expired token' },
+        id: body?.id || null,
+      }, { status: 401 })
+    }
+  }
+
+  // Proceed with MCP handling...
+}
+```
+
+### B.10 Subscriber Dashboard Wireframe
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│  torly.ai/schengen/marco-polo/dashboard                              │
+│                                                                      │
+│  ┌── Your Marco Polo Subscription ──────────────────────────────┐   │
+│  │                                                               │   │
+│  │  Plan: Standard (£9/month)              Status: ● Active      │   │
+│  │  Next billing: June 26, 2026            Usage: 47 tool calls  │   │
+│  │                                                               │   │
+│  │  [Manage subscription]  [Cancel]                              │   │
+│  └───────────────────────────────────────────────────────────────┘   │
+│                                                                      │
+│  ┌── Your MCP Credentials ──────────────────────────────────────┐   │
+│  │                                                               │   │
+│  │  Client ID                                                    │   │
+│  │  ┌──────────────────────────────────────────┐                │   │
+│  │  │ mp_a7Bx3kQ9mWzYp2NvR5hT8jF              │  [📋 Copy]     │   │
+│  │  └──────────────────────────────────────────┘                │   │
+│  │                                                               │   │
+│  │  Client Secret                                                │   │
+│  │  ┌──────────────────────────────────────────┐                │   │
+│  │  │ sk_mp_••••••••••••••••••••••••••••••••   │  [👁 Show]     │   │
+│  │  └──────────────────────────────────────────┘  [📋 Copy]     │   │
+│  │                                                               │   │
+│  │  ⚠️ Secret shown once. Store it securely.                    │   │
+│  │  [🔄 Regenerate secret]                                       │   │
+│  └───────────────────────────────────────────────────────────────┘   │
+│                                                                      │
+│  ┌── Setup Instructions ────────────────────────────────────────┐   │
+│  │                                                               │   │
+│  │  1. Open claude.ai                                            │   │
+│  │  2. Go to Customize > Connectors > Add custom connector       │   │
+│  │  3. Name: Visa Master (Schengen)                              │   │
+│  │  4. URL: https://torly.ai/api/mcp/visa-master/               │   │
+│  │  5. Expand "Advanced settings"                                │   │
+│  │  6. Paste your Client ID and Client Secret                    │   │
+│  │  7. Click "Add" then "Connect"                                │   │
+│  │                                                               │   │
+│  │  Also works with: Cursor, VS Code Copilot, Windsurf,         │   │
+│  │  Claude Code CLI                                              │   │
+│  └───────────────────────────────────────────────────────────────┘   │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+### B.11 Phase 1 Definition of Done
+
+| # | Criterion | How to verify |
+|---|---|---|
+| 1 | Pricing page live at `/schengen/marco-polo/pricing` | Visit URL, see 3 tiers |
+| 2 | Stripe checkout works for all 3 plans | Complete checkout for trial, standard, per-app |
+| 3 | Dashboard shows OAuth credentials after subscription | Subscribe → redirected to dashboard → credentials visible |
+| 4 | Claude.ai connector authenticates with credentials | Enter Client ID + Secret → "Connected" |
+| 5 | Authenticated user can invoke all 24 tools | Systematic tool-by-tool test |
+| 6 | Unauthenticated user can invoke `visa_knowledge` only | Test without credentials → knowledge works, others return 401 |
+| 7 | Per-app user hits 500 limit → gets error | Simulate 500 calls → verify limit message |
+| 8 | Cancelled subscription → token rejected | Cancel in Stripe → verify 403 on next MCP request |
+| 9 | Secret regeneration works | Regenerate → old secret fails, new secret works |
+| 10 | Webhook handles all Stripe events | Test with Stripe CLI: `stripe trigger checkout.session.completed` |
+| 11 | Ops dashboard shows subscription + auth data | Check `/admin/ops/schengen-visa/mcp` for authenticated events |
+| 12 | Landing page CTAs link to pricing page | Click "Subscribe" → goes to `/schengen/marco-polo/pricing` |
+
+### B.12 Environment Variables Needed
+
+```bash
+# Add to .env.local before starting Phase 1:
+
+MARCO_POLO_JWT_SECRET=           # Generate: openssl rand -base64 32
+STRIPE_MP_TRIAL_PRICE_ID=        # From Stripe Dashboard after creating products
+STRIPE_MP_STANDARD_PRICE_ID=     # Monthly £9 subscription price
+STRIPE_MP_PER_APP_PRICE_ID=      # One-time £19 price
+STRIPE_MP_WEBHOOK_SECRET=        # From Stripe Dashboard > Webhooks
+```
+
+### B.13 Existing Infrastructure to Reuse
+
+| What | Where | Reuse how |
+|---|---|---|
+| Stripe checkout pattern | `app/api/stripe/checkout/route.ts` | Copy pattern for Marco Polo checkout |
+| Stripe webhook pattern | `app/api/stripe/webhook/route.ts` | Copy event handling pattern |
+| Stripe portal | `app/api/stripe/portal/route.ts` | Reuse for "Manage subscription" link |
+| Supabase admin client | `lib/supabase/server.ts` | Already used by MCP logger |
+| Email sending | `lib/email/send.ts` | Send welcome email with credentials |
+| Admin auth guard | `app/api/admin/ops/*/route.ts` | Pattern for checking admin access |
+| Ops dashboard styling | `components/admin/McpActivityDashboard.tsx` | Match card/table styling |
