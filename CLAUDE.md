@@ -38,7 +38,9 @@ Schengen-visa/
 │   ├── 18-ops-dashboard-wireframes.md           # P-17 wireframes
 │   ├── 19-vm-n7-multi-booking-prd.md            # N-7 multi-booking after 24h refund window
 │   ├── 20-vm-n8-refund-evidence-prd.md          # N-8 required refund evidence (Tier 1)
-│   └── 21-vm-v1.2.0-post-deploy-monitoring-plan.md  # v1.2.0 operational playbook
+│   ├── 21-vm-v1.2.0-post-deploy-monitoring-plan.md  # v1.2.0 operational playbook
+│   ├── 31-plugin-marketplace-backlog.md             # Marketplace submission tracking + analytics
+│   └── 32-marco-polo-managed-agent-prd.md           # Marco Polo: Claude Managed Agent PRD
 └── (other family-trip planning docs — unrelated to the extension)
 ```
 
