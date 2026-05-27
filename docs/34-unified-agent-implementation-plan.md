@@ -130,20 +130,22 @@ agent-core/
 
 **Goal:** Get the visa agent responding to messages in Telegram. Telegram first because: no Business API approval needed (just a bot token), and you already have Telegram infrastructure from Visa Master notifications.
 
-### Step 3.1: OpenClaw installation and config (Docker on local MacBook M1 Pro)
+### Step 3.1: OpenClaw installation and config (native on MacBook M1 Pro)
 
-**Strategy:** Docker on local MacBook for dev/dogfood. When paying users arrive (Phase 5), `docker push` the same image to Railway/Fly.io. Zero config drift.
+**Strategy:** Install OpenClaw natively on the MacBook for fast dev iteration. Dockerize after it's stable (Step 3.4) for production portability.
 
 **Work:**
-- [ ] Create `lib/marco-polo/openclaw/Dockerfile` — Node.js 24 base, OpenClaw installed, content volume mount point
-- [ ] Create `lib/marco-polo/openclaw/docker-compose.yml` — defines service, env vars, volume mounts for content
-- [ ] Volume mount `lib/marco-polo/content/` into container at `/app/content` (skills, consulate files, knowledge — editable on host, live in container)
-- [ ] Volume mount `agent-core/` into container at `/app/agent-core` (system prompt + tool schemas)
-- [ ] Configure Anthropic as LLM provider (`ANTHROPIC_API_KEY`, model: `claude-sonnet-4-6`) via `.env`
-- [ ] Load system prompt from `/app/agent-core/SYSTEM_PROMPT.md`
-- [ ] Configure tool definitions from `/app/agent-core/tools/*.json` (12 tools)
-- [ ] Verify: `docker compose up` starts OpenClaw and responds to local test messages
-- [ ] Document: add macOS energy settings note (disable sleep: System Settings → Energy → Prevent automatic sleeping)
+- [ ] Install OpenClaw natively: `git clone https://github.com/openclaw/openclaw` + `npm install` (Node.js 24+, ARM64 native on M1 Pro)
+- [ ] Configure Anthropic as LLM provider (`ANTHROPIC_API_KEY`, model: `claude-sonnet-4-6`) in OpenClaw config
+- [ ] Point content paths to the local repos:
+  - System prompt: `~/AI/AI_Coding/Workspaces/Schengen-visa/agent-core/SYSTEM_PROMPT.md`
+  - Tool schemas: `~/AI/AI_Coding/Workspaces/Schengen-visa/agent-core/tools/*.json`
+  - Skills content: `~/AI/AI_Coding/Repositories/torlyAI/lib/marco-polo/content/`
+- [ ] Load system prompt from `agent-core/SYSTEM_PROMPT.md`
+- [ ] Configure tool definitions from `agent-core/tools/*.json` (12 tools)
+- [ ] Start OpenClaw: verify it responds to local test messages
+- [ ] macOS setup: disable sleep (System Settings → Energy → Prevent automatic sleeping when display is off)
+- [ ] Set up `launchd` user service so OpenClaw auto-starts on boot
 
 ### Step 3.2: Implement tool execution in OpenClaw
 
@@ -162,18 +164,24 @@ agent-core/
 - [ ] Verify session persistence: close Telegram, reopen, send follow-up → agent remembers context
 - [ ] Test bilingual: send message in Chinese → agent responds in Chinese
 
-### Step 3.4: Deploy (local Docker → production later)
+### Step 3.4: Deploy (native local → Dockerize → production)
 
-**Local (Phase 3):**
-- [ ] `docker compose up -d` on MacBook M1 Pro — runs as background container
+**Local native (Phase 3 — dev/dogfood):**
+- [ ] OpenClaw running natively via `launchd` on MacBook M1 Pro
 - [ ] Set up Tailscale or Cloudflare Tunnel for webhook ingress (Telegram needs to reach your machine)
 - [ ] Verify Telegram bot works from a phone (not just desktop)
 - [ ] Set up basic monitoring: log conversations to Supabase `marco_polo_openclaw_events` table
 
+**Dockerize (Phase 4 — after Telegram is validated):**
+- [ ] Create `lib/marco-polo/openclaw/Dockerfile` — captures the working native setup
+- [ ] Create `lib/marco-polo/openclaw/docker-compose.yml` — env vars, volume mounts for content
+- [ ] Verify: `docker compose up` produces identical behaviour to native install
+- [ ] Content layer as volume mount — edit skills on host, live in container
+
 **Production migration (Phase 5, when paying users arrive):**
 - [ ] Push Docker image to container registry (Docker Hub or GitHub Container Registry)
-- [ ] Deploy to Railway or Fly.io (`docker push` → deploy)
-- [ ] Update Telegram webhook URL from Tailscale/Cloudflare to production URL
+- [ ] Deploy to Railway or Fly.io
+- [ ] Update Telegram/WhatsApp webhook URLs to production URL
 - [ ] Verify identical behaviour in production
 
 **Acceptance:** Telegram bot responds to visa questions using 12 tools. Sessions persist. Bilingual works.
