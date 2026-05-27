@@ -108,7 +108,7 @@ OpenClaw is a self-hosted Node.js daemon that routes messages between chat platf
 | **Tool execution** | Local: reads `skills/` from disk, returns content to LLM |
 | **Session state** | OpenClaw built-in per-user session manager |
 | **Channels** | WhatsApp (P0), Telegram (P1), Slack/Discord (P2) |
-| **Deployment** | VPS or Railway (persistent Node.js process) |
+| **Deployment** | Docker on local MacBook M1 Pro (dev/dogfood) → `docker push` to Railway/Fly.io (production) |
 | **Payment** | Stripe payment link sent in-chat at paywall boundary |
 
 ### 3.3 Channel priority
@@ -152,10 +152,11 @@ Cover letters, checklists, and other generated documents are LLM text output (no
 
 | Aspect | Choice |
 |---|---|
-| **Host** | Railway or VPS (e.g. Hetzner) |
-| **Process** | systemd user service or Railway persistent process |
+| **Dev/dogfood** | Docker on local MacBook M1 Pro. Tailscale or Cloudflare Tunnel for webhook ingress. |
+| **Production** | Same Docker image pushed to Railway or Fly.io (when paying users arrive) |
+| **Containerisation** | `Dockerfile` + `docker-compose.yml` in `lib/marco-polo/openclaw/`. Content layer (`skills/`, consulate files) mounted as Docker volume — editable on host, live in container. |
 | **Repo** | Directory in torlyAI monorepo at `lib/marco-polo/openclaw/` (co-located with existing Marco Polo backend code) |
-| **Secrets** | `ANTHROPIC_API_KEY`, WhatsApp Business API credentials, Telegram bot token, Stripe webhook secret |
+| **Secrets** | `.env` file: `ANTHROPIC_API_KEY`, Telegram bot token, Stripe webhook secret. WhatsApp Business API credentials added in Phase 4. |
 | **Monitoring** | OpenClaw built-in logs + Supabase usage table |
 
 ### 3.8 Limitations (accepted)

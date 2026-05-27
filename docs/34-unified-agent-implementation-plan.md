@@ -130,14 +130,20 @@ agent-core/
 
 **Goal:** Get the visa agent responding to messages in Telegram. Telegram first because: no Business API approval needed (just a bot token), and you already have Telegram infrastructure from Visa Master notifications.
 
-### Step 3.1: OpenClaw installation and config
+### Step 3.1: OpenClaw installation and config (Docker on local MacBook M1 Pro)
+
+**Strategy:** Docker on local MacBook for dev/dogfood. When paying users arrive (Phase 5), `docker push` the same image to Railway/Fly.io. Zero config drift.
 
 **Work:**
-- [ ] Install OpenClaw on a VPS or Railway (Node.js 24+, persistent process)
-- [ ] Configure Anthropic as LLM provider (`ANTHROPIC_API_KEY`, model: `claude-sonnet-4-6`)
-- [ ] Load system prompt from `agent-core/SYSTEM_PROMPT.md`
-- [ ] Configure tool definitions from `agent-core/tools/*.json` (12 tools)
-- [ ] Copy `lib/marco-polo/content/` to the OpenClaw machine (skills + consulate files + knowledge)
+- [ ] Create `lib/marco-polo/openclaw/Dockerfile` — Node.js 24 base, OpenClaw installed, content volume mount point
+- [ ] Create `lib/marco-polo/openclaw/docker-compose.yml` — defines service, env vars, volume mounts for content
+- [ ] Volume mount `lib/marco-polo/content/` into container at `/app/content` (skills, consulate files, knowledge — editable on host, live in container)
+- [ ] Volume mount `agent-core/` into container at `/app/agent-core` (system prompt + tool schemas)
+- [ ] Configure Anthropic as LLM provider (`ANTHROPIC_API_KEY`, model: `claude-sonnet-4-6`) via `.env`
+- [ ] Load system prompt from `/app/agent-core/SYSTEM_PROMPT.md`
+- [ ] Configure tool definitions from `/app/agent-core/tools/*.json` (12 tools)
+- [ ] Verify: `docker compose up` starts OpenClaw and responds to local test messages
+- [ ] Document: add macOS energy settings note (disable sleep: System Settings → Energy → Prevent automatic sleeping)
 
 ### Step 3.2: Implement tool execution in OpenClaw
 
@@ -156,13 +162,19 @@ agent-core/
 - [ ] Verify session persistence: close Telegram, reopen, send follow-up → agent remembers context
 - [ ] Test bilingual: send message in Chinese → agent responds in Chinese
 
-### Step 3.4: Deploy
+### Step 3.4: Deploy (local Docker → production later)
 
-**Work:**
-- [ ] Deploy OpenClaw to Railway (or VPS with systemd)
-- [ ] Set up environment variables (API keys, bot tokens)
+**Local (Phase 3):**
+- [ ] `docker compose up -d` on MacBook M1 Pro — runs as background container
+- [ ] Set up Tailscale or Cloudflare Tunnel for webhook ingress (Telegram needs to reach your machine)
 - [ ] Verify Telegram bot works from a phone (not just desktop)
 - [ ] Set up basic monitoring: log conversations to Supabase `marco_polo_openclaw_events` table
+
+**Production migration (Phase 5, when paying users arrive):**
+- [ ] Push Docker image to container registry (Docker Hub or GitHub Container Registry)
+- [ ] Deploy to Railway or Fly.io (`docker push` → deploy)
+- [ ] Update Telegram webhook URL from Tailscale/Cloudflare to production URL
+- [ ] Verify identical behaviour in production
 
 **Acceptance:** Telegram bot responds to visa questions using 12 tools. Sessions persist. Bilingual works.
 
