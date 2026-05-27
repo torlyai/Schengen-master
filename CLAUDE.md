@@ -13,7 +13,33 @@ This workspace contains **Visa Master**, a Chrome Manifest V3 extension that wat
 
 **Architecture doc to read first:** `docs/11-architecture.md`. It is the canonical source for the two-repo system map, the FSMs, payment flow, and trust boundaries.
 
-**Backend companion repo:** `/Users/Jason-uk/AI/AI_Coding/Repositories/torlyAI` — Next.js app at `torly.ai`. The `/api/visa-master/*` routes + `lib/visa-master/*` + Supabase migration `026_visa_master.sql` belong to this product.
+**Backend companion repo:** `torlyAI` — Next.js app at `torly.ai`. The `/api/visa-master/*` routes + `lib/visa-master/*` + Supabase migration `026_visa_master.sql` belong to this product. Path depends on which machine you're on — see §"Two-machine development model" below.
+
+## Git remotes and repos
+
+| Remote | Repo | Visibility | Purpose |
+|---|---|---|---|
+| `private` | `DukeWood/Schengen-visa` | **Private** | Dev work — both machines push/pull here (default for `git push`) |
+| `origin` | `torlyai/Schengen-master` | **Public** | User-facing releases — skills, extension, README |
+
+**Default push target is `private`** (set via `--set-upstream`). To push a public release: `git push origin main` (explicit).
+
+**The M1 Pro clones from the private repo:** `gh repo clone DukeWood/Schengen-visa`
+
+## Two-machine development model
+
+This repo is developed across two machines:
+
+| | Primary dev machine | MacBook M1 Pro (study) |
+|---|---|---|
+| **Role** | Extension, torlyAI backend, skills authoring, MCP Gateway, docs | OpenClaw daemon (always-on), Telegram/WhatsApp bot, dogfood testing |
+| **Repo paths** | `~/AI/AI_Coding/Workspaces/Schengen-visa` + `~/AI/AI_Coding/Repositories/torlyAI` | Same paths (cloned from private remote) |
+| **Owns** | `agent-core/`, `skills/`, `lib/marco-polo/mcp-tools/`, `lib/marco-polo/content/`, `docs/` | `lib/marco-polo/openclaw/` (OpenClaw config, tool executor, channel wiring) |
+| **Sync** | `git push` (to private remote) | `git pull` (content updates are live immediately — OpenClaw reads from disk) |
+
+**Rule:** Each machine owns its files. Don't edit `agent-core/` on the M1 Pro or `openclaw/` config on the primary machine. Git is the sync mechanism.
+
+**Backend companion repo path** (both machines): `~/AI/AI_Coding/Repositories/torlyAI`
 
 ## Workspace layout
 
@@ -22,6 +48,12 @@ Schengen-visa/
 ├── README.md / README.zh-CN.md      # User-facing (Chrome Web Store + GitHub)
 ├── DASHBOARD.md                      # Personal tracker (don't ship)
 ├── extension/                        # The MV3 extension — see §"Extension layout" below
+├── skills/                           # 37 Claude Code skills (10 personas, EN + zh-CN)
+├── agent-core/                       # Shared Agent Core (Phase 1 — coming)
+│   ├── SYSTEM_PROMPT.md              #   One canonical system prompt for all paths
+│   ├── tools/                        #   24 tool definitions (JSON Schema)
+│   └── config/                       #   Per-path config templates (MCP, OpenClaw, Managed Agents)
+├── .claude-plugin/                   # Plugin Marketplace manifest (visa-schengen)
 ├── docs/
 │   ├── 06-visa-master-chrome-extension-prd.md  # Free-tier PRD
 │   ├── 07-chrome-extension-wireframes.md        # Free-tier wireframes
@@ -40,7 +72,9 @@ Schengen-visa/
 │   ├── 20-vm-n8-refund-evidence-prd.md          # N-8 required refund evidence (Tier 1)
 │   ├── 21-vm-v1.2.0-post-deploy-monitoring-plan.md  # v1.2.0 operational playbook
 │   ├── 31-plugin-marketplace-backlog.md             # Marketplace submission tracking + analytics
-│   └── 32-marco-polo-managed-agent-prd.md           # Marco Polo: Claude Managed Agent PRD
+│   ├── 32-marco-polo-managed-agent-prd.md           # Marco Polo agent PRD (MCP Gateway + Hosted Chat)
+│   ├── 33-marco-polo-unified-agent-architecture.md  # Three-path architecture design (A/B/C)
+│   └── 34-unified-agent-implementation-plan.md      # 5-phase implementation plan + M1 Pro setup appendix
 └── (other family-trip planning docs — unrelated to the extension)
 ```
 
@@ -170,7 +204,7 @@ When you merge anything in the torlyAI repo that touches `app/api/visa-master/*`
 1. Edit the squash-merge commit message in the GitHub PR UI to append `[deploy]` *before* clicking "Confirm squash and merge". The default `feat(...): … (#NN)` line is what Vercel sees, so the token has to live there.
 2. If you forgot (or the merge already happened): push an empty trigger commit on `main`:
    ```bash
-   cd /Users/Jason-uk/AI/AI_Coding/Repositories/torlyAI
+   cd ~/AI/AI_Coding/Repositories/torlyAI
    git checkout main && git pull
    git commit --allow-empty -m "chore(deploy): trigger [deploy]"
    git push
@@ -227,11 +261,23 @@ Base URL: `https://torly.ai/api/visa-master`. Override at build time with `VITE_
 
 ## Quick references
 
+**Extension + Premium:**
 - **Architecture:** `docs/11-architecture.md`
 - **Premium PRD:** `docs/09-visa-master-premium-prd.md`
 - **Premium wireframes:** `docs/10-visa-master-premium-wireframes.md`
 - **v1.2.0 PRDs:** `docs/19` (N-7 multi-booking) · `docs/20` (N-8 refund evidence) · `docs/14` (N-3b email) · `docs/17` (install metadata)
 - **v1.2.0 monitoring plan:** `docs/21-vm-v1.2.0-post-deploy-monitoring-plan.md` (CWS review window through T+30d)
 - **Premium backlog:** `docs/12-premium-backlog.md`
-- **Backend repo:** `/Users/Jason-uk/AI/AI_Coding/Repositories/torlyAI` (search `app/api/visa-master`)
+
+**Marco Polo (agent):**
+- **Agent PRD:** `docs/32-marco-polo-managed-agent-prd.md` (MCP Gateway + Hosted Chat)
+- **Unified architecture:** `docs/33-marco-polo-unified-agent-architecture.md` (3-path design: MCP + OpenClaw + Managed Agents)
+- **Implementation plan:** `docs/34-unified-agent-implementation-plan.md` (5 phases + M1 Pro setup appendix)
+- **Spec:** `docs/superpowers/specs/2026-05-27-unified-agent-architecture-spec.md`
+- **MCP server code:** `~/AI/AI_Coding/Repositories/torlyAI/lib/marco-polo/` (tools, content, server)
+- **Landing page:** `~/AI/AI_Coding/Repositories/torlyAI/app/schengen/marco-polo/`
+
+**Repos:**
+- **Private dev repo:** `https://github.com/DukeWood/Schengen-visa` (both machines sync here)
 - **Public release repo:** `https://github.com/torlyai/Schengen-master`
+- **Backend repo:** `~/AI/AI_Coding/Repositories/torlyAI` (search `app/api/visa-master` or `lib/marco-polo`)
