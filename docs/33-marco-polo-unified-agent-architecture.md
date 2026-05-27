@@ -162,7 +162,7 @@ Agent: [calls visa_plan_trip, visa_document_checklist]
 | **Tool execution** | Local (OpenClaw reads `skills/` from disk) | Skills are markdown files — no sandbox needed for reading. Document *generation* (cover letters) happens as LLM text output, not file writes. |
 | **Session state** | OpenClaw's per-user session manager | Conversations persist across messages. User can pick up where they left off. |
 | **File delivery** | WhatsApp document messages | Generated PDFs/docs sent as WhatsApp attachments via the channel adapter. |
-| **Deployment** | VPS or Railway (self-hosted daemon) | OpenClaw runs as a Node.js service. Needs a persistent process, not serverless. |
+| **Deployment** | Native on MacBook M1 Pro (dev/dogfood) -> Docker -> Railway/Fly.io (production) | Dedicated M1 Pro in study runs OpenClaw daemon always-on. Tailscale Funnel for webhook ingress. Dockerize when stable, push to cloud for paying users. |
 | **Auth / payment** | Stripe payment link sent in-chat | User pays via link before the agent proceeds past the free tier (e.g., first 2 tools free, full 24 requires payment). |
 
 ### 2.5 What OpenClaw does NOT do (vs Managed Agents)
@@ -333,9 +333,35 @@ No redeployment needed for content updates. The shared content layer is **read a
 |---|---|---|---|
 | **Who pays LLM** | User (their Claude sub) | You (API key) | You (API key) |
 | **Your LLM cost** | £0 | ~£0.50-1.50/application (Sonnet) | ~£1.50-3.00/application (Sonnet + sandbox) |
-| **Your infra cost** | Vercel (existing) | VPS ~£5-10/mo (OpenClaw daemon) | Vercel (existing) + Managed Agents session fees |
+| **Your infra cost** | Vercel (existing) | £0 dev/dogfood (M1 Pro) -> ~£5-10/mo production (Railway) | Vercel (existing) + Managed Agents session fees |
 | **User price** | £9/mo or £19/app | £19-29/app | £19-29/app |
 | **Margin** | ~100% (no LLM cost) | ~85-95% | ~75-90% |
+
+---
+
+## 6. Two-Machine Development Model
+
+```
+┌─────────────────────────────────┐          ┌─────────────────────────────────┐
+│  PRIMARY DEV MACHINE (current)  │          │  MACBOOK M1 PRO (study)         │
+│                                 │          │                                 │
+│  Extension development          │  git     │  OpenClaw daemon (always-on)    │
+│  torlyAI backend (Vercel)       │ push/    │  Telegram bot                   │
+│  Skills authoring               │  pull    │  WhatsApp bot (future)          │
+│  agent-core/ (system prompt,    │ ◄──────► │  Tailscale Funnel (ingress)     │
+│    tool schemas)                │          │  Clones of both repos           │
+│  MCP Gateway (Path A)           │          │  OpenClaw config + tool wiring  │
+│  Docs & planning                │          │  Dogfood testing                │
+│                                 │          │                                 │
+│  OWNS: agent-core/, skills/,    │          │  OWNS: lib/marco-polo/openclaw/ │
+│  lib/marco-polo/mcp-tools/,    │          │  (channel config, tool executor │
+│  lib/marco-polo/content/, docs  │          │   wiring, deployment config)    │
+└─────────────────────────────────┘          └─────────────────────────────────┘
+```
+
+**Sync workflow:** Primary machine `git push` -> M1 Pro `git pull` -> OpenClaw reads updated content from disk at runtime (no rebuild needed for skill/content changes; gateway restart only for tool schema or config changes).
+
+**Production path:** When paying users arrive, Dockerize the working M1 Pro setup and push to Railway/Fly.io. M1 Pro continues as staging/dogfood.
 
 ---
 

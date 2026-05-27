@@ -130,22 +130,18 @@ agent-core/
 
 **Goal:** Get the visa agent responding to messages in Telegram. Telegram first because: no Business API approval needed (just a bot token), and you already have Telegram infrastructure from Visa Master notifications.
 
-### Step 3.1: OpenClaw installation and config (native on MacBook M1 Pro)
+### Step 3.1: OpenClaw installation and config (on MacBook M1 Pro in study)
 
-**Strategy:** Install OpenClaw natively on the MacBook for fast dev iteration. Dockerize after it's stable (Step 3.4) for production portability.
+**Prerequisite:** Complete Appendix A (M1 Pro dev environment setup) first. This gives you: Node.js 24, OpenClaw installed + daemon running, repos cloned, Telegram bot created, Tailscale tunnel active.
 
-**Work:**
-- [ ] Install OpenClaw natively: `git clone https://github.com/openclaw/openclaw` + `npm install` (Node.js 24+, ARM64 native on M1 Pro)
-- [ ] Configure Anthropic as LLM provider (`ANTHROPIC_API_KEY`, model: `claude-sonnet-4-6`) in OpenClaw config
-- [ ] Point content paths to the local repos:
+**Work (on the M1 Pro):**
+- [ ] Complete Appendix A steps A.1–A.10 (full machine setup)
+- [ ] Configure OpenClaw to use the shared agent core from the cloned repos:
   - System prompt: `~/AI/AI_Coding/Workspaces/Schengen-visa/agent-core/SYSTEM_PROMPT.md`
   - Tool schemas: `~/AI/AI_Coding/Workspaces/Schengen-visa/agent-core/tools/*.json`
   - Skills content: `~/AI/AI_Coding/Repositories/torlyAI/lib/marco-polo/content/`
-- [ ] Load system prompt from `agent-core/SYSTEM_PROMPT.md`
 - [ ] Configure tool definitions from `agent-core/tools/*.json` (12 tools)
-- [ ] Start OpenClaw: verify it responds to local test messages
-- [ ] macOS setup: disable sleep (System Settings → Energy → Prevent automatic sleeping when display is off)
-- [ ] Set up `launchd` user service so OpenClaw auto-starts on boot
+- [ ] Test: send a message locally, verify OpenClaw calls Anthropic API with the shared system prompt
 
 ### Step 3.2: Implement tool execution in OpenClaw
 
@@ -166,16 +162,16 @@ agent-core/
 
 ### Step 3.4: Deploy (native local → Dockerize → production)
 
-**Local native (Phase 3 — dev/dogfood):**
-- [ ] OpenClaw running natively via `launchd` on MacBook M1 Pro
-- [ ] Set up Tailscale or Cloudflare Tunnel for webhook ingress (Telegram needs to reach your machine)
+**Dev/dogfood on M1 Pro (Phase 3):**
+- [ ] OpenClaw running natively via `launchd` on MacBook M1 Pro (Appendix A)
+- [ ] Tailscale Funnel or Cloudflare Tunnel active for webhook ingress
 - [ ] Verify Telegram bot works from a phone (not just desktop)
 - [ ] Set up basic monitoring: log conversations to Supabase `marco_polo_openclaw_events` table
 
 **Dockerize (Phase 4 — after Telegram is validated):**
 - [ ] Create `lib/marco-polo/openclaw/Dockerfile` — captures the working native setup
 - [ ] Create `lib/marco-polo/openclaw/docker-compose.yml` — env vars, volume mounts for content
-- [ ] Verify: `docker compose up` produces identical behaviour to native install
+- [ ] Verify: `docker compose up` on M1 Pro produces identical behaviour to native install
 - [ ] Content layer as volume mount — edit skills on host, live in container
 
 **Production migration (Phase 5, when paying users arrive):**
@@ -183,6 +179,7 @@ agent-core/
 - [ ] Deploy to Railway or Fly.io
 - [ ] Update Telegram/WhatsApp webhook URLs to production URL
 - [ ] Verify identical behaviour in production
+- [ ] M1 Pro continues as staging/dogfood; production runs on Railway/Fly.io
 
 **Acceptance:** Telegram bot responds to visa questions using 12 tools. Sessions persist. Bilingual works.
 
@@ -265,8 +262,12 @@ agent-core/
 
 | Dependency | Blocks | Lead time | Action |
 |---|---|---|---|
+| M1 Pro dev environment setup | Phase 3 | ~1-2 hours | Follow Appendix A before starting Phase 3 |
+| Tailscale account + Funnel | Phase 3 | ~15 min | Set up during Appendix A step A.7 |
+| Telegram bot token (@BotFather) | Phase 3 | ~5 min | Set up during Appendix A step A.6 |
 | WhatsApp Business API approval | Phase 4 | 1-2 weeks | Start application at beginning of Phase 3 so it's ready when needed |
-| VPS / Railway account | Phase 3 | < 1 hour | Set up during Phase 3 Step 3.1 |
+| Docker (for production migration) | Phase 4-5 | ~10 min | `brew install docker` on M1 Pro when needed |
+| Railway / Fly.io account | Phase 5 | < 1 hour | Set up when paying users arrive |
 | OpenClaw stability | Phase 3-5 | Ongoing | Pin version, monitor releases |
 | Stripe payment links | Phase 5 | Already have Stripe (Visa Master) | Reuse existing Stripe account |
 
@@ -294,3 +295,248 @@ agent-core/
 | Phase 4: WhatsApp channel | 1-2 | Week 3 (plus approval wait) |
 | Phase 5: Paywall + monitoring | 1-2 | Week 3-4 |
 | **Total** | **10-14** | **~4 weeks** |
+
+---
+
+## Two-machine development model
+
+| | Primary dev machine (current) | MacBook M1 Pro (study) |
+|---|---|---|
+| **Role** | Extension, torlyAI backend, skills authoring, MCP Gateway, docs | OpenClaw daemon, Telegram/WhatsApp bot, dogfood testing |
+| **Repos** | `Schengen-visa` + `torlyAI` (source of truth) | Clones of both (pull to sync) |
+| **What runs here** | Vercel dev server, extension dev, Claude Code sessions | OpenClaw daemon (always-on), Tailscale/Cloudflare tunnel |
+| **What gets edited here** | `agent-core/`, `skills/`, `lib/marco-polo/mcp-tools/`, `lib/marco-polo/content/`, docs | `lib/marco-polo/openclaw/` (OpenClaw config, tool executor, channel wiring) |
+| **Sync method** | `git push` | `git pull` (OpenClaw reads content from disk — changes are live after pull) |
+
+**Rule:** Each machine owns its files. Don't edit `agent-core/` on the M1 Pro or `openclaw/` config on the primary machine. Git is the sync mechanism.
+
+---
+
+## Appendix A: MacBook M1 Pro — Full Dev Environment Setup
+
+This appendix covers setting up the M1 Pro from a fresh macOS install to a working OpenClaw dev/dogfood machine.
+
+### A.1 macOS system setup
+
+```bash
+# 1. Accept Xcode command-line tools (will prompt on first git/dev tool use)
+xcode-select --install
+
+# 2. Install Homebrew
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# 3. Add Homebrew to PATH (Apple Silicon default location)
+echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# 4. Install essentials
+brew install git node@24 pnpm gh
+
+# 5. Verify
+node --version    # should be v24.x
+pnpm --version
+git --version
+gh --version
+```
+
+### A.2 Git and GitHub setup
+
+```bash
+# Configure git identity
+git config --global user.name "Jason-uk"
+git config --global user.email "dukeharewood@gmail.com"
+
+# Authenticate GitHub CLI
+gh auth login
+# Follow prompts: GitHub.com → HTTPS → authenticate via browser
+
+# Verify
+gh auth status
+```
+
+### A.3 Clone repositories
+
+```bash
+# Create workspace structure matching the primary machine
+mkdir -p ~/AI/AI_Coding/Workspaces
+mkdir -p ~/AI/AI_Coding/Repositories
+
+# Clone Schengen-visa (skills, agent-core, extension, docs)
+cd ~/AI/AI_Coding/Workspaces
+gh repo clone DukeWood/Schengen-visa
+# This is also mirrored as torlyai/Schengen-master (public)
+
+# Clone torlyAI (backend, MCP server, content layer)
+cd ~/AI/AI_Coding/Repositories
+gh repo clone DukeWood/torlyAI
+
+# Verify both repos
+cd ~/AI/AI_Coding/Workspaces/Schengen-visa && git status
+cd ~/AI/AI_Coding/Repositories/torlyAI && git status
+```
+
+### A.4 Install OpenClaw
+
+```bash
+# Method 1: Installer script (recommended — handles Node.js, PATH, daemon)
+curl -fsSL https://openclaw.ai/install.sh | bash
+
+# Method 2: npm global install (if you prefer manual control)
+npm install -g openclaw@latest
+
+# Run onboarding wizard + install as launchd daemon
+openclaw onboard --install-daemon
+
+# Verify installation
+openclaw --version
+openclaw doctor          # checks dependencies, permissions, config
+openclaw gateway status  # should show "running" after onboard
+```
+
+### A.5 Configure Anthropic as LLM provider
+
+During `openclaw onboard`, you'll be prompted for an LLM provider. Choose Anthropic and paste your API key.
+
+If configuring manually, edit `~/.openclaw/openclaw.json`:
+
+```json
+{
+  "agent": {
+    "model": "anthropic/claude-sonnet-4-6"
+  }
+}
+```
+
+Set the API key as an environment variable (add to `~/.zprofile` for persistence):
+
+```bash
+echo 'export ANTHROPIC_API_KEY="sk-ant-your-key-here"' >> ~/.zprofile
+source ~/.zprofile
+```
+
+### A.6 Configure Telegram channel
+
+```bash
+# 1. Create a Telegram bot:
+#    - Open Telegram, message @BotFather
+#    - Send /newbot
+#    - Name: "Marco Polo Visa Advisor"
+#    - Username: MarcoPolo_VisaBot (or similar available name)
+#    - Copy the bot token
+
+# 2. Add Telegram channel in OpenClaw config (~/.openclaw/openclaw.json):
+```
+
+Add to your `openclaw.json`:
+
+```json
+{
+  "agent": {
+    "model": "anthropic/claude-sonnet-4-6"
+  },
+  "channels": {
+    "telegram": {
+      "bot_token": "YOUR_TELEGRAM_BOT_TOKEN"
+    }
+  }
+}
+```
+
+```bash
+# 3. Restart the gateway to pick up the new channel
+openclaw gateway restart
+
+# 4. Test: message your bot in Telegram
+#    Send: "Hello, can you help me with a France Schengen visa?"
+#    The bot should respond using the default OpenClaw agent
+```
+
+### A.7 Set up network ingress (Tailscale or Cloudflare Tunnel)
+
+Telegram sends webhook callbacks to your machine. You need a public URL pointing to the OpenClaw gateway port (default: 18789).
+
+**Option A: Tailscale (recommended — zero config, encrypted)**
+
+```bash
+# Install Tailscale
+brew install tailscale
+
+# Start and authenticate
+# (Opens browser for Tailscale account login)
+sudo tailscale up
+
+# Enable Tailscale Funnel (exposes a local port to the internet)
+tailscale funnel 18789
+
+# This gives you a URL like: https://your-machine-name.tail1234.ts.net/
+# Use this as the Telegram webhook URL
+```
+
+**Option B: Cloudflare Tunnel (alternative)**
+
+```bash
+# Install cloudflared
+brew install cloudflared
+
+# Create a tunnel (requires Cloudflare account)
+cloudflared tunnel login
+cloudflared tunnel create marco-polo
+cloudflared tunnel route dns marco-polo openclaw.torly.ai
+
+# Run the tunnel
+cloudflared tunnel run --url http://localhost:18789 marco-polo
+```
+
+### A.8 macOS always-on settings
+
+The M1 Pro needs to stay awake for the bot to respond 24/7:
+
+```
+System Settings → Energy:
+  ☑ Prevent automatic sleeping when the display is off
+  ☑ Wake for network access
+
+System Settings → Lock Screen:
+  Set "Turn display off" to a reasonable time (10-30 min)
+  (Display sleeps but machine stays awake)
+
+System Settings → General → Software Update:
+  ☐ Automatic updates OFF (or schedule for a specific maintenance window)
+  (Prevent surprise reboots that kill the daemon)
+```
+
+OpenClaw's `launchd` service auto-restarts after a reboot. Verify with:
+
+```bash
+# After a reboot:
+openclaw gateway status  # should show "running"
+```
+
+### A.9 Sync workflow (daily routine)
+
+```bash
+# On the M1 Pro — pull latest changes from primary dev machine
+cd ~/AI/AI_Coding/Workspaces/Schengen-visa && git pull
+cd ~/AI/AI_Coding/Repositories/torlyAI && git pull
+
+# OpenClaw reads content from disk at runtime, so:
+# - Skill updates: live immediately after pull
+# - Tool schema changes: may need gateway restart
+# - OpenClaw config changes: need gateway restart
+
+openclaw gateway restart  # only if tool schemas or config changed
+```
+
+### A.10 Verification checklist
+
+After completing setup, verify everything works:
+
+- [ ] `node --version` returns v24.x
+- [ ] `openclaw --version` returns latest
+- [ ] `openclaw doctor` passes all checks
+- [ ] `openclaw gateway status` shows "running"
+- [ ] Both repos cloned and `git pull` works
+- [ ] Telegram bot responds to a test message
+- [ ] Tailscale/Cloudflare tunnel is active (webhook ingress working)
+- [ ] macOS energy settings: machine doesn't sleep when lid is closed (if using external display) or display is off
+- [ ] After a reboot: `openclaw gateway status` shows "running" (launchd auto-restart works)
