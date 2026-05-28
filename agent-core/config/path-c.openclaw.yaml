@@ -1,0 +1,116 @@
+# Marco Polo Visa Advisor — OpenClaw Agent Configuration
+# Path C: OpenClaw Router → Telegram / WhatsApp / Slack / Discord
+#
+# This is a TEMPLATE. Validate against the installed OpenClaw version's
+# actual schema before deploying. Config format may differ between versions.
+# See: docs/34-unified-agent-implementation-plan.md (Phase 3, Appendix A)
+#
+# IMPORTANT: This file is AUTHORED on the primary dev machine and CONSUMED
+# on the MacBook M1 Pro via git pull. Do not edit on the M1 Pro.
+# See: docs/34-unified-agent-implementation-plan.md §"Two-machine model"
+#
+# OpenClaw config is typically at: ~/.openclaw/openclaw.json (JSON format)
+# This YAML represents the same structure in a more readable form.
+# Convert to JSON before placing in ~/.openclaw/ if OpenClaw requires JSON.
+#
+# OpenClaw docs: https://openclaw.ai/docs
+# OpenClaw GitHub: https://github.com/openclaw/openclaw
+
+agent:
+  name: marco-polo-visa-advisor
+  model: anthropic/claude-sonnet-4-6
+
+  # System prompt loaded from the shared agent core
+  # Absolute path on the M1 Pro (both repos cloned at the same paths as the primary machine)
+  system_prompt_file: ~/AI/AI_Coding/Workspaces/Schengen-visa/agent-core/SYSTEM_PROMPT.md
+
+  tools:
+    # Tool definitions from agent-core — JSON Schema format
+    # OpenClaw reads these to construct Anthropic tool_use definitions
+    # NOTE: validate this key name against your OpenClaw version's schema
+    schema_dir: ~/AI/AI_Coding/Workspaces/Schengen-visa/agent-core/tools/
+
+  content:
+    # Content layer — read from disk at runtime; no restart needed for updates
+    # Skills (37 skill files): agent-core/tools/*.json -> skill_path references these
+    skills_dir: ~/AI/AI_Coding/Workspaces/Schengen-visa/skills/
+    # Knowledge base, consulate files, ETHOS — read by tool executor
+    content_dir: ~/AI/AI_Coding/Repositories/torlyAI/lib/marco-polo/content/
+
+channels:
+  # PHASE 3 (build first — no approval needed, already have Telegram infra)
+  telegram:
+    enabled: true
+    bot_token: ${TELEGRAM_BOT_TOKEN}
+    # Create via @BotFather:
+    #   /newbot -> Name: "Marco Polo Visa Advisor" -> Username: MarcoPolo_VisaBot
+    # Then: openclaw gateway restart
+
+  # PHASE 4 (requires Meta Business API approval — apply during Phase 3)
+  whatsapp:
+    enabled: false  # Enable after Meta approval
+    business_account_id: ${WHATSAPP_BUSINESS_ACCOUNT_ID}
+    phone_number_id: ${WHATSAPP_PHONE_NUMBER_ID}
+    access_token: ${WHATSAPP_ACCESS_TOKEN}
+    # WhatsApp-specific constraints:
+    #   - Max message length: 4096 chars (split long responses)
+    #   - 24h messaging window for user-initiated conversations
+    #   - Template messages required for business-initiated re-engagement
+    #   - Documents sent as WhatsApp attachment messages (PDF)
+
+  # FUTURE (P2 — after WhatsApp/Telegram validated)
+  slack:
+    enabled: false
+    bot_token: ${SLACK_BOT_TOKEN}
+    signing_secret: ${SLACK_SIGNING_SECRET}
+
+  discord:
+    enabled: false
+    bot_token: ${DISCORD_BOT_TOKEN}
+
+session:
+  # Per-user conversation persistence
+  # file: local JSON files at ~/.openclaw/sessions/ (dev/dogfood)
+  # supabase: Supabase table marco_polo_openclaw_sessions (production)
+  storage: file
+  ttl: 86400  # 24 hours — user can pick up where they left off
+
+llm:
+  provider: anthropic
+  api_key: ${ANTHROPIC_API_KEY}  # Set in ~/.zprofile: export ANTHROPIC_API_KEY="sk-ant-..."
+  model: anthropic/claude-sonnet-4-6
+  # Cost: ~£0.50-1.50/application (Sonnet pricing)
+
+deployment:
+  # Dev/dogfood: native on MacBook M1 Pro (launchd daemon, always-on)
+  # Production: Dockerize after Telegram validation -> Railway/Fly.io
+  host: 0.0.0.0
+  port: 18789
+
+  # Network ingress — required for Telegram/WhatsApp webhook callbacks
+  # Option A (recommended): Tailscale Funnel
+  #   tailscale funnel 18789
+  #   -> gives https://your-machine-name.tail1234.ts.net/
+  # Option B: Cloudflare Tunnel
+  #   cloudflared tunnel run --url http://localhost:18789 marco-polo
+  webhook_base_url: ${WEBHOOK_BASE_URL}  # Set to your Tailscale or Cloudflare URL
+
+logging:
+  # Supabase logging (extend the ops dashboard in Phase 5)
+  # Table: marco_polo_openclaw_events
+  # Fields: user_id (hashed), channel, tool_name, duration_ms, tokens_used, payment_status
+  provider: supabase
+  url: ${SUPABASE_URL}
+  key: ${SUPABASE_SERVICE_ROLE_KEY}
+
+# Tool executor configuration
+# When the LLM calls a tool, OpenClaw routes to this executor.
+# The executor reads skill markdown from content_dir and returns it to the LLM.
+# For generation tools (cover letter, employer letter): LLM generates text in response.
+# For lookup tools (knowledge, photo check, insurance): executor reads markdown + returns it.
+# NOTE: validate executor config key names against your OpenClaw version.
+tool_executor:
+  type: local  # local file reads — no sandbox needed for markdown skill content
+  # Mapping: tool name -> which content file to read
+  # This replicates what mcp-tools/*.ts handlers do in Path A
+  # Full executor implementation: lib/marco-polo/openclaw/tool-executor.ts (owned by M1 Pro)

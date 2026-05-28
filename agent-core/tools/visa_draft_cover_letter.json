@@ -1,0 +1,50 @@
+{
+  "name": "visa_draft_cover_letter",
+  "description": "Draft a personalised cover letter for a France Schengen visa application. Follows the 30-second-skimmable format: purpose and dates up front, funding and accommodation in the middle, ties to home and commitment to return at the close.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "applicant_name": {
+        "type": "string"
+      },
+      "purpose": {
+        "type": "string",
+        "enum": ["tourism", "family-visit", "business", "other"]
+      },
+      "travel_dates": {
+        "type": "string"
+      },
+      "itinerary_summary": {
+        "type": "string",
+        "description": "Brief description of planned activities"
+      },
+      "accommodation": {
+        "type": "string",
+        "description": "Hotel name + booking reference, or host details"
+      },
+      "funding_source": {
+        "type": "string",
+        "description": "Who is funding: self, employer, sponsor"
+      },
+      "employer": {
+        "type": "string",
+        "description": "Employer name + role if employed"
+      },
+      "ties_to_home": {
+        "type": "string",
+        "description": "Evidence of ties: property, job, family, studies"
+      }
+    },
+    "required": [
+      "applicant_name",
+      "purpose",
+      "travel_dates",
+      "itinerary_summary",
+      "accommodation",
+      "funding_source",
+      "ties_to_home"
+    ]
+  },
+  "skill_path": "skills/cover-letter/SKILL.md",
+  "content_path": "content/skills/cover-letter.md"
+}

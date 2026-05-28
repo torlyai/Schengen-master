@@ -1,0 +1,57 @@
+{
+  "name": "visa_refusal_appeal",
+  "description": "Decode a France Schengen visa refusal and provide a structured recovery plan. Interprets refusal codes 1-9 (Schengen Visa Code Annex VI), determines whether to reapply or appeal, and produces an action plan with specific documents to strengthen for each cited code. Codes 1, 6, 7 trigger a solicitor referral; codes 2, 3, 4, 8, 9 are handled with document improvements. Applies ETHOS principle #9: refusal is not failure — ~10-15% of first-time applications are refused and most are recoverable.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "refusal_code": {
+        "type": "number",
+        "minimum": 1,
+        "maximum": 9,
+        "description": "Primary refusal code from the letter (1-9 per Schengen Visa Code Annex VI)"
+      },
+      "additional_codes": {
+        "type": "array",
+        "items": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 9
+        },
+        "description": "Additional refusal codes if multiple were cited"
+      },
+      "refusal_date": {
+        "type": "string",
+        "description": "Date of the refusal letter (DD Month YYYY or YYYY-MM-DD)"
+      },
+      "original_purpose": {
+        "type": "string",
+        "enum": ["tourism", "family-visit", "business", "other"]
+      },
+      "applicant_name": {
+        "type": "string",
+        "description": "Applicant full name"
+      },
+      "previous_ref": {
+        "type": "string",
+        "description": "France-Visas reference from the refused application"
+      },
+      "has_previous_approvals": {
+        "type": "boolean",
+        "description": "Whether the applicant has had any prior Schengen visa approvals"
+      },
+      "willing_to_reapply": {
+        "type": "boolean",
+        "description": "Whether the applicant is willing to reapply (as opposed to only pursuing an appeal)"
+      }
+    },
+    "required": [
+      "refusal_code",
+      "refusal_date",
+      "original_purpose",
+      "has_previous_approvals",
+      "willing_to_reapply"
+    ]
+  },
+  "skill_path": "skills/refusal-appeal/SKILL.md",
+  "content_path": "content/skills/refusal-appeal.md"
+}

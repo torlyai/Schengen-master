@@ -1,0 +1,37 @@
+{
+  "name": "visa_check_finances",
+  "description": "Review bank statement financial evidence for a Schengen visa. Calculates the minimum required balance (€65/day × days × applicants), compares against provided savings, and returns PASS/HOLD/FAIL with the required and provided amounts. Also flags common red flags: large recent deposits, thin margins, accounts opened less than 6 months ago, and sponsored vs self-funded cases.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "applicant_count": {
+        "type": "number",
+        "description": "Number of applicants the bank statement must cover"
+      },
+      "duration_days": {
+        "type": "number",
+        "description": "Duration of the trip in days"
+      },
+      "monthly_income": {
+        "type": "number",
+        "description": "Monthly net income (in the currency specified by the currency field)"
+      },
+      "savings_balance": {
+        "type": "number",
+        "description": "Current savings / available balance shown on the bank statement"
+      },
+      "currency": {
+        "type": "string",
+        "description": "Currency of the amounts provided (e.g. GBP, EUR, USD)"
+      },
+      "funding_source": {
+        "type": "string",
+        "enum": ["self", "employer", "sponsor"],
+        "description": "How the trip is funded: self-funded, employer-funded, or third-party sponsor"
+      }
+    },
+    "required": []
+  },
+  "skill_path": "skills/bank-statement-check/SKILL.md",
+  "content_path": "content/skills/bank-statement-check.md"
+}

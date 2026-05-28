@@ -1,0 +1,43 @@
+{
+  "name": "visa_france_visas_form",
+  "description": "Step-by-step companion through the France-Visas online application form at france-visas.gouv.fr. The form has 10 sections (Section 0 Visa-Wizard through Section 9 Submit). Without a current_section, returns an overview of all sections and a progress checklist. With current_section set to 0-9, returns field-level guidance, common pitfalls, and consistency checks for that specific section. Call repeatedly as the applicant works through the form.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "current_section": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 9,
+        "description": "Section number 0-9 to get detailed guidance for. Omit for an overview of all sections."
+      },
+      "purpose": {
+        "type": "string",
+        "enum": ["tourism", "family-visit", "business", "other"]
+      },
+      "applicant_name": {
+        "type": "string",
+        "description": "Full name as on passport"
+      },
+      "travel_dates": {
+        "type": "string",
+        "description": "Travel dates in natural language or ISO"
+      },
+      "stay_days": {
+        "type": "number",
+        "description": "Number of days in the Schengen area"
+      },
+      "first_entry_country": {
+        "type": "string",
+        "description": "First Schengen country of entry — may differ from France if flying via another member state"
+      },
+      "entries_requested": {
+        "type": "string",
+        "enum": ["single", "multiple"],
+        "description": "Number of entries — request multiple if you may leave and re-enter Schengen"
+      }
+    },
+    "required": []
+  },
+  "skill_path": "skills/france-visas-form/SKILL.md",
+  "content_path": "content/skills/france-visas-form.md"
+}

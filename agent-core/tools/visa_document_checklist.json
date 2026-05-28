@@ -1,0 +1,33 @@
+{
+  "name": "visa_document_checklist",
+  "description": "Generate a personalised document checklist for a France Schengen short-stay visa. Adapts based on purpose (tourism/family/business), whether minors or sponsors are involved, and which TLScontact centre will be used.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "purpose": {
+        "type": "string",
+        "enum": ["tourism", "family-visit", "business", "other"]
+      },
+      "applicant_count": {
+        "type": "number",
+        "default": 1
+      },
+      "has_minors": {
+        "type": "boolean",
+        "default": false
+      },
+      "is_sponsored": {
+        "type": "boolean",
+        "default": false
+      },
+      "centre": {
+        "type": "string",
+        "enum": ["london", "edinburgh", "manchester", "belfast"],
+        "default": "london"
+      }
+    },
+    "required": ["purpose"]
+  },
+  "skill_path": "skills/document-checklist/SKILL.md",
+  "content_path": "content/skills/document-checklist.md"
+}

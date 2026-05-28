@@ -1,0 +1,25 @@
+{
+  "name": "visa_check_photo",
+  "description": "Review Schengen visa photo requirements and common rejection reasons at TLScontact. Returns the full 35×45 mm ICAO specification, the 15 most common rejection reasons, and personalised advice based on photo method and whether the applicant wears glasses or a head covering. A non-compliant photo at TLS means rebooking the appointment.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "photo_method": {
+        "type": "string",
+        "enum": ["studio", "self", "booth"],
+        "description": "How the photo was taken: professional studio, self/DIY, or photo booth"
+      },
+      "has_glasses": {
+        "type": "boolean",
+        "description": "Whether the applicant wears glasses in the photo"
+      },
+      "wears_headcovering": {
+        "type": "boolean",
+        "description": "Whether the applicant wears a head covering (religious coverings permitted; face must be fully visible)"
+      }
+    },
+    "required": []
+  },
+  "skill_path": "skills/photo-check/SKILL.md",
+  "content_path": "content/skills/photo-check.md"
+}

@@ -1,0 +1,36 @@
+{
+  "name": "visa_check_insurance",
+  "description": "Verify travel insurance meets Schengen visa requirements (Article 15 of the Schengen Visa Code). Validates: minimum €30,000 medical coverage stated in EUR, emergency medical repatriation, geographic scope covering all Schengen states, and full trip date coverage. Returns PASS/FAIL with specific issues and fix actions.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "provider_name": {
+        "type": "string",
+        "description": "Name of the insurance provider / insurer"
+      },
+      "coverage_amount": {
+        "type": "number",
+        "description": "Stated coverage amount for medical expenses"
+      },
+      "coverage_currency": {
+        "type": "string",
+        "description": "Currency of the coverage amount (e.g. EUR, GBP, USD)"
+      },
+      "start_date": {
+        "type": "string",
+        "description": "First day of insurance coverage in ISO format (YYYY-MM-DD) or natural language"
+      },
+      "end_date": {
+        "type": "string",
+        "description": "Last day of insurance coverage in ISO format (YYYY-MM-DD) or natural language"
+      },
+      "covers_repatriation": {
+        "type": "boolean",
+        "description": "Whether the policy explicitly covers emergency medical repatriation"
+      }
+    },
+    "required": []
+  },
+  "skill_path": "skills/insurance-check/SKILL.md",
+  "content_path": "content/skills/insurance-check.md"
+}

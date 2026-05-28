@@ -1,0 +1,92 @@
+{
+  "name": "visa_draft_employer_letter",
+  "description": "Generate an employment letter template for a France Schengen visa application. Produces a ready-to-print letter for the applicant to take to HR, pre-populated with all required fields: role, salary, approved leave dates, and return-to-work commitment. Also includes a compliance checklist and payslip requirements. For self-employed applicants, the skill guidance covers the alternative self-declaration letter path.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "applicant_name": {
+        "type": "string",
+        "description": "Full name as on passport"
+      },
+      "employer_name": {
+        "type": "string",
+        "description": "Company name"
+      },
+      "employer_address": {
+        "type": "string",
+        "description": "Company address for letterhead"
+      },
+      "employer_phone": {
+        "type": "string",
+        "description": "HR contact phone number"
+      },
+      "job_title": {
+        "type": "string",
+        "description": "Applicant job title — must match France-Visas form Section 4 exactly"
+      },
+      "start_date": {
+        "type": "string",
+        "description": "Date the applicant started at this employer (DD Month YYYY)"
+      },
+      "annual_salary": {
+        "type": "number",
+        "description": "Gross annual salary (numeric)"
+      },
+      "currency": {
+        "type": "string",
+        "description": "Currency code, e.g. GBP, EUR, USD"
+      },
+      "contract_type": {
+        "type": "string",
+        "enum": ["permanent", "fixed-term", "other"],
+        "description": "Employment contract type — permanent reads strongest for return commitment"
+      },
+      "leave_approved": {
+        "type": "boolean",
+        "description": "Whether leave has been approved for the travel dates"
+      },
+      "leave_dates": {
+        "type": "string",
+        "description": "Approved leave dates matching travel dates exactly"
+      },
+      "return_to_work_date": {
+        "type": "string",
+        "description": "First working day back after the trip (DD Month YYYY)"
+      },
+      "hr_signer_name": {
+        "type": "string",
+        "description": "Name of the person signing the letter"
+      },
+      "hr_signer_title": {
+        "type": "string",
+        "description": "Title of the signer, e.g. HR Manager, Company Secretary"
+      },
+      "letter_date": {
+        "type": "string",
+        "description": "Date of the letter (DD Month YYYY); defaults to today"
+      },
+      "tls_centre": {
+        "type": "string",
+        "description": "TLScontact centre, e.g. London"
+      }
+    },
+    "required": [
+      "applicant_name",
+      "employer_name",
+      "employer_address",
+      "employer_phone",
+      "job_title",
+      "start_date",
+      "annual_salary",
+      "currency",
+      "contract_type",
+      "leave_approved",
+      "leave_dates",
+      "return_to_work_date",
+      "hr_signer_name",
+      "hr_signer_title"
+    ]
+  },
+  "skill_path": "skills/employment-letter/SKILL.md",
+  "content_path": "content/skills/employment-letter.md"
+}

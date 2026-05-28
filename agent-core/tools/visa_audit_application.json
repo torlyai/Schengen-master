@@ -1,0 +1,55 @@
+{
+  "name": "visa_audit_application",
+  "description": "Run a 5-layer pre-submission audit on a Schengen visa application: completeness, consistency, credibility, compliance, and admissibility. Returns PASS/HOLD/FAIL per layer with specific fixes for any issues found.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "documents_present": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "List of documents the applicant has prepared"
+      },
+      "purpose": {
+        "type": "string",
+        "enum": ["tourism", "family-visit", "business", "other"]
+      },
+      "applicant_count": {
+        "type": "number",
+        "default": 1
+      },
+      "has_minors": {
+        "type": "boolean",
+        "default": false
+      },
+      "is_sponsored": {
+        "type": "boolean",
+        "default": false
+      },
+      "travel_dates": {
+        "type": "string"
+      },
+      "cover_letter_drafted": {
+        "type": "boolean",
+        "default": false
+      },
+      "financial_evidence": {
+        "type": "string",
+        "description": "Summary of financial documents"
+      },
+      "insurance_verified": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "required": [
+      "documents_present",
+      "purpose",
+      "travel_dates",
+      "financial_evidence"
+    ]
+  },
+  "skill_path": "skills/audit-application/SKILL.md",
+  "content_path": "content/skills/audit-application.md"
+}

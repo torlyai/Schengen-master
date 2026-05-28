@@ -1,0 +1,59 @@
+{
+  "_comment": "Reference: how Path A (MCP Gateway) consumes the shared agent core. Not executable — documents the consumption pattern only.",
+  "path": "A",
+  "name": "MCP Gateway",
+  "status": "LIVE",
+  "runtime": "torlyAI MCP server (lib/marco-polo/mcp-server.ts)",
+  "endpoint": "https://torly.ai/api/mcp/visa-master",
+
+  "system_prompt": {
+    "source": "agent-core/SYSTEM_PROMPT.md",
+    "how": "Loaded at server startup via fs.readFileSync; embedded in each MCP tool handler's context. Step 1.2 (Phase 1) refactors mcp-server.ts to read from this file instead of inline strings."
+  },
+
+  "tools": {
+    "source": "agent-core/tools/*.json",
+    "count": 5,
+    "implemented": [
+      "visa_start_here",
+      "visa_knowledge",
+      "visa_document_checklist",
+      "visa_draft_cover_letter",
+      "visa_audit_application"
+    ],
+    "how": "Tool name + description are read from each JSON file. Input schemas (Zod) and handler functions remain in lib/marco-polo/mcp-tools/*.ts. The JSON schemas are the source of truth — mcp-server.ts registerVisaTools() reads them at startup."
+  },
+
+  "content": {
+    "source": "lib/marco-polo/content/",
+    "structure": {
+      "skills": "lib/marco-polo/content/skills/*.md",
+      "knowledge": "lib/marco-polo/content/KNOWLEDGE.md",
+      "consulates": "lib/marco-polo/content/consulates/*.md",
+      "ethos": "lib/marco-polo/content/ETHOS.md"
+    },
+    "how": "Read from disk at request time via skill-loader.ts and knowledge-loader.ts. No caching — every tool call reads the latest file. Content updates are live immediately without a server restart."
+  },
+
+  "llm": {
+    "who_pays": "User (their Claude subscription via claude.ai MCP connector)",
+    "model": "User's choice (claude.ai defaults to Claude Sonnet)",
+    "your_cost": "£0 LLM cost"
+  },
+
+  "pricing": "£9/month or £19/application (MCP tool access subscription)",
+
+  "logging": {
+    "tool": "lib/marco-polo/mcp-logger.ts",
+    "destination": "Supabase (marco_polo_tool_calls table)"
+  },
+
+  "cross_repo_note": "The MCP server code lives in torlyAI repo; the agent-core content lives in Schengen-visa repo. Both repos are cloned on both machines. The mcp-server.ts reads from the cloned Schengen-visa path at runtime.",
+
+  "related": {
+    "mcp_server": "~/AI/AI_Coding/Repositories/torlyAI/lib/marco-polo/mcp-server.ts",
+    "tool_handlers": "~/AI/AI_Coding/Repositories/torlyAI/lib/marco-polo/mcp-tools/",
+    "skill_loader": "~/AI/AI_Coding/Repositories/torlyAI/lib/marco-polo/skill-loader.ts",
+    "http_endpoint": "~/AI/AI_Coding/Repositories/torlyAI/app/api/mcp/visa-master/route.ts"
+  }
+}
