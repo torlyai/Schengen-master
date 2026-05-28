@@ -22,9 +22,33 @@ This workspace contains **Visa Master**, a Chrome Manifest V3 extension that wat
 | `private` | `DukeWood/Schengen-visa` | **Private** | Dev work — both machines push/pull here (default for `git push`) |
 | `origin` | `torlyai/Schengen-master` | **Public** | User-facing releases — skills, extension, README |
 
-**Default push target is `private`** (set via `--set-upstream`). To push a public release: `git push origin main` (explicit).
+**Default push target is `private`** (set via `--set-upstream`). Both machines push/pull `main` to/from the private remote.
 
 **The M1 Pro clones from the private repo:** `gh repo clone DukeWood/Schengen-visa`
+
+### Public release flow — branch divergence
+
+The public repo (`origin/main`) is **not a copy of `main`** — it's a filtered snapshot. Internal docs (PRDs, specs, research, backlogs) stay private; only public-facing content (skills, extension, README, templates, release-notes) goes public.
+
+**Workflow:**
+```bash
+# After committing changes on main, when you want to update the public repo:
+./scripts/release-public.sh          # dry run — builds public-release branch locally
+./scripts/release-public.sh --push   # builds + force-pushes to origin/main
+```
+
+**Excluded from public** (defined in `scripts/release-public.sh`):
+- `docs/30-tls-slot-release-windows-research.md`
+- `docs/31-plugin-marketplace-backlog.md`
+- `docs/32-marco-polo-managed-agent-prd.md`
+- `docs/33-marco-polo-unified-agent-architecture.md`
+- `docs/34-unified-agent-implementation-plan.md`
+- `docs/35-vm-catcher-prd.md`
+- `docs/superpowers/` (specs)
+
+To add a new PRD or internal doc, add its path to the `EXCLUDED_PATHS` array in `scripts/release-public.sh`.
+
+**Never run `git push origin main`** directly — that would push everything including PRDs. Always use the release script.
 
 ## Two-machine development model
 
