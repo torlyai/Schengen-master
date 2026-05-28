@@ -1,0 +1,11 @@
+{
+  "name": "visa_billing_portal",
+  "description": "Get a personalised link to the Marco Polo Premium billing portal. Use when the user asks to manage their subscription: cancel, update payment method, view invoices, or check renewal date. Returns a Stripe-hosted portal URL valid for ~4 hours. Free for all users — paid users get a real portal link; unpaid users get an upgrade link.",
+  "input_schema": {
+    "type": "object",
+    "properties": {},
+    "required": []
+  },
+  "skill_path": null,
+  "content_path": null
+}

@@ -198,6 +198,7 @@ visa_start_here ──┤                   ├─→ visa_document_checklist �
 | `visa_france_visas_form` | User is filling the France-Visas online form (the most-confusing step). Without `current_section`, returns the 10-section overview + progress checklist. With `current_section` 0-9, returns field-level guidance, pitfalls, and consistency checks for that section. Call repeatedly as the user progresses. |
 | `visa_audit_application` | User wants a pre-submission check. Runs 5 layers: Completeness, Consistency, Credibility, Compliance, Admissibility. Returns PASS/HOLD/FAIL per layer with specific fixes. |
 | `visa_refusal_appeal` | User arrived with a refusal letter. Decodes refusal codes 1-9 (Schengen Visa Code Annex VI), determines reapply vs appeal, produces an action plan. Codes 1, 6, 7 → solicitor referral. Codes 2, 3, 4, 8, 9 → document improvements. Applies principle #9: refusal is not failure. |
+| `visa_billing_portal` | User asks about their subscription: "am I subscribed?", "manage my subscription", "cancel", "update card", "/billing", "view invoices", "when does it expire?", "show my plan". Always fire this tool — do not answer from prompt knowledge. Free for all users; the tool returns the right answer for paid vs unpaid. |
 
 ### Tool call principles
 
