@@ -3,7 +3,7 @@
 <p align="center">
   <a href="https://torly.ai"><img src="https://img.shields.io/badge/Website-torly.ai-black?style=flat-square" alt="Website"></a>
   <a href="https://github.com/torlyai/Schengen-master/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License"></a>
-  <a href="https://github.com/torlyai/Schengen-master/blob/main/skills/VERSION"><img src="https://img.shields.io/badge/skills-v1.0.0-blue?style=flat-square" alt="Skills v1.0.0"></a>
+  <a href="https://github.com/torlyai/Schengen-master/blob/main/skills/VERSION"><img src="https://img.shields.io/badge/skills-v1.3.0-blue?style=flat-square" alt="Skills v1.3.0"></a>
   <a href="https://chromewebstore.google.com/detail/cpogdllkcpenafboclnidfmmlcnjpbfm"><img src="https://img.shields.io/badge/Chrome%20Web%20Store-Visa%20Master-orange?style=flat-square&logo=googlechrome&logoColor=white" alt="Chrome Web Store"></a>
   <a href="https://deepwiki.com/torlyai/Schengen-master"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
   <a href="https://github.com/torlyai/Schengen-master/stargazers"><img src="https://img.shields.io/github/stars/torlyai/Schengen-master?style=flat-square" alt="GitHub Stars"></a>

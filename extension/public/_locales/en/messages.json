@@ -1,0 +1,8 @@
+{
+  "extensionName": {
+    "message": "Visa Master — Schengen Visa Slot Watcher (TLScontact: France, Italy, Spain)"
+  },
+  "extensionDesc": {
+    "message": "Stop refreshing TLScontact. Get a phone + desktop ping the second a Schengen visa slot opens. Local-only, no servers."
+  }
+}

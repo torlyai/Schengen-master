@@ -78,7 +78,7 @@ Schengen-visa/
 └── (other family-trip planning docs — unrelated to the extension)
 ```
 
-**Current release state (2026-05-22):** v1.2.0 is **live on Chrome Web Store** (approved after a 4-day review window; CWS item ID `cpogdllkcpenafboclnidfmmlcnjpbfm`). Auto-update rollout from v1.1.0 → v1.2.0 is in flight (Chrome's default check interval is ~5h, so most users will be on v1.2.0 within 24–48h). See `docs/21-vm-v1.2.0-post-deploy-monitoring-plan.md` §5 (post-approval rollout) + §10 (operational SQL queries) for what to watch over the first week.
+**Current release state (2026-05-28):** v1.3.0 is **live on Chrome Web Store** (approved 2026-05-28; CWS item ID `cpogdllkcpenafboclnidfmmlcnjpbfm`, size 675 KiB, 2 languages — EN + zh-CN). Auto-update rollout from v1.2.0 → v1.3.0 is in flight (Chrome's default check interval is ~5h, so most users will be on v1.3.0 within 24–48h). v1.2.0 was the previous stable release (live 2026-05-22). See `docs/21-vm-v1.2.0-post-deploy-monitoring-plan.md` for the operational playbook pattern — adapt the same monitoring approach for v1.3.0's first week.
 
 ## Free vs Premium — the trust boundary (CRITICAL)
 

@@ -69,16 +69,31 @@ insurance/**
 *.tar.gz
 *.tgz
 
-# ---- Video files (deny by default — may contain personal recordings) ----
+# ---- Video files (deny by default — large binaries + may contain personal recordings) ----
 *.mp4
 *.mov
 *.avi
 *.mkv
 *.webm
 
-# ---- Exception: Remotion-rendered marketing videos (no PII) ----
-!marketing/video/out/*.mp4
-!marketing/video/out/*.webm
+# ---- Audio files (deny by default — large binaries + voice recordings) ----
+*.wav
+*.mp3
+*.m4a
+*.aac
+*.ogg
+*.flac
+
+# ---- Subtitle / caption files generated alongside videos ----
+*.srt
+*.vtt
+
+# ---- Remotion rendered outputs — KEEP LOCAL ONLY, never commit ----
+# Policy (2026-05-28): generated video artifacts (mp4, wav, srt, etc.) bloat
+# the repo. Source code (src/, scripts/, Thumbnail.tsx) is committed; the
+# `out/` directory is a build artifact. To regenerate: `npm run build` in
+# marketing/video/.
+marketing/video/out/
 
 # ---- Email / contact exports ----
 *.eml
@@ -237,6 +252,7 @@ Thumbs.db
 # ─── Internal AI / IDE config ───
 /.claude/
 /.obsidian/
+/.antigravitycli/
 
 # ---- Secrets / env (defence in depth — should never exist here anyway) ----
 .env

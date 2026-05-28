@@ -61,13 +61,13 @@ Neither marketplace exposes download/install counts to publishers. Monitor via p
 
 ### GitHub proxy signals (check monthly)
 
-| Signal | How to check | Baseline (2026-05-25) | Latest |
+| Signal | How to check | Baseline (2026-05-27) | Latest |
 |---|---|---|---|
-| **Stars** | `gh api repos/torlyai/Schengen-master --jq .stargazers_count` | ___ | |
-| **Forks** | `gh api repos/torlyai/Schengen-master --jq .forks_count` | ___ | |
-| **Traffic — views (14d)** | `gh api repos/torlyai/Schengen-master/traffic/views --jq .count` | ___ | |
-| **Traffic — clones (14d)** | `gh api repos/torlyai/Schengen-master/traffic/clones --jq .count` | ___ | |
-| **Traffic — referrers** | `gh api repos/torlyai/Schengen-master/traffic/popular/referrers` | ___ | |
+| **Stars** | `gh api repos/torlyai/Schengen-master --jq .stargazers_count` | 0 | |
+| **Forks** | `gh api repos/torlyai/Schengen-master --jq .forks_count` | 0 | |
+| **Traffic — views (14d)** | `gh api repos/torlyai/Schengen-master/traffic/views --jq .count` | 202 | |
+| **Traffic — clones (14d)** | `gh api repos/torlyai/Schengen-master/traffic/clones --jq .count` | 621 | |
+| **Traffic — referrers** | `gh api repos/torlyai/Schengen-master/traffic/popular/referrers` | github.com (40 views, 12 uniques), torly.ai (2, 2), doubao.com (2, 1) | |
 | **Issues mentioning skills** | `gh issue list --repo torlyai/Schengen-master --search "skill OR plugin OR marketplace"` | 0 | |
 
 ### Marketplace-specific checks

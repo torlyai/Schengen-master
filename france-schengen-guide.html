@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>France Schengen Visa — A Step-by-Step Guide for UK Residents</title>
+<style>
+  :root {
+    --fg: #0f172a;
+    --fg-2: #334155;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --surface: #f8fafc;
+    --accent: #1d4ed8;
+    --accent-soft: #eff6ff;
+    --accent-line: #bfdbfe;
+    --warn: #b45309;
+    --warn-soft: #fef3c7;
+    --warn-line: #fcd34d;
+    --good: #047857;
+    --good-soft: #ecfdf5;
+    --good-line: #6ee7b7;
+    --page: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--page); color: var(--fg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.6; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code { background: var(--surface); padding: 1px 5px; border-radius: 3px; font-size: 0.92em; }
+
+  /* Layout */
+  .page { max-width: 1200px; margin: 0 auto; padding: 24px 28px 80px; display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: 40px; }
+  @media (max-width: 900px) { .page { grid-template-columns: 1fr; } .toc { display: none; } }
+  main { min-width: 0; }
+
+  /* Header */
+  .hero { padding: 36px 0 28px; border-bottom: 1px solid var(--line); margin-bottom: 32px; }
+  .hero .eyebrow { color: var(--accent); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+  .hero h1 { font-size: 32px; font-weight: 700; margin: 0 0 12px; line-height: 1.2; }
+  .hero p.lede { color: var(--fg-2); font-size: 16px; margin: 0; max-width: 720px; }
+  .hero .audience { margin-top: 18px; font-size: 13px; color: var(--muted); }
+
+  /* Snapshot card */
+  .snapshot { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; padding: 18px; background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: 10px; margin-bottom: 36px; }
+  .snapshot .item .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); font-weight: 600; margin-bottom: 4px; }
+  .snapshot .item .value { font-size: 14px; font-weight: 500; color: var(--fg); }
+
+  /* TOC */
+  .toc { position: sticky; top: 24px; align-self: start; max-height: calc(100vh - 48px); overflow-y: auto; font-size: 13px; padding-left: 16px; border-left: 1px solid var(--line); }
+  .toc h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 10px; font-weight: 600; }
+  .toc ol { list-style: none; padding: 0; margin: 0 0 16px; counter-reset: step; }
+  .toc ol li { counter-increment: step; margin-bottom: 4px; padding-left: 22px; position: relative; }
+  .toc ol li::before { content: counter(step); position: absolute; left: 0; top: 0; width: 16px; height: 16px; line-height: 16px; text-align: center; font-size: 10px; font-weight: 600; background: var(--surface); border-radius: 50%; color: var(--muted); }
+  .toc ul { list-style: none; padding: 0; margin: 0; }
+  .toc ul li { margin-bottom: 4px; padding-left: 22px; }
+  .toc a { color: var(--fg-2); }
+  .toc a:hover { color: var(--accent); text-decoration: none; }
+
+  /* Sections */
+  section { margin-bottom: 48px; scroll-margin-top: 24px; }
+  h2 { font-size: 22px; font-weight: 700; margin: 0 0 14px; padding-top: 8px; border-top: 3px solid var(--accent); display: inline-block; padding-right: 24px; }
+  h3 { font-size: 17px; font-weight: 600; margin: 24px 0 8px; }
+  p { margin: 0 0 12px; color: var(--fg-2); }
+  ul, ol { color: var(--fg-2); padding-left: 22px; }
+  li { margin-bottom: 6px; }
+
+  /* Step card */
+  .step { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 22px 24px; margin-bottom: 20px; }
+  .step h3 { margin-top: 0; display: flex; align-items: center; gap: 10px; color: var(--fg); }
+  .step-number { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: var(--accent); color: white; border-radius: 50%; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+  .step h4 { margin: 18px 0 6px; font-size: 14px; font-weight: 600; color: var(--fg); }
+
+  /* Callout boxes */
+  .callout { border-left: 4px solid; padding: 12px 16px; margin: 14px 0; border-radius: 0 6px 6px 0; font-size: 14px; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout strong { color: var(--fg); }
+  .tip { background: var(--accent-soft); border-color: var(--accent); }
+  .warn { background: var(--warn-soft); border-color: var(--warn); }
+  .good { background: var(--good-soft); border-color: var(--good); }
+  .callout-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; margin-bottom: 4px; }
+  .tip .callout-title { color: var(--accent); }
+  .warn .callout-title { color: var(--warn); }
+  .good .callout-title { color: var(--good); }
+
+  /* Checklist */
+  .checklist { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px 22px; margin: 16px 0; }
+  .checklist h4 { margin: 0 0 12px; font-size: 14px; font-weight: 600; }
+  .checklist ul { list-style: none; padding: 0; margin: 0; }
+  .checklist li { position: relative; padding-left: 28px; margin-bottom: 8px; font-size: 14px; }
+  .checklist li::before { content: ""; position: absolute; left: 0; top: 4px; width: 16px; height: 16px; border: 1.5px solid var(--muted); border-radius: 3px; background: var(--page); }
+  .checklist li.required::after { content: "required"; position: absolute; right: 0; top: 2px; font-size: 10px; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+  .checklist li.optional::after { content: "recommended"; position: absolute; right: 0; top: 2px; font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+  .checklist li.conditional::after { content: "if applicable"; position: absolute; right: 0; top: 2px; font-size: 10px; color: var(--warn); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 14px 0; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 600; }
+
+  /* Link card */
+  .links { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin: 16px 0; }
+  .link-card { padding: 14px 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--page); text-decoration: none; display: block; }
+  .link-card:hover { border-color: var(--accent); text-decoration: none; }
+  .link-card .url-host { font-size: 11px; color: var(--accent); margin-bottom: 4px; font-weight: 600; }
+  .link-card .title { color: var(--fg); font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+  .link-card .desc { color: var(--muted); font-size: 12px; line-height: 1.4; }
+
+  /* FAQ */
+  details { background: var(--page); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; }
+  details[open] { background: var(--surface); }
+  summary { cursor: pointer; font-weight: 600; color: var(--fg); list-style: none; padding-right: 24px; position: relative; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; position: absolute; right: 0; top: 0; font-weight: 400; color: var(--muted); font-size: 18px; line-height: 1; }
+  details[open] summary::after { content: "−"; }
+  details > p { margin-top: 10px; }
+
+  /* Footer */
+  .footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); text-align: center; }
+  .footer p { color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="page">
+<main>
+
+<div class="hero">
+  <div class="eyebrow">A complete walkthrough</div>
+  <h1>France Schengen Visa — Step-by-Step Guide</h1>
+  <p class="lede">A practical, end-to-end playbook for applying for a French short-stay Schengen tourist visa from the UK. Based on a successful family-of-three submission via TLScontact Manchester in May 2026.</p>
+  <p class="audience">Audience: UK residents (any nationality) applying for a Schengen Type C tourist visa with France as the main destination. Other applicant types (students, business, transit, long-stay) will overlap heavily but have additional requirements not covered here.</p>
+</div>
+
+<div class="snapshot">
+  <div class="item"><div class="label">Visa type</div><div class="value">Schengen Type C (short-stay, &le;90 days)</div></div>
+  <div class="item"><div class="label">Apply where</div><div class="value">TLScontact UK (5 cities)</div></div>
+  <div class="item"><div class="label">Fee (adult)</div><div class="value">&euro;90 + TLS service fee</div></div>
+  <div class="item"><div class="label">Decision time</div><div class="value">15–30 days typical</div></div>
+  <div class="item"><div class="label">Apply how early</div><div class="value">6 months max, 4 weeks min</div></div>
+  <div class="item"><div class="label">Validity</div><div class="value">As granted (single, double, or multi-entry)</div></div>
+</div>
+
+<section id="overview">
+<h2>The big picture</h2>
+<p>A successful French Schengen application is mostly about <strong>consistency</strong> — every date, every city, every name across your forms, cover letter, hotel bookings, transport tickets, insurance, and supporting letters has to tell the same story. The consular officer's job is to look for contradictions; your job is to make sure there aren't any.</p>
+<p>The process has eight steps, in order:</p>
+<ol>
+  <li><a href="#step-1">Plan your trip &amp; check eligibility</a></li>
+  <li><a href="#step-2">Complete the France-Visas online form</a></li>
+  <li><a href="#step-3">Book your TLScontact appointment</a></li>
+  <li><a href="#step-4">Pay visa fees + service fees</a></li>
+  <li><a href="#step-5">Gather supporting documents</a></li>
+  <li><a href="#step-6">Write your cover letter &amp; itinerary</a></li>
+  <li><a href="#step-7">Attend the TLS appointment in person</a></li>
+  <li><a href="#step-8">Wait for the decision &amp; collect passport</a></li>
+</ol>
+<p>Allow at least <strong>4–6 weeks</strong> from "we want to go" to "we have a visa". Allow more if appointment slots in your nearest TLS centre are scarce (Manchester and London routinely book out 1–2 months ahead).</p>
+</section>
+
+<section id="step-1">
+<h2>Step-by-step process</h2>
+
+<div class="step">
+  <h3><span class="step-number">1</span> Plan your trip &amp; check eligibility</h3>
+  <p>Before any paperwork, settle four things:</p>
+  <h4>(a) Travel dates</h4>
+  <p>Pick exact entry and exit dates. Your visa will be issued for those specific dates (plus a small buffer if you're lucky). Don't apply "open-ended" — you need real bookings later.</p>
+  <h4>(b) Main destination</h4>
+  <p>Under EU Visa Code Article 5, you apply at the consulate of the country where you'll spend the most nights. If two countries tie, you apply at the country of <em>first entry</em>. For a France-heavy trip with a side jump to Italy, that's France. Get this wrong and your application is refused without further consideration.</p>
+  <h4>(c) Passport validity</h4>
+  <p>Your passport must be valid for <strong>at least 3 months past your intended departure from Schengen</strong> and have at least 2 blank pages. It must also have been issued in the last 10 years. If yours is close to either limit, renew first.</p>
+  <h4>(d) Who needs a visa?</h4>
+  <p>You need a Schengen visa if you hold a passport from a country whose nationals don't have visa-free access to the Schengen Area, regardless of where you live. UK ILR or BRP holders still need a Schengen visa unless their nationality is visa-exempt. Check at the France-Visas portal (linked below).</p>
+
+  <div class="callout tip">
+    <div class="callout-title">Tip — main destination</div>
+    <p>If your trip is "France 13 nights, Italy 6 nights", France is your main destination. If it's "France 4, Spain 4, Italy 4", apply at the country of first entry. Many refusals happen because applicants apply at the country with the fanciest consulate, not the right one.</p>
+  </div>
+</div>
+
+<div class="step" id="step-2">
+  <h3><span class="step-number">2</span> Complete the France-Visas online form</h3>
+  <p>Start at <a href="https://france-visas.gouv.fr/en" target="_blank" rel="noopener">france-visas.gouv.fr</a> — the official portal of the French Ministry for Europe and Foreign Affairs. This is where you fill out the formal visa application form.</p>
+  <ul>
+    <li>Create an account using your personal email.</li>
+    <li>Each applicant (including each child) needs their <strong>own</strong> account and form.</li>
+    <li>Fill out all fields exactly as they appear on your passport.</li>
+    <li>Get a France-Visas <strong>reference number</strong> at the end — note it carefully. You'll need it for TLS.</li>
+    <li>Download and print the signed application form to bring to your appointment.</li>
+  </ul>
+  <div class="callout warn">
+    <div class="callout-title">Don't confuse</div>
+    <p>The France-Visas portal account is <strong>separate</strong> from your TLScontact account. You'll create accounts in both. Different login, different password, different reference numbers. Many first-time applicants assume they're the same and waste an hour finding out.</p>
+  </div>
+</div>
+
+<div class="step" id="step-3">
+  <h3><span class="step-number">3</span> Book your TLScontact appointment</h3>
+  <p>TLScontact is the company France contracts to handle visa applications in the UK. You don't deal with the French consulate directly until your file reaches them — TLS is your front door.</p>
+  <p>UK centres: <strong>London, Manchester, Edinburgh, Belfast, Cardiff</strong>. Apply at the centre nearest your UK residence; mismatches between your address and the centre you booked may trigger questions.</p>
+  <h4>Find a slot</h4>
+  <ul>
+    <li>Slots open in waves with no published schedule.</li>
+    <li>Check at different times of day; new slots often appear in the morning.</li>
+    <li>In peak season (Mar–Aug for summer trips), London &amp; Manchester book out 4–8 weeks ahead.</li>
+    <li>For families, all applicants must be booked into the <strong>same slot</strong> — the TLS system can handle groups.</li>
+  </ul>
+  <div class="callout tip">
+    <div class="callout-title">Tip — appointment scarcity</div>
+    <p>If no slots are showing, don't refresh manually for hours. Either check 2–3 times daily, or use a browser tool/extension that monitors the page for you. Don't pay for a "guaranteed slot" service — those rarely deliver and aren't refundable.</p>
+  </div>
+</div>
+
+<div class="step" id="step-4">
+  <h3><span class="step-number">4</span> Pay visa fees + service fees</h3>
+  <table>
+    <thead><tr><th>Charge</th><th>Amount (2026)</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Schengen visa fee (adult, 12+)</td><td>&euro;90</td><td>Paid in GBP at the prevailing rate; non-refundable on refusal.</td></tr>
+      <tr><td>Schengen visa fee (child 6–11)</td><td>&euro;45</td><td>Same as above.</td></tr>
+      <tr><td>Schengen visa fee (under 6)</td><td>Free</td><td>—</td></tr>
+      <tr><td>TLScontact service fee</td><td>~&pound;30–35 per applicant</td><td>Mandatory; covers facility and processing.</td></tr>
+      <tr><td>Optional add-ons</td><td>Varies</td><td>SMS tracking, premium lounge, courier passport return, photocopying.</td></tr>
+    </tbody>
+  </table>
+  <p>Pay online before or at the appointment via the TLS portal. Keep the receipts — you'll need to show them on the day.</p>
+</div>
+
+<div class="step" id="step-5">
+  <h3><span class="step-number">5</span> Gather supporting documents</h3>
+  <p>This is where most of the work happens. See the <a href="#checklist">master document checklist</a> below for the full list. The big buckets are:</p>
+  <ul>
+    <li><strong>Identity</strong>: current passport, previous passports, biometric photo</li>
+    <li><strong>UK residency</strong>: BRP and/or eVisa share code, proof of address</li>
+    <li><strong>Financial means</strong>: bank statements, employment letter, payslips or savings evidence</li>
+    <li><strong>Trip evidence</strong>: hotel reservations, transport bookings (entry &amp; exit), insurance certificate</li>
+    <li><strong>Personal circumstances</strong>: employer letter, school enrolment letter (for students), birth certificate (for minors), marriage certificate (sometimes)</li>
+  </ul>
+  <div class="callout warn">
+    <div class="callout-title">Originals + photocopies</div>
+    <p>Bring the <strong>original</strong> of every document <strong>plus a clean photocopy</strong> on plain A4. TLS will photocopy what you don't bring, but they charge for it, and the queue slows you down.</p>
+  </div>
+</div>
+
+<div class="step" id="step-6">
+  <h3><span class="step-number">6</span> Write your cover letter &amp; itinerary</h3>
+  <p>Neither is strictly mandatory for a France tourist visa, but both are strongly recommended — they let you tell your story to the consular officer in your own words, and they help reconcile any minor inconsistencies elsewhere in your file.</p>
+  <h4>The cover letter</h4>
+  <ul>
+    <li>Each adult applicant should write their own letter, signed by them.</li>
+    <li>For minors, parents jointly write a letter on the child's behalf.</li>
+    <li>One page is ideal; two is the upper limit.</li>
+    <li>Lead with the trip purpose, dates, and main destination.</li>
+    <li>Address ties to the UK (employment, school, home, family) — this is what the officer is really looking for.</li>
+    <li>List enclosures explicitly so the officer can cross-check.</li>
+  </ul>
+  <h4>The itinerary document</h4>
+  <ul>
+    <li>A single 1–3 page document showing the day-by-day trip plan.</li>
+    <li>Include cities, hotel names, dates, transport between cities.</li>
+    <li>Mention any intra-Schengen movement (so the officer doesn't have to infer it from hotel addresses).</li>
+  </ul>
+  <div class="callout good">
+    <div class="callout-title">From experience</div>
+    <p>If you change your itinerary at any point during prep (cities dropped, dates shifted), re-read <strong>every</strong> document with the new plan in mind. Cover letters, bookings, the itinerary doc, the France-Visas form, your travel insurance certificate — they all need to match. A single Avignon left over from an earlier draft is enough to derail a file.</p>
+  </div>
+</div>
+
+<div class="step" id="step-7">
+  <h3><span class="step-number">7</span> Attend the TLS appointment in person</h3>
+  <p>All applicants must attend in person, including children. The visit covers three things:</p>
+  <ol>
+    <li><strong>Document submission</strong> — you hand over the application form, supporting documents, and fees.</li>
+    <li><strong>Biometrics</strong> — fingerprints and photo. Required for first-time applicants and for anyone whose last Schengen biometrics were taken more than 59 months ago. Children under 12 are exempt from fingerprints.</li>
+    <li><strong>Consent for minors</strong> — both parents (or legal guardians) must be present at the centre for a child's application, OR provide signed, witnessed consent and ID copies of the absent parent.</li>
+  </ol>
+  <h4>On the day</h4>
+  <ul>
+    <li>Arrive 15 minutes early. TLS centres run strictly on time; late arrivals are turned away.</li>
+    <li>Bring printed appointment confirmation + all documents in a single folder.</li>
+    <li>Phones are typically allowed but switched to silent. Some centres restrict bags — check the centre-specific rules on the TLS site.</li>
+    <li>Expect 45–90 minutes inside for a family of three.</li>
+    <li>You'll leave your passport with TLS. They forward it to the French Consulate General with your file.</li>
+  </ul>
+  <div class="callout tip">
+    <div class="callout-title">Pack the night before</div>
+    <p>Use a single physical folder per applicant, ordered the same way as the official checklist. Number each section with sticky tabs. This both speeds up the TLS handover and reduces the risk of leaving something at home.</p>
+  </div>
+</div>
+
+<div class="step" id="step-8">
+  <h3><span class="step-number">8</span> Wait for the decision &amp; collect passport</h3>
+  <p>Processing typically takes 15 calendar days. The Visa Code allows up to 30 days in normal cases and up to 60 days in exceptional cases (during peak summer or where additional checks are needed). For France, 12–20 days is the most common.</p>
+  <h4>Tracking</h4>
+  <ul>
+    <li>Log into your TLS account to see the file status: <em>at TLS</em> → <em>at consulate</em> → <em>decision made</em> → <em>passport returned to TLS</em>.</li>
+    <li>If you opted in to SMS, you'll get text updates at each stage.</li>
+  </ul>
+  <h4>Collection or courier</h4>
+  <ul>
+    <li>Default: collect your passport from your TLS centre with ID.</li>
+    <li>For a fee, TLS can courier your passport back to your home address (recommended if your nearest centre is far).</li>
+  </ul>
+  <h4>If refused</h4>
+  <ul>
+    <li>You'll receive a refusal letter with one or more reason codes.</li>
+    <li>You can either reapply (addressing the reasons) or appeal in writing to the French Ministry of Foreign Affairs within 30 days.</li>
+    <li>The visa fee is not refunded.</li>
+  </ul>
+</div>
+
+</section>
+
+<section id="checklist">
+<h2>Master document checklist</h2>
+<p>The exact list TLS hands you on the day is more granular than this, but if you have everything below, you're in good shape. Items marked <em>required</em> are checklist-mandatory; <em>recommended</em> items aren't on the official list but strengthen your file; <em>if applicable</em> items depend on your circumstances.</p>
+
+<div class="checklist">
+<h4>For every applicant</h4>
+<ul>
+  <li class="required">Signed France-Visas application form (printed from the online portal)</li>
+  <li class="required">Current passport — valid 3+ months past return, 2 blank pages, issued in last 10 years</li>
+  <li class="required">Biometric photo — 35×45 mm, recent (last 6 months), white background, no glasses</li>
+  <li class="required">UK residency proof — BRP and/or eVisa share code printed</li>
+  <li class="required">Travel insurance — Schengen-wide, min €30,000 medical, covers full trip dates</li>
+  <li class="required">Proof of accommodation — hotel bookings covering every night of the trip</li>
+  <li class="required">Proof of transport — entry to and exit from Schengen (flights, Eurostar, ferry)</li>
+  <li class="required">Proof of financial means — 3 months bank statements minimum (some consulates ask 6 months)</li>
+  <li class="required">Visa fee + TLS service fee paid</li>
+  <li class="conditional">Previous passports with prior Schengen stamps (if any) — bring originals + photocopies</li>
+  <li class="optional">Cover letter explaining purpose and ties to the UK</li>
+  <li class="optional">Detailed day-by-day itinerary document</li>
+</ul>
+</div>
+
+<div class="checklist">
+<h4>If employed</h4>
+<ul>
+  <li class="required">Employer letter / Certificate of Employment confirming position, salary, start date, and approved leave dates</li>
+  <li class="optional">Recent payslips (3 months) — usually redundant if you have a Certificate of Employment that states salary</li>
+  <li class="conditional">Annual leave approval, if not in the employer letter</li>
+</ul>
+</div>
+
+<div class="checklist">
+<h4>If self-employed / business owner</h4>
+<ul>
+  <li class="required">Company registration / Companies House extract</li>
+  <li class="required">Recent business bank statements (3 months)</li>
+  <li class="required">HMRC self-assessment or corporation tax confirmation (latest year)</li>
+  <li class="optional">Accountant's letter confirming standing</li>
+</ul>
+</div>
+
+<div class="checklist">
+<h4>If a student</h4>
+<ul>
+  <li class="required">School / university enrolment letter confirming current attendance and required return date</li>
+  <li class="required">Parental sponsorship letter (if funded by parents)</li>
+</ul>
+</div>
+
+<div class="checklist">
+<h4>If a homemaker / not employed</h4>
+<ul>
+  <li class="required">Three months of personal UK bank statements (savings or current account)</li>
+  <li class="optional">Letter from spouse confirming household relationship (if relevant)</li>
+  <li class="optional">A statement that you are self-funding the trip from personal savings, or a sponsorship letter from a family member if relying on them</li>
+</ul>
+</div>
+
+<div class="checklist">
+<h4>For minors (under 18)</h4>
+<ul>
+  <li class="required">Birth certificate naming both parents — with certified English translation if in another language</li>
+  <li class="required">School enrolment letter confirming approved absence and required return date</li>
+  <li class="required">Parental consent — both parents present at TLS, OR signed and notarised consent from absent parent(s) with passport copies</li>
+  <li class="optional">Photocopy of both parents' passport biographical pages</li>
+</ul>
+</div>
+
+<div class="checklist">
+<h4>Useful extras (not mandatory)</h4>
+<ul>
+  <li class="optional">Property ownership evidence — title deeds or Land Registry record (strong tie to UK)</li>
+  <li class="optional">Council tax bill — corroborates your address</li>
+  <li class="optional">UK utility bills (last 3 months)</li>
+  <li class="optional">Marriage certificate with translation — only sometimes asked for; check current TLS list</li>
+</ul>
+</div>
+</section>
+
+<section id="tips">
+<h2>Tips from experience</h2>
+
+<div class="callout tip">
+  <div class="callout-title">1 · Make your file scannable</div>
+  <p>Order documents the same way TLS lists them on their checklist, use tab dividers, and put a single-page index sheet at the front. A consular officer who can find what they need in 30 seconds is one who decides faster.</p>
+</div>
+
+<div class="callout tip">
+  <div class="callout-title">2 · Same address on every document</div>
+  <p>If your employer letter, council tax bill, and bank statements use slightly different spellings of your address ("Castle Wood Close" vs "Castle Wood Cl"), pick one form and use it consistently across your cover letter, application form, and itinerary. Trivial-looking inconsistencies cause real follow-up questions.</p>
+</div>
+
+<div class="callout tip">
+  <div class="callout-title">3 · Don't over-book transport</div>
+  <p>For UK residents, the strict requirement is proof of <strong>entry into and exit from</strong> the Schengen area. Internal Schengen movement between France and Italy can be booked after visa approval. Don't lock in non-refundable flights you might lose money on.</p>
+</div>
+
+<div class="callout tip">
+  <div class="callout-title">4 · The cover letter is yours</div>
+  <p>Don't copy a template verbatim. Officers see hundreds of letters; cliché phrases ("I have always dreamed of visiting France...") are noise. Concrete sentences ("My approved leave is 14 Aug–4 Sep; my employer letter dated 19 May confirms this") are signal.</p>
+</div>
+
+<div class="callout tip">
+  <div class="callout-title">5 · Photo specifications are exact</div>
+  <p>35×45 mm, white background, neutral expression, head 32–36 mm from chin to crown, no shadows, no glasses. UK passport photo machines often produce 45×35 mm crops that don't comply. Use a photographer who explicitly knows the Schengen / ICAO biometric spec.</p>
+</div>
+
+<div class="callout warn">
+  <div class="callout-title">6 · Don't apply too early or too late</div>
+  <p>Maximum: 6 months before travel. Minimum recommended: 4 weeks before travel (15 days is the legal minimum, but it leaves no margin if anything is missing). The sweet spot is 6–10 weeks out.</p>
+</div>
+
+<div class="callout warn">
+  <div class="callout-title">7 · Don't lie</div>
+  <p>If you make a claim in your cover letter that contradicts a document elsewhere in the file (income, employment, residence, marital status), you risk not just refusal but a multi-year ban. Visa officers cross-reference within the file and against past applications.</p>
+</div>
+</section>
+
+<section id="websites">
+<h2>Key websites</h2>
+<div class="links">
+  <a class="link-card" href="https://france-visas.gouv.fr/en" target="_blank" rel="noopener">
+    <div class="url-host">france-visas.gouv.fr</div>
+    <div class="title">France-Visas — Official portal</div>
+    <div class="desc">The official application portal. Fill the form, get your reference number, check fee details.</div>
+  </a>
+  <a class="link-card" href="https://fr.tlscontact.com/visa/gb/" target="_blank" rel="noopener">
+    <div class="url-host">fr.tlscontact.com</div>
+    <div class="title">TLScontact UK</div>
+    <div class="desc">Where you book your appointment, upload documents, pay fees, and track decisions.</div>
+  </a>
+  <a class="link-card" href="https://uk.ambafrance.org/" target="_blank" rel="noopener">
+    <div class="url-host">uk.ambafrance.org</div>
+    <div class="title">French Embassy in the UK</div>
+    <div class="desc">Consular information, official statements, contact for escalations and appeals.</div>
+  </a>
+  <a class="link-card" href="https://www.schengenvisainfo.com/france/" target="_blank" rel="noopener">
+    <div class="url-host">schengenvisainfo.com</div>
+    <div class="title">Schengen Visa Info — France</div>
+    <div class="desc">Third-party reference with country-specific rules. Cross-check with official sources before relying on anything.</div>
+  </a>
+  <a class="link-card" href="https://www.gov.uk/visa-passport-news" target="_blank" rel="noopener">
+    <div class="url-host">gov.uk</div>
+    <div class="title">UK Government — Visa &amp; Passport News</div>
+    <div class="desc">For ETA / passport / eVisa news affecting UK residents.</div>
+  </a>
+  <a class="link-card" href="https://ec.europa.eu/home-affairs/policies/schengen-borders-and-visa_en" target="_blank" rel="noopener">
+    <div class="url-host">ec.europa.eu</div>
+    <div class="title">European Commission — Schengen &amp; Visa Policy</div>
+    <div class="desc">The Visa Code and Schengen Borders Code in full. For the legalistically curious.</div>
+  </a>
+</div>
+</section>
+
+<section id="faq">
+<h2>Frequently asked questions</h2>
+
+<details>
+<summary>Do I need a Schengen visa if I have UK indefinite leave to remain (ILR)?</summary>
+<p>Yes, unless your nationality is visa-exempt for Schengen. UK ILR / BRP doesn't grant Schengen access — it only governs your right to stay in the UK. Check the official France-Visas eligibility tool for your nationality.</p>
+</details>
+
+<details>
+<summary>How many days can I stay in Schengen on a tourist visa?</summary>
+<p>Up to 90 days within any rolling 180-day period across all 29 Schengen countries combined. A single-entry visa lets you enter once; multi-entry lets you enter and leave multiple times within the visa's validity.</p>
+</details>
+
+<details>
+<summary>Can I apply for someone else (e.g., my child or my parents)?</summary>
+<p>You can prepare and submit documents on behalf of a family member, but each applicant must <strong>attend in person</strong> for biometrics (except children under 12, who are exempt from fingerprints but must still appear). For minors, both parents need to attend or provide notarised consent.</p>
+</details>
+
+<details>
+<summary>What's the difference between France-Visas and TLScontact?</summary>
+<p>France-Visas is the French government's official portal where you submit the formal application form online and get a reference number. TLScontact is the contractor France uses to physically collect documents, take biometrics, and forward the file to the consulate. You'll use both: the form on France-Visas, the appointment on TLScontact.</p>
+</details>
+
+<details>
+<summary>What happens if I'm refused?</summary>
+<p>You'll receive a refusal letter listing the reasons (Article 32 of the Visa Code grounds). You can either reapply addressing the issues, or appeal to the French Ministry of Foreign Affairs within 30 days of receipt. The visa fee is not refundable on refusal. A refusal is not a permanent bar; many people get approved on a second, better-prepared application.</p>
+</details>
+
+<details>
+<summary>Can I leave the UK while my application is being processed?</summary>
+<p>You can leave the UK, but your passport is held by TLS for the duration. Practically, that means you can't travel internationally during processing. If you have unavoidable travel, you can request urgent passport return — but this withdraws your application and you'll need to start over.</p>
+</details>
+
+<details>
+<summary>Is travel insurance mandatory?</summary>
+<p>Yes. The policy must cover the full Schengen area, all dates of travel (including any buffer days), and have minimum medical coverage of €30,000 including repatriation. Most UK-issued annual or single-trip Schengen-compliant policies are acceptable. The certificate must list all travellers by name.</p>
+</details>
+
+<details>
+<summary>Should I bring my whole family in one application or separate ones?</summary>
+<p>Each applicant submits their own individual file (form, documents, fees), but you book a single TLS appointment slot for the family. All applicants must attend together. The consulate decides each visa independently — receiving one approval doesn't guarantee the others.</p>
+</details>
+
+<details>
+<summary>What if I have prior Schengen refusals?</summary>
+<p>You must declare them on the form. A prior refusal isn't automatically a bar, but you need to clearly demonstrate how this application addresses the reason for the previous refusal. A cover letter explicitly addressing the prior refusal is strongly recommended.</p>
+</details>
+
+<details>
+<summary>Do I need to translate documents?</summary>
+<p>Documents in English are accepted directly. Documents in any other language (Chinese, Arabic, Russian, etc.) need a certified English (or French) translation attached. Use a translator from the certified translator directory, not Google Translate.</p>
+</details>
+</section>
+
+<div class="footer">
+  <p>This guide reflects French Schengen visa procedures as of May 2026, based on a successful UK-resident family application. Rules change — always cross-check current requirements on <a href="https://france-visas.gouv.fr/en" target="_blank" rel="noopener">france-visas.gouv.fr</a> and <a href="https://fr.tlscontact.com/visa/gb/" target="_blank" rel="noopener">fr.tlscontact.com</a> before submitting. This is not legal advice.</p>
+</div>
+
+</main>
+
+<aside class="toc">
+  <h3>On this page</h3>
+  <ol>
+    <li><a href="#step-1">Plan your trip</a></li>
+    <li><a href="#step-2">France-Visas form</a></li>
+    <li><a href="#step-3">Book TLS appointment</a></li>
+    <li><a href="#step-4">Pay fees</a></li>
+    <li><a href="#step-5">Gather documents</a></li>
+    <li><a href="#step-6">Cover letter &amp; itinerary</a></li>
+    <li><a href="#step-7">Attend appointment</a></li>
+    <li><a href="#step-8">Wait for decision</a></li>
+  </ol>
+  <h3>Reference</h3>
+  <ul>
+    <li><a href="#checklist">Document checklist</a></li>
+    <li><a href="#tips">Tips from experience</a></li>
+    <li><a href="#websites">Key websites</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+</aside>
+
+</div>
+</body>
+</html>

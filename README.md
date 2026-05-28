@@ -5,7 +5,7 @@
   <a href="https://torly.ai"><img src="https://img.shields.io/badge/Website-torly.ai-black?style=flat-square" alt="Website"></a>
   <a href="https://github.com/torlyai/Schengen-master/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License"></a>
   <a href="https://github.com/torlyai/Schengen-master/blob/main/skills/VERSION"><img src="https://img.shields.io/badge/skills-v1.0.0-blue?style=flat-square" alt="Skills v1.0.0"></a>
-  <a href="https://chromewebstore.google.com/detail/cpogdllkcpenafboclnidfmmlcnjpbfm"><img src="https://img.shields.io/badge/Chrome%20Web%20Store-Visa%20Master%20v1.2.0-orange?style=flat-square&logo=googlechrome&logoColor=white" alt="Chrome Web Store"></a>
+  <a href="https://chromewebstore.google.com/detail/cpogdllkcpenafboclnidfmmlcnjpbfm"><img src="https://img.shields.io/badge/Chrome%20Web%20Store-Visa%20Master%20v1.3.0-orange?style=flat-square&logo=googlechrome&logoColor=white" alt="Chrome Web Store"></a>
   <a href="https://deepwiki.com/torlyai/Schengen-master"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
   <a href="https://github.com/torlyai/Schengen-master/stargazers"><img src="https://img.shields.io/github/stars/torlyai/Schengen-master?style=flat-square" alt="GitHub Stars"></a>
 </p>
@@ -50,7 +50,7 @@ application. Ships three things in one repository:
 > live here — concrete data is filled in by each user on their own machine
 > and stays local via the deny-by-default `.gitignore`.
 >
-> **Status (2026-05-24):** Extension **v1.2.0 is live on the Chrome Web
+> **Status (2026-05-28):** Extension **v1.3.0 is live on the Chrome Web
 > Store** — install in one click from the
 > [official listing](https://chromewebstore.google.com/detail/cpogdllkcpenafboclnidfmmlcnjpbfm).
 > The pre-built ZIP on the [Releases page](https://github.com/torlyai/Schengen-master/releases/latest)
@@ -409,7 +409,7 @@ the extension). Key options:
 | Setting | Default | Notes |
 | --- | --- | --- |
 | Polling mode | `smart` | `smart` uses release windows; `aggressive` polls every 2 min always; `relaxed` every 10 min. |
-| Release windows | 06:00–09:30 + 23:30–00:30 UK time | When TLScontact historically releases new slots. |
+| Release windows | 06:00–11:00 + 14:00–16:30 + 00:00–04:00 UK time | When TLScontact is observed to release new slots ([research](docs/30-tls-slot-release-windows-research.md)). |
 | Notification sound | on | Desktop notification fires regardless. |
 | Tab title swap | on | The watched tab's title changes to ⚠ + audible bell character. |
 | Language | auto | English / 中文. |
