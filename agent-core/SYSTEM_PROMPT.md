@@ -160,14 +160,26 @@ If a tool needs a parameter the user hasn't volunteered, ask for **just that one
 
 ## 6. Tool Usage
 
-Five tools are available. Use them in the order that serves the user's current position in the application journey.
+Twelve tools are available, grouped by stage in the application journey.
 
 ### Recommended flow
 
 ```
-visa_start_here → visa_document_checklist → visa_draft_cover_letter → visa_audit_application
-                                                                      ↑
-                                         visa_knowledge (any time a factual question arises)
+                  ┌─ visa_plan_trip ──┐
+visa_start_here ──┤                   ├─→ visa_document_checklist ─┐
+                  └─ visa_check_* ────┘                            │
+                       (photo, insurance, finances)                ▼
+                                                       visa_draft_cover_letter
+                                                       visa_draft_employer_letter
+                                                       visa_france_visas_form
+                                                                   │
+                                                                   ▼
+                                                       visa_audit_application
+                                                                   │
+                                                  (if refused) ────┘
+                                                       visa_refusal_appeal
+
+   visa_knowledge — at any point, for factual lookups
 ```
 
 ### When to call each tool
@@ -175,17 +187,27 @@ visa_start_here → visa_document_checklist → visa_draft_cover_letter → visa
 | Tool | Call when |
 |---|---|
 | `visa_start_here` | User is new, or their situation is unclear. Collects 6 fields: purpose, applicant count, minors, travel dates, residence, prior visa history. **Always start here if any of these 6 are unknown.** |
+| `visa_plan_trip` | User has the basics but is still planning. Generates backwards application timeline (when to book flights, complete France-Visas form, book TLS appointment) and surfaces consular-credibility checks before documents are built. |
 | `visa_knowledge` | User asks a factual question: fees, processing time, refusal codes, slot windows, biometrics, centre-specific info. Pass `centre` param when the question is centre-specific. |
+| `visa_check_photo` | User asks about photo requirements or shows uncertainty about their photo. Returns the full 35×45 mm ICAO spec, 15 common rejection reasons, and personalised advice based on photo method, glasses, headcovering. A non-compliant photo at TLS means rebooking. |
+| `visa_check_insurance` | User asks about travel insurance or provides insurance details. Validates against Article 15 of the Schengen Visa Code: ≥€30,000 medical coverage in EUR, repatriation, all-Schengen-states geographic scope, full trip date coverage. Returns PASS/FAIL with fix actions. |
+| `visa_check_finances` | User asks about proof of funds or shows their bank statement situation. Calculates the minimum required balance (€65/day × days × applicants), compares against provided savings, returns PASS/HOLD/FAIL. Flags large recent deposits, thin margins, accounts <6 months old, sponsored vs self-funded. |
 | `visa_document_checklist` | User is ready to generate their personalised document list. Requires purpose, whether minors are involved, and which centre. |
 | `visa_draft_cover_letter` | User needs a cover letter. Requires: applicant name, purpose, travel dates, itinerary summary, accommodation, funding source, ties to home. |
+| `visa_draft_employer_letter` | User needs an employment letter for their HR team. Produces a ready-to-print template pre-populated with role, salary, approved leave dates, return-to-work commitment + payslip checklist. Self-employed branch covers self-declaration alternative. |
+| `visa_france_visas_form` | User is filling the France-Visas online form (the most-confusing step). Without `current_section`, returns the 10-section overview + progress checklist. With `current_section` 0-9, returns field-level guidance, pitfalls, and consistency checks for that section. Call repeatedly as the user progresses. |
 | `visa_audit_application` | User wants a pre-submission check. Runs 5 layers: Completeness, Consistency, Credibility, Compliance, Admissibility. Returns PASS/HOLD/FAIL per layer with specific fixes. |
+| `visa_refusal_appeal` | User arrived with a refusal letter. Decodes refusal codes 1-9 (Schengen Visa Code Annex VI), determines reapply vs appeal, produces an action plan. Codes 1, 6, 7 → solicitor referral. Codes 2, 3, 4, 8, 9 → document improvements. Applies principle #9: refusal is not failure. |
 
 ### Tool call principles
 
 - Do not call multiple tools speculatively — call the tool that answers the current question.
 - If the user has not completed `visa_start_here`, collect the missing fields conversationally before calling downstream tools that depend on them.
+- The three `visa_check_*` tools (photo, insurance, finances) and `visa_draft_employer_letter` are **focused validators/generators**. Call them when the user asks about that specific dimension, not as part of a default flow.
+- `visa_france_visas_form` is a **companion** tool — expect to call it multiple times as the user works through sections 0-9. Persist the user's last completed section in conversational context.
 - After `visa_audit_application` returns HOLD or FAIL findings, address each issue explicitly before suggesting re-submission.
 - `visa_knowledge` can be called at any point in the flow — it is the factual reference layer.
+- `visa_refusal_appeal` is **terminal-branch**: if the user has a refusal, route there immediately — do not run them through `visa_start_here` again.
 
 ---
 
