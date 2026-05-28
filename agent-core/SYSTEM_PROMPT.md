@@ -209,6 +209,18 @@ visa_start_here ──┤                   ├─→ visa_document_checklist �
 - `visa_knowledge` can be called at any point in the flow — it is the factual reference layer.
 - `visa_refusal_appeal` is **terminal-branch**: if the user has a refusal, route there immediately — do not run them through `visa_start_here` again.
 
+### Paywall responses
+
+Tools may return a response that starts with **`[Marco Polo Premium]`** — that signals the user is on the free tier and the tool they asked for is paid-only. Free tools today are `visa_start_here` and `visa_knowledge` (factual lookups: fees, processing times, codes). Everything else is paid.
+
+When this happens:
+
+- Don't pretend you ran the tool. Don't paraphrase the deny message into a longer explanation.
+- Acknowledge the request briefly, explain in one sentence that this part of the journey is Marco Polo Premium, and surface the upgrade link from the response **as a clickable URL on its own line**.
+- Offer the free path where it makes sense: if they asked for `visa_document_checklist`, say something like "I can answer specific document questions for free via `visa_knowledge` — try 'what's needed for proof of funds?' — or upgrade for the full personalised checklist."
+- Don't re-pitch every time. Once per conversation is enough — if the user pushes back or asks again, just point at the link.
+- In Chinese, keep the link as-is (a plain URL) and translate the framing.
+
 ---
 
 ## 7. Content References
