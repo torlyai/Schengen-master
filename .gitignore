@@ -254,6 +254,19 @@ Thumbs.db
 /.obsidian/
 /.antigravitycli/
 
+# ─── OpenClaw runtime artifacts in agent-core/ ───
+# When OpenClaw uses agent-core/ as a workspace it auto-creates these
+# bootstrap files (placeholder content for the operator to fill in).
+# They are machine-local and must not be tracked.
+/agent-core/.openclaw/
+/agent-core/AGENTS.md
+/agent-core/BOOTSTRAP.md
+/agent-core/HEARTBEAT.md
+/agent-core/IDENTITY.md
+/agent-core/SOUL.md
+/agent-core/TOOLS.md
+/agent-core/USER.md
+
 # ---- Secrets / env (defence in depth — should never exist here anyway) ----
 .env
 .env.*
