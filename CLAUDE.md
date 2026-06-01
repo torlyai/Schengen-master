@@ -197,15 +197,20 @@ npm run dev                # rebuilds on save; press the reload button on the ex
 
 ## Release workflow
 
-1. Bump `manifest.json` `version` (e.g. `1.1.0` → `1.2.0`).
-2. `npm run build` and verify by loading `dist/` unpacked.
-3. Zip the build: `(cd extension/dist && zip -rq ../../visa-master-v1.2.0.zip .)`.
-4. Tag + push to `torlyai/Schengen-master` (the public release repo): `git tag v1.2.0 && git push origin v1.2.0`.
-5. Create the GitHub Release with the ZIP attached: `gh release create v1.2.0 visa-master-v1.2.0.zip --repo torlyai/Schengen-master --notes "..."`.
-6. Upload the same ZIP to Chrome Web Store via the dev console.
-7. CWS review: 1–3 days typical. v(N-1) stays live throughout.
+Source lives on `feat/*` branches; `main` is distribution-only (`/extension/src/` is gitignored there). The release path is therefore: build on a feat branch, push the public-facing subset via `scripts/release-public.sh`, attach the ZIP to a GitHub Release on `torlyai/Schengen-master`, then upload the same ZIP to CWS.
 
-The "Check for updates" button in Settings (`update-checker.ts`) calls the GitHub Releases API for the latest tag — so the GitHub Release MUST be created for in-extension update notifications to surface to existing users.
+1. On the feat branch, bump `manifest.json` `version` (e.g. `1.3.0` → `1.3.1`).
+2. `npm run build` and verify by loading `dist/` unpacked.
+3. Zip the build: `(cd extension/dist && zip -rq ../../visa-master-v1.3.1.zip .)`.
+4. Commit + tag on the private remote: `git tag v1.3.1 && git push private v1.3.1`.
+5. Propagate to public (filters out internal docs): `./scripts/release-public.sh --push`.
+6. Create the GitHub Release on the public repo with the ZIP attached: `gh release create v1.3.1 visa-master-v1.3.1.zip --repo torlyai/Schengen-master --notes "..."`.
+7. Upload the same ZIP to Chrome Web Store via the dev console.
+8. CWS review: 1–3 days typical. v(N-1) stays live throughout.
+
+The "Check for updates" button in Settings (`update-checker.ts`) calls the GitHub Releases API for the latest tag — so step 6 (the public GitHub Release) MUST happen for in-extension update notifications to surface to existing users.
+
+**Never** run `git push origin main` directly to ship — that would push everything including PRDs. Always go through the script.
 
 **Cross-repo coupling: many releases require a backend deploy first.** If the release introduces new fields on `/api/visa-master/*` request bodies, the torlyAI side must ship + deploy before the extension reaches CWS approval (extensions deploy via CWS review cycle, but old extensions already in the wild keep talking to your backend). Deploy backend → wait for `vercel ls torlyai --prod` to show `● Ready` → then submit extension to CWS.
 
@@ -248,12 +253,12 @@ When editing **anything** that crosses to the server, also update the backend si
 | Activation postMessage | `src/content/license-relay.ts` | `app/visa-master/activated/ActivatedClient.tsx` |
 | Email events (PRD 14 N-3b) | `src/background/email.ts` | `app/api/visa-master/notify/email/route.ts` + `lib/visa-master/notifications.ts` |
 | Refund evidence (PRD 20) | `src/popup/states/premium/RefundPrompt.tsx` | `app/api/visa-master/booking/refund/route.ts` (column `visa_master_bookings.refund_evidence_text`) |
-| Install metadata (PRD 17) | `src/background/backend-client.ts` `activateLicense()` | `app/api/visa-master/license/activate/route.ts` |
+| Install metadata (PRD 17) | `src/background/license-status-poll.ts` → `refreshLicenseStatusWithMetadata()` (v1.3.1+) | `app/api/visa-master/license/status/route.ts` (POST variant) |
 
 JWT contract:
 - Audience MUST be `visa-master-extension` (the desktop torlyAI license uses `torlyai-desktop` and shares the same signing key — the audience check is what keeps them apart).
 - Signed RS256 with `JWT_PRIVATE_KEY`; verified with `JWT_PUBLIC_KEY`.
-- Extension does **structural** validation only (`iss`/`aud`/`exp`/`tier`). Liveness/revocation is via `/api/visa-master/license/status?installId=…` polled ~1×/24h.
+- Extension does **structural** validation only (`iss`/`aud`/`exp`/`tier`). Liveness/revocation is via `/api/visa-master/license/status?installId=…` polled ~1×/24h. **Wired in v1.3.1** by `background/license-status-poll.ts` (alarm name `VM_LICENSE_STATUS`); installs on v1.3.0 and earlier never polled, leaving `last_status_check_at` + `extension_version` NULL on the backend.
 
 Activation flow: **always use `?session_id={CHECKOUT_SESSION_ID}` in Stripe Checkout's `success_url`, NEVER `{SETUP_INTENT_ID}`** — Stripe only substitutes the former. The `/license/activate` route accepts either `sessionId` (preferred, resolves session → setup_intent) or `setupIntentId` (legacy / manual recovery). The route also self-heals SetupIntents that landed with `customer:null` by creating a Customer from `session.customer_details.email`. This combined flow shipped 2026-05-18 to recover Visa Master's first paid user from a launch-night activation bug; do not regress.
 
@@ -264,16 +269,29 @@ Base URL: `https://torly.ai/api/visa-master`. Override at build time with `VITE_
 - `src/shared/states.ts` — `ExtState` is the discriminator everywhere. Adding a variant requires updating `badge.ts` config + `popup.tsx` router + `service-worker.ts` switches. The compiler will tell you what's missing.
 - `src/shared/messages.ts` — `Msg` is the SW ↔ UI ↔ content bus. Same exhaustiveness rule.
 - `src/shared/storage.ts` — the keys (`settings`, `state`, `target`, `stats`, `bookingWindow`, `tlsCreds`, `installSalt`, `vmLicense`, `installId`, `webhookInstallId`, plus booking-FSM-owned: `activeBooking`, `previousBooking`, `lastBookedAt`) are read by multiple contexts. Renaming any breaks installed users on upgrade. Add new keys instead of repurposing. Notes: `installId` is the Premium-tier identifier disclosed to torly.ai; `webhookInstallId` is a SEPARATE anonymous UUID used only by the BYO webhook channel so Free users enabling webhook never reveal an identifier we can correlate with anything else. `activeBooking` holds the current booking inside the 24h refund window; `previousBooking` holds the most recent captured booking after the window has expired (N-7 archive).
-- **`chrome.alarms` names** — `POLL_ALARM` (scheduler), `AUTOSTOP_ALARM` (cloudflare/logged-out timeout), `VM_BOOKING_TIMEOUT` (60s booking budget), `VM_REFUND_WINDOW_EXPIRED` (N-7 24h auto-return). All alarms survive SW eviction and are wired in `service-worker.ts`'s `chrome.alarms.onAlarm.addListener`. Adding a new alarm = add to that switch + the cleanup paths.
+- **`chrome.alarms` names** — `POLL_ALARM` (scheduler), `AUTOSTOP_ALARM` (cloudflare/logged-out timeout), `VM_BOOKING_TIMEOUT` (60s booking budget), `VM_REFUND_WINDOW_EXPIRED` (N-7 24h auto-return), `VM_LICENSE_STATUS` (v1.3.1+ daily liveness ping, Premium-only). All alarms survive SW eviction and are wired in `service-worker.ts`'s `chrome.alarms.onAlarm.addListener`. Adding a new alarm = add to that switch + the cleanup paths.
 - `manifest.json` host permissions — the only domains we touch are `*.tlscontact.com` and `torly.ai`. Don't add a third without updating PRD §11 and the welcome i18n promise list.
 
 ## Known open items
 
-**Pre-existing risks (carried from v1.0/v1.1, not regressed by v1.2.0):**
-- `driveBookingFlow()` in `background/booking-fsm.ts` is **a stub**. Needs empirical validation against a real TLS booking page. Fails-safe (no submit) on any missing selector.
-- `injectedFill()` selectors in `background/tls-auto-login.ts` are **best-guess**. Same caveat.
+**v1.3.1 known caveats (driveBookingFlow now implemented, but fragile):**
+- `driveBookingFlow()` in `background/booking-fsm.ts` was a stub through v1.3.0. **v1.3.1 implements it** via `chrome.scripting.executeScript` injecting `clickSlotInPage` + `clickConfirmInPage` helpers. Known fragilities to monitor:
+  - Time matching uses `Intl.DateTimeFormat` with a per-country IANA timezone map (`COUNTRY_TZ` in booking-fsm.ts). Falls back to `Europe/London` for unmapped countries — add new entries as TLS adds new venues.
+  - `clickConfirmInPage` matches `text.includes('book')` style — could false-match navigation labels like "Booking history". Tighten with exact-match if false-clicks appear.
+  - Hardcoded 500ms wait between slot click and confirm click; slow networks or multi-step forms break it.
+  - No extension-side idempotency — backend's `(installId, bookingId)` UNIQUE check at `capture/route.ts:69-86` is what prevents double-charging.
+  - No verification that clicks advanced the TLS flow — `step=2`/`step=3` are marked on click-registered, not on confirmation.
+  - `BOOK_BUTTON_TEXTS` covers EN/FR/DE/ES/PT/AR/HI/ZH but missing Italian (prenota / conferma), Polish (rezerwuj), Russian (забронировать) — add as markets demand.
+
+**Pre-existing risks (carried from v1.0/v1.1):**
+- `injectedFill()` selectors in `background/tls-auto-login.ts` are **best-guess**. Same caveat as the old driveBookingFlow.
 - `extension/test-fixtures/tls-dom/` contains `.keep` placeholders only — **no real TLS HTML has ever been captured.** Detection logic has no automated coverage; validated only by empirical production observation. See `docs/21-vm-v1.2.0-post-deploy-monitoring-plan.md` §7 for the planned remediation.
 - 中文 (zh-CN) translations are partial — Premium popup states have placeholder translations added during v1.2.0 (need native-speaker review).
+
+**Empirical truth from 2026-05-29 production check (resolved or in flight in v1.3.1):**
+- `visa_master_bookings` had **0 rows lifetime** as of 2026-05-29 — no install had ever reached the booking-capture step in production. driveBookingFlow's UTC time bug (now fixed in v1.3.1) was the most likely cause; observe whether the capture row count moves after v1.3.1 reaches the existing fleet (~24-48h post-CWS approval).
+- `visa_master_installs.last_status_check_at` was **NULL for all 16 active installs** as of 2026-05-29 — the v1.0-v1.3.0 extension never POSTed `/license/status`. **Fixed in v1.3.1** via the new VM_LICENSE_STATUS alarm.
+- `visa_master_installs.extension_version` + `browser_name` + `os` were **NULL for all 17 installs**. Same root cause; also fixed by v1.3.1's liveness ping (the POST variant of `/license/status` carries the metadata).
 
 **v1.2.0 deferred (PRD 14 N-3b "out of scope" list):**
 - Popup P-12 "Send test email" button UI not wired. `testEmailConnection()` exists in `email.ts` but no UI calls it — verifiable from SW console only.
